@@ -1,0 +1,39 @@
+# .github/ISSUE_TEMPLATE/refactor.yml
+name: 🔧 Refactor
+description: 코드 리팩토링을 요청합니다
+title: "[REFACTOR] "
+labels: ["refactor", "refactoring"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        코드 리팩토링을 위한 템플릿입니다.
+        
+  - type: textarea
+    id: refactor-description
+    attributes:
+      label: 리팩토링 설명
+      description: 어떤 부분을 리팩토링하고 싶나요?
+      placeholder: 리팩토링할 코드나 구조에 대해 설명해주세요
+    validations:
+      required: true
+      
+  - type: textarea
+    id: current-issues
+    attributes:
+      label: 현재 문제점
+      description: 현재 코드의 어떤 점이 문제인가요?
+      placeholder: 개선이 필요한 이유를 설명해주세요
+    validations:
+      required: true
+      
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: 제안하는 해결책
+      description: 어떻게 개선하고 싶나요?
+      placeholder: 리팩토링 후 기대되는 개선사항을 설명해주세요
+    validations:
+      required: true
+
+---
