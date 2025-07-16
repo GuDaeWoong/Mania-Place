@@ -1,0 +1,52 @@
+# .github/ISSUE_TEMPLATE/bug.yml
+name: 🐛 Bug Report
+description: 버그를 신고합니다
+title: "[BUG] "
+labels: ["bug", "fix"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        버그 신고를 위한 템플릿입니다.
+        
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: 버그 설명
+      description: 어떤 버그가 발생했나요?
+      placeholder: 버그에 대한 구체적인 설명을 입력해주세요
+    validations:
+      required: true
+      
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 재현 방법
+      description: 버그를 재현하는 방법을 단계별로 설명해주세요
+      placeholder: |
+        1. 이동: '...'
+        2. 클릭: '...'
+        3. 스크롤: '...'
+        4. 오류 발생
+    validations:
+      required: true
+      
+  - type: textarea
+    id: expected
+    attributes:
+      label: 예상 동작
+      description: 어떤 결과를 예상했나요?
+      placeholder: 예상했던 정상적인 동작을 설명해주세요
+    validations:
+      required: true
+      
+  - type: textarea
+    id: actual
+    attributes:
+      label: 실제 동작
+      description: 실제로 어떤 일이 일어났나요?
+      placeholder: 실제로 발생한 동작을 설명해주세요
+    validations:
+      required: true
+
+---
