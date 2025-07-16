@@ -1,0 +1,43 @@
+
+# .github/ISSUE_TEMPLATE/feature.yml
+name: 🚀 Feature Request
+description: 새로운 기능을 요청합니다
+title: "[FEAT] "
+labels: ["feature", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        새로운 기능 요청을 위한 템플릿입니다.
+        
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: 기능 설명
+      description: 어떤 기능을 원하시나요?
+      placeholder: 구체적인 기능 설명을 입력해주세요
+    validations:
+      required: true
+      
+  - type: textarea
+    id: motivation
+    attributes:
+      label: 동기 및 필요성
+      description: 왜 이 기능이 필요한가요?
+      placeholder: 이 기능이 필요한 이유를 설명해주세요
+    validations:
+      required: true
+      
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: 완료 조건
+      description: 어떤 상태가 되면 완료된 것으로 볼 수 있나요?
+      placeholder: |
+        - [ ] 조건 1
+        - [ ] 조건 2
+        - [ ] 조건 3
+    validations:
+      required: true
+
+---
