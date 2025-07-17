@@ -6,10 +6,10 @@ spring:
     name: Plus-Project
 
   datasource:
-    url: jdbc:mysql://localhost:3306/
+    url: jdbc:mysql://localhost:3306/mania_place
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username:
-    password:
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate.ddl-auto: create-drop
@@ -20,12 +20,8 @@ spring:
         format_sql: true
         highlight_sql: true
 
-#  data:
-#    redis:
-#      host: 127.0.0.1
-#      port: 6379
 
 jwt:
   secret:
-    key:
-    # (필요하다면) 파일 경로 환경 변수로 추가 필요
+    key: ${JWT_SECRET_KEY}
+
