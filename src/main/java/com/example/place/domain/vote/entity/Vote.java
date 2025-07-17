@@ -31,9 +31,6 @@ public class Vote {
 	@JoinColumn(name = "post_id")
 	private Post post;
 
-	@ManyToOne
-	@JoinColumn(name = "item_id")
-	private Item item;
 
 	@Enumerated(EnumType.STRING)
 	private ReactionType type;

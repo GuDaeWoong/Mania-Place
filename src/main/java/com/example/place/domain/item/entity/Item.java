@@ -32,7 +32,7 @@ public class Item {
 	private String productName;
 	private String productDescription;
 
-	private Boolean isUsed;
+	private Boolean is_official;
 	private double price;
 	private int count;
 

@@ -28,10 +28,6 @@ public class Comment {
 	@JoinColumn(name = "post_id")
 	private Post post;
 
-	@ManyToOne
-	@JoinColumn(name = "item_id")
-	private Item item;
-
 	private String content;
 
 }
