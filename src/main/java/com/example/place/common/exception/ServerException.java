@@ -1,4 +1,4 @@
-package com.example.demo.common.exception;
+package com.example.place.common.exception;
 
 public class ServerException extends RuntimeException {
 

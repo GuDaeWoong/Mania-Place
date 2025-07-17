@@ -1,4 +1,4 @@
-package com.example.demo.common.exception;
+package com.example.place.common.exception;
 
 import javax.lang.model.type.ErrorType;
 
