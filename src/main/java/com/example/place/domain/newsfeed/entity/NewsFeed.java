@@ -16,7 +16,7 @@ import lombok.Getter;
 
 @Getter
 @Entity
-@Table(name = "newsfeed")
+@Table(name = "newsfeeds")
 public class NewsFeed {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,10 +1,14 @@
-package com.example.place.domain.comment.entity;
+package com.example.place.order.entity;
+
+import java.time.LocalDateTime;
 
 import com.example.place.domain.item.entity.Item;
-import com.example.place.domain.post.entity.Post;
 import com.example.place.domain.user.entity.User;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,19 +19,26 @@ import lombok.Getter;
 
 @Getter
 @Entity
-@Table(name = "comments")
-public class Comment {
+@Table(name = "orders")
+public class Order {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	@ManyToOne
+
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User user;
 
-	@ManyToOne
-	@JoinColumn(name = "post_id")
-	private Post post;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "item_id")
+	private Item item;
 
-	private String content;
+	@Enumerated(EnumType.STRING)
+	private OrderStatus status;
+	//배송지
+	private String deliveryAddress;
 
+	private LocalDateTime creatAt;
+
+	private LocalDateTime completeAt;
 }

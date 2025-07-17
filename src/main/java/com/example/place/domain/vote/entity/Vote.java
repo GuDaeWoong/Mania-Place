@@ -17,7 +17,7 @@ import lombok.Getter;
 
 @Getter
 @Entity
-@Table(name = "vote")
+@Table(name = "votes")
 public class Vote {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
