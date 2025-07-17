@@ -1,5 +1,5 @@
 # .github/ISSUE_TEMPLATE/refactor.yml
-name: 🔧 Refactor
+name: Refactor
 description: 코드 리팩토링을 요청합니다
 title: "[REFACTOR] "
 labels: ["refactor", "refactoring"]
