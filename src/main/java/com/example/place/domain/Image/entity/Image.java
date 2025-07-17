@@ -5,6 +5,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import com.example.place.domain.item.entity.Item;
+import com.example.place.domain.newsfeed.entity.NewsFeed;
+
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -23,7 +25,13 @@ public class Image {
 	@JoinColumn(name = "item_id")
 	private Item item;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "newsfeed_id")
+	private NewsFeed newsFeed;
+
 	private String imageUrl;
 
 	private Boolean isMain = false;
+
+
 }
