@@ -1,5 +1,5 @@
 # .github/ISSUE_TEMPLATE/chore.yml
-name: 🧹 Chore
+name:  Chore
 description: 기타 작업을 요청합니다
 title: "[CHORE] "
 labels: ["chore", "maintenance"]
