@@ -42,5 +42,7 @@ jobs:
 
       - name: Create and push branch
         run: |
+          git fetch origin develop
+          git checkout develop
           git checkout -b "$BRANCH_NAME"
           git push origin "$BRANCH_NAME"
