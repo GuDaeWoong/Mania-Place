@@ -40,29 +40,28 @@ jobs:
           echo "prefix=$PREFIX" >> $GITHUB_OUTPUT
 
       - name: Sanitize title and create branch name
-  id: create-branch-name
-  run: |
-    ISSUE_NUMBER=${{ github.event.issue.number }}
-    PREFIX=${{ steps.extract-prefix.outputs.prefix }}
-    ISSUE_TITLE="${{ github.event.issue.title }}"
+        id: create-branch-name
+        run: |
+          ISSUE_NUMBER=${{ github.event.issue.number }}
+          PREFIX=${{ steps.extract-prefix.outputs.prefix }}
+          ISSUE_TITLE="${{ github.event.issue.title }}"
 
-    SANITIZED_TITLE=$(echo "$ISSUE_TITLE" | \
-      tr '[:upper:]' '[:lower:]' | \
-      sed 's/[^a-z0-9가-힣]/-/g' | \
-      sed 's/--*/-/g' | \
-      sed 's/^-\|-$//g' | \
-      awk '{ if(length($0)>50) print substr($0, 1, 50); else print $0 }')
+          SANITIZED_TITLE=$(echo "$ISSUE_TITLE" | \
+            tr '[:upper:]' '[:lower:]' | \
+            sed 's/[^a-z0-9가-힣]/-/g' | \
+            sed 's/--*/-/g' | \
+            sed 's/^-\|-$//g' | \
+            awk '{ if(length($0)>50) print substr($0, 1, 50); else print $0 }')
 
-    # 제목이 비어있으면 기본값 지정
-    if [[ -z "$SANITIZED_TITLE" ]]; then
-      SANITIZED_TITLE="issue"
-    fi
+          # 제목이 비어 있으면 기본값 설정
+          if [[ -z "$SANITIZED_TITLE" ]]; then
+            SANITIZED_TITLE="issue"
+          fi
 
-    BRANCH_NAME="${PREFIX}/${ISSUE_NUMBER}-${SANITIZED_TITLE}"
+          BRANCH_NAME="${PREFIX}/${ISSUE_NUMBER}-${SANITIZED_TITLE}"
 
-    echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
-    echo "sanitized_title=$SANITIZED_TITLE" >> $GITHUB_OUTPUT
-
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "sanitized_title=$SANITIZED_TITLE" >> $GITHUB_OUTPUT
 
       - name: Debug branch values
         run: |
