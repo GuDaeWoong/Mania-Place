@@ -46,28 +46,52 @@ jobs:
           PREFIX=${{ steps.extract-prefix.outputs.prefix }}
           ISSUE_TITLE="${{ github.event.issue.title }}"
 
-          SANITIZED_TITLE=$(echo "$ISSUE_TITLE" | \
-            tr '[:upper:]' '[:lower:]' | \
-            sed 's/[^a-z0-9가-힣]/-/g' | \
-            sed 's/--*/-/g' | \
-            sed 's/^-\|-$//g' | \
-            awk '{ if(length($0)>50) print substr($0, 1, 50); else print $0 }')
+          echo "Debug - Original title: '$ISSUE_TITLE'"
+          echo "Debug - Issue number: '$ISSUE_NUMBER'"
+          echo "Debug - Prefix: '$PREFIX'"
 
-          # 제목이 비어 있으면 기본값 설정
-          if [[ -z "$SANITIZED_TITLE" ]]; then
+          # 제목이 비어있거나 공백만 있는 경우 체크
+          if [[ -z "$ISSUE_TITLE" || "$ISSUE_TITLE" =~ ^[[:space:]]*$ ]]; then
+            echo "Warning: Issue title is empty or contains only whitespace"
             SANITIZED_TITLE="issue"
+          else
+            # 제목 정리: 소문자 변환, 특수문자를 하이픈으로 변경
+            SANITIZED_TITLE=$(echo "$ISSUE_TITLE" | \
+              tr '[:upper:]' '[:lower:]' | \
+              sed 's/[^a-z0-9가-힣ㄱ-ㅎㅏ-ㅣ]/-/g' | \
+              sed 's/--*/-/g' | \
+              sed 's/^-\+\|-\+$//g')
+            
+            # 길이 제한 (50자)
+            if [[ ${#SANITIZED_TITLE} -gt 50 ]]; then
+              SANITIZED_TITLE="${SANITIZED_TITLE:0:50}"
+              # 끝에 하이픈이 있으면 제거
+              SANITIZED_TITLE=$(echo "$SANITIZED_TITLE" | sed 's/-\+$//')
+            fi
+            
+            # 여전히 비어있으면 기본값 설정
+            if [[ -z "$SANITIZED_TITLE" ]]; then
+              SANITIZED_TITLE="issue"
+            fi
           fi
 
           BRANCH_NAME="${PREFIX}/${ISSUE_NUMBER}-${SANITIZED_TITLE}"
+
+          echo "Debug - Sanitized title: '$SANITIZED_TITLE'"
+          echo "Debug - Final branch name: '$BRANCH_NAME'"
 
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
           echo "sanitized_title=$SANITIZED_TITLE" >> $GITHUB_OUTPUT
 
       - name: Debug branch values
         run: |
-          echo "Original title: ${{ github.event.issue.title }}"
-          echo "Sanitized title: ${{ steps.create-branch-name.outputs.sanitized_title }}"
-          echo "Branch name: ${{ steps.create-branch-name.outputs.branch_name }}"
+          echo "=== Debug Information ==="
+          echo "Original title: '${{ github.event.issue.title }}'"
+          echo "Sanitized title: '${{ steps.create-branch-name.outputs.sanitized_title }}'"
+          echo "Branch name: '${{ steps.create-branch-name.outputs.branch_name }}'"
+          echo "Issue number: '${{ github.event.issue.number }}'"
+          echo "Prefix: '${{ steps.extract-prefix.outputs.prefix }}'"
+          echo "========================"
 
       - name: Create and push branch
         env:
@@ -82,6 +106,9 @@ jobs:
           else
             BASE_BRANCH="main"
           fi
+
+          echo "Creating branch: ${{ steps.create-branch-name.outputs.branch_name }}"
+          echo "From base branch: $BASE_BRANCH"
 
           git checkout -b "${{ steps.create-branch-name.outputs.branch_name }}" origin/$BASE_BRANCH
           git push origin "${{ steps.create-branch-name.outputs.branch_name }}"
