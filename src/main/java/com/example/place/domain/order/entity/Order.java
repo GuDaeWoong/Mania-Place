@@ -1,10 +1,9 @@
-package com.example.place.order.entity;
+package com.example.place.domain.order.entity;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.user.entity.User;
 
 import jakarta.persistence.Entity;
