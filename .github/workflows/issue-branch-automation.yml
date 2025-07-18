@@ -1,4 +1,3 @@
-# .github/workflows/issue-branch-automation.yml
 name: Issue Branch Automation
 
 on:
@@ -25,7 +24,7 @@ jobs:
         run: |
           LABELS=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -r '.[].name')
           PREFIX="feat"  # 기본값
-          
+
           for label in $LABELS; do
             case "$label" in
               "bug"|"fix") PREFIX="fix" ;;
@@ -37,7 +36,7 @@ jobs:
               "test"|"testing") PREFIX="test" ;;
             esac
           done
-          
+
           echo "prefix=$PREFIX" >> $GITHUB_OUTPUT
 
       - name: Sanitize title and create branch name
@@ -46,19 +45,25 @@ jobs:
           ISSUE_NUMBER=${{ github.event.issue.number }}
           PREFIX=${{ steps.extract-prefix.outputs.prefix }}
           ISSUE_TITLE="${{ github.event.issue.title }}"
-          
-          # 제목을 브랜치명에 적합하게 변환
+
+          # 제목을 소문자로 바꾸고, 한글/영문/숫자 외 문자는 하이픈으로 대체
           SANITIZED_TITLE=$(echo "$ISSUE_TITLE" | \
             tr '[:upper:]' '[:lower:]' | \
             sed 's/[^a-z0-9가-힣]/-/g' | \
             sed 's/--*/-/g' | \
             sed 's/^-\|-$//g' | \
-            cut -c1-50)
-          
+            awk '{ if(length($0)>50) print substr($0, 1, 50); else print $0 }')
+
           BRANCH_NAME="${PREFIX}/${ISSUE_NUMBER}-${SANITIZED_TITLE}"
-          
+
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
           echo "sanitized_title=$SANITIZED_TITLE" >> $GITHUB_OUTPUT
+
+      - name: Debug branch values
+        run: |
+          echo "Original title: ${{ github.event.issue.title }}"
+          echo "Sanitized title: ${{ steps.create-branch-name.outputs.sanitized_title }}"
+          echo "Branch name: ${{ steps.create-branch-name.outputs.branch_name }}"
 
       - name: Create and push branch
         env:
@@ -66,15 +71,14 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # develop 브랜치에서 새 브랜치 생성
+
           git fetch origin
           if git show-ref --verify --quiet refs/remotes/origin/develop; then
             BASE_BRANCH="develop"
           else
             BASE_BRANCH="main"
           fi
-          
+
           git checkout -b "${{ steps.create-branch-name.outputs.branch_name }}" origin/$BASE_BRANCH
           git push origin "${{ steps.create-branch-name.outputs.branch_name }}"
 
@@ -85,9 +89,9 @@ jobs:
           issue-number: ${{ github.event.issue.number }}
           body: |
             🚀 **브랜치가 자동 생성되었습니다!**
-            
+
             **브랜치명**: `${{ steps.create-branch-name.outputs.branch_name }}`
-            
+
             ### 다음 단계
             1. 로컬에서 브랜치 체크아웃:
                ```bash
@@ -96,7 +100,7 @@ jobs:
                ```
             2. 작업 완료 후 PR 생성
             3. PR이 머지되면 브랜치와 이슈가 자동으로 정리됩니다
-            
+
             > 💡 **팁**: PR 제목에 `closes #${{ github.event.issue.number }}` 또는 `fixes #${{ github.event.issue.number }}`를 포함하면 이슈가 자동으로 닫힙니다.
 
       - name: Add labels to issue
@@ -126,10 +130,9 @@ jobs:
         run: |
           BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
-          
-          # 브랜치명에서 이슈 번호 추출 (예: feat/123-some-feature -> 123)
+
           ISSUE_NUMBER=$(echo "$BRANCH_NAME" | grep -oE '/[0-9]+' | sed 's/\///')
-          
+
           if [[ "$ISSUE_NUMBER" =~ ^[0-9]+$ ]]; then
             echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
             echo "has_issue=true" >> $GITHUB_OUTPUT
@@ -153,11 +156,11 @@ jobs:
           issue-number: ${{ steps.extract-issue.outputs.issue_number }}
           body: |
             ✅ **작업이 완료되었습니다!**
-            
+
             **PR**: #${{ github.event.pull_request.number }} - ${{ github.event.pull_request.title }}
             **브랜치**: `${{ steps.extract-issue.outputs.branch_name }}` (삭제됨)
             **머지 시간**: ${{ github.event.pull_request.merged_at }}
-            
+
             이 이슈는 자동으로 닫힙니다. 🎉
 
       - name: Close issue
