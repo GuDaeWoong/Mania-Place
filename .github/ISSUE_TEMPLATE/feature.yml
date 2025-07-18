@@ -13,15 +13,17 @@ body:
     validations:
       required: true
   
-  - type: checkboxes
-    id: requirements
+   - type: textarea
+    id: task-list
     attributes:
-      label: 요구사항
-      description: 기능 개발을 위한 요구사항을 체크해주세요.
-      options:
-        - label: 요구사항 1
-        - label: 요구사항 2
-        - label: 요구사항 3
+      label: 작업 목록
+      description: 수행해야 할 작업들을 나열해주세요
+      placeholder: |
+        - [ ] 작업 1
+        - [ ] 작업 2
+        - [ ] 작업 3
+    validations:
+      required: true
   
   - type: textarea
     id: related-issues
