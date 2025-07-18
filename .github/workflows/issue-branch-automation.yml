@@ -113,23 +113,66 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -e  # 에러 발생 시 즉시 종료
+          
+          echo "=== Branch Creation Process ==="
+          echo "Branch name: '${{ steps.create-branch-name.outputs.branch_name }}'"
+          
+          # Git 설정
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
+          
+          # 브랜치명 유효성 검사
+          BRANCH_NAME="${{ steps.create-branch-name.outputs.branch_name }}"
+          if [[ -z "$BRANCH_NAME" ]]; then
+            echo "ERROR: Branch name is empty!"
+            exit 1
+          fi
+          
+          echo "Fetching origin..."
           git fetch origin
+          
+          # 베이스 브랜치 확인
           if git show-ref --verify --quiet refs/remotes/origin/develop; then
             BASE_BRANCH="develop"
-          else
+          elif git show-ref --verify --quiet refs/remotes/origin/main; then
             BASE_BRANCH="main"
+          else
+            echo "ERROR: Neither develop nor main branch found!"
+            git branch -r
+            exit 1
           fi
-
-          echo "Creating branch: ${{ steps.create-branch-name.outputs.branch_name }}"
-          echo "From base branch: $BASE_BRANCH"
-
-          git checkout -b "${{ steps.create-branch-name.outputs.branch_name }}" origin/$BASE_BRANCH
-          git push origin "${{ steps.create-branch-name.outputs.branch_name }}"
+          
+          echo "Base branch: $BASE_BRANCH"
+          
+          # 브랜치가 이미 존재하는지 확인
+          if git show-ref --verify --quiet refs/remotes/origin/"$BRANCH_NAME"; then
+            echo "WARNING: Branch $BRANCH_NAME already exists!"
+            exit 0
+          fi
+          
+          # 브랜치 생성
+          echo "Creating branch: $BRANCH_NAME"
+          git checkout -b "$BRANCH_NAME" origin/$BASE_BRANCH
+          
+          if [[ $? -ne 0 ]]; then
+            echo "ERROR: Failed to create branch!"
+            exit 1
+          fi
+          
+          # 브랜치 푸시
+          echo "Pushing branch: $BRANCH_NAME"
+          git push origin "$BRANCH_NAME"
+          
+          if [[ $? -ne 0 ]]; then
+            echo "ERROR: Failed to push branch!"
+            exit 1
+          fi
+          
+          echo "SUCCESS: Branch created and pushed successfully!"
 
       - name: Add branch info to issue
+        if: success()
         uses: peter-evans/create-or-update-comment@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -149,6 +192,25 @@ jobs:
             3. PR이 머지되면 브랜치와 이슈가 자동으로 정리됩니다
 
             > 💡 **팁**: PR 제목에 `closes #${{ github.event.issue.number }}` 또는 `fixes #${{ github.event.issue.number }}`를 포함하면 이슈가 자동으로 닫힙니다.
+
+      - name: Add error info to issue
+        if: failure()
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            ❌ **브랜치 생성 실패!**
+
+            **오류**: 브랜치 생성 중 문제가 발생했습니다.
+            **예상 브랜치명**: `${{ steps.create-branch-name.outputs.branch_name }}`
+
+            ### 확인사항
+            - 브랜치명에 특수문자가 포함되어 있는지 확인
+            - 동일한 브랜치가 이미 존재하는지 확인
+            - GitHub Actions 로그를 확인하여 자세한 오류 내용 확인
+
+            수동으로 브랜치를 생성하거나 이슈 제목을 수정 후 새 이슈를 생성해주세요.
 
       - name: Add labels to issue
         uses: peter-evans/create-or-update-comment@v4
