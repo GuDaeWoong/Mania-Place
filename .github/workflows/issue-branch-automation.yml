@@ -1,306 +1,99 @@
-name: Issue Branch Automation
+name: Auto Create Branch from Issue
 
 on:
   issues:
-    types: [opened]
-  pull_request:
-    types: [closed]
+    types: [opened, labeled]
 
 jobs:
   create-branch:
-    if: github.event_name == 'issues' && github.event.action == 'opened'
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      issues: write
+    if: contains(github.event.issue.labels.*.name, 'create-branch') || contains(github.event.issue.title, '[FEATURE]') || contains(github.event.issue.title, '[BUG]') || contains(github.event.issue.title, '[HOTFIX]')
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract branch prefix from labels
-        id: extract-prefix
+      - name: Extract branch name from issue title
+        id: extract_branch
         run: |
-          LABELS=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -r '.[].name')
-          PREFIX="feat"  # 기본값
-
-          for label in $LABELS; do
-            case "$label" in
-              "bug"|"fix") PREFIX="fix" ;;
-              "feature"|"enhancement") PREFIX="feat" ;;
-              "refactor"|"refactoring") PREFIX="refactor" ;;
-              "chore"|"maintenance") PREFIX="chore" ;;
-              "docs"|"documentation") PREFIX="docs" ;;
-              "hotfix") PREFIX="hotfix" ;;
-              "test"|"testing") PREFIX="test" ;;
-            esac
-          done
-
-          echo "prefix=$PREFIX" >> $GITHUB_OUTPUT
-
-      - name: Sanitize title and create branch name
-        id: create-branch-name
-        run: |
-          ISSUE_NUMBER=${{ github.event.issue.number }}
-          PREFIX=${{ steps.extract-prefix.outputs.prefix }}
           ISSUE_TITLE="${{ github.event.issue.title }}"
-
-          echo "=== Title Processing Debug ==="
-          echo "Original title: '$ISSUE_TITLE'"
-          echo "Issue number: '$ISSUE_NUMBER'"
-          echo "Prefix: '$PREFIX'"
+          ISSUE_NUMBER="${{ github.event.issue.number }}"
           
-          # 제목이 비어있거나 공백만 있는 경우 체크
-          if [[ -z "$ISSUE_TITLE" || "$ISSUE_TITLE" =~ ^[[:space:]]*$ ]]; then
-            echo "Warning: Issue title is empty or contains only whitespace"
-            SANITIZED_TITLE="issue"
-          else
-            # 제목 정리 - 원하는 형태로 처리
-            echo "Processing title step by step..."
-            
-            # 1. [FEATURE], [BUG], **bold** 등 마크다운 및 태그 제거
-            TEMP_TITLE=$(echo "$ISSUE_TITLE" | sed 's/\[.*\]//g' | sed 's/\*\*//g' | sed 's/\*//g' | sed 's/#[0-9]*//g')
-            echo "Step 1 - After tag/markdown removal: '$TEMP_TITLE'"
-            
-            # 2. 앞뒤 공백 제거
-            TEMP_TITLE=$(echo "$TEMP_TITLE" | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
-            echo "Step 2 - After trim: '$TEMP_TITLE'"
-            
-            # 3. 여전히 비어있으면 기본값
-            if [[ -z "$TEMP_TITLE" ]]; then
-              SANITIZED_TITLE="issue"
-              echo "Step 3 - Empty after cleanup, using default: '$SANITIZED_TITLE'"
-            else
-              # 4. 소문자 변환 (한글은 그대로 유지)
-              TEMP_TITLE=$(echo "$TEMP_TITLE" | tr '[:upper:]' '[:lower:]')
-              echo "Step 4 - After lowercase: '$TEMP_TITLE'"
-              
-              # 5. 공백과 특수문자를 하이픈으로 변경 (한글, 영문, 숫자, 하이픈, 언더스코어만 허용)
-              TEMP_TITLE=$(echo "$TEMP_TITLE" | sed 's/[^a-z0-9가-힣ㄱ-ㅎㅏ-ㅣ_-]/-/g')
-              echo "Step 5 - After special char replacement: '$TEMP_TITLE'"
-              
-              # 6. 연속된 하이픈을 하나로 줄이기
-              TEMP_TITLE=$(echo "$TEMP_TITLE" | sed 's/-\+/-/g')
-              echo "Step 6 - After dash reduction: '$TEMP_TITLE'"
-              
-              # 7. 앞뒤 하이픈 제거
-              TEMP_TITLE=$(echo "$TEMP_TITLE" | sed 's/^-\+//' | sed 's/-\+$//')
-              echo "Step 7 - After trim dashes: '$TEMP_TITLE'"
-              
-              # 8. 길이 제한 (40자)
-              if [[ ${#TEMP_TITLE} -gt 40 ]]; then
-                TEMP_TITLE="${TEMP_TITLE:0:40}"
-                # 끝에 하이픈이 있으면 제거
-                TEMP_TITLE=$(echo "$TEMP_TITLE" | sed 's/-\+$//')
-                echo "Step 8 - After length limit: '$TEMP_TITLE'"
-              fi
-              
-              # 9. 최종 검증
-              if [[ -z "$TEMP_TITLE" || "$TEMP_TITLE" == "-" ]]; then
-                SANITIZED_TITLE="issue"
-                echo "Step 9 - Final validation failed, using default: '$SANITIZED_TITLE'"
-              else
-                SANITIZED_TITLE="$TEMP_TITLE"
-                echo "Step 9 - Final result: '$SANITIZED_TITLE'"
-              fi
-            fi
-          fi
-
-          # 브랜치명 생성 - 슬래시 대신 하이픈 사용
-          BRANCH_NAME="${PREFIX}-${ISSUE_NUMBER}-${SANITIZED_TITLE}"
+          # 대괄호 안의 태그 제거 ([FEATURE], [BUG], [HOTFIX] 등)
+          CLEAN_TITLE=$(echo "$ISSUE_TITLE" | sed 's/\[[^]]*\]//g' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
           
-          echo "=== Final Results ==="
-          echo "Sanitized title: '$SANITIZED_TITLE'"
-          echo "Branch name: '$BRANCH_NAME'"
-          echo "Branch name length: ${#BRANCH_NAME}"
+          # 이슈 번호 추가
+          FINAL_BRANCH_NAME="issue-${ISSUE_NUMBER}-${BRANCH_NAME}"
           
-          # 브랜치명 유효성 최종 검증
-          if [[ -z "$BRANCH_NAME" || "$BRANCH_NAME" == *"--" ]]; then
-            echo "ERROR: Invalid branch name generated!"
-            exit 1
-          fi
+          echo "branch_name=$FINAL_BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "clean_title=$CLEAN_TITLE" >> $GITHUB_OUTPUT
+          
+          echo "원본 제목: $ISSUE_TITLE"
+          echo "정리된 제목: $CLEAN_TITLE"
+          echo "생성될 브랜치명: $FINAL_BRANCH_NAME"
 
-          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
-          echo "sanitized_title=$SANITIZED_TITLE" >> $GITHUB_OUTPUT
-
-      - name: Debug branch values
+      - name: Create branch
         run: |
-          echo "=== Debug Information ==="
-          echo "Original title: '${{ github.event.issue.title }}'"
-          echo "Sanitized title: '${{ steps.create-branch-name.outputs.sanitized_title }}'"
-          echo "Branch name: '${{ steps.create-branch-name.outputs.branch_name }}'"
-          echo "Issue number: '${{ github.event.issue.number }}'"
-          echo "Prefix: '${{ steps.extract-prefix.outputs.prefix }}'"
-          echo "========================"
-
-      - name: Create and push branch
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -e  # 에러 발생 시 즉시 종료
-          
-          echo "=== Branch Creation Process ==="
-          echo "Branch name: '${{ steps.create-branch-name.outputs.branch_name }}'"
-          
-          # Git 설정
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # 브랜치명 유효성 검사
-          BRANCH_NAME="${{ steps.create-branch-name.outputs.branch_name }}"
-          if [[ -z "$BRANCH_NAME" ]]; then
-            echo "ERROR: Branch name is empty!"
-            exit 1
-          fi
-          
-          echo "Fetching origin..."
-          git fetch origin
-          
-          # 베이스 브랜치 확인
-          if git show-ref --verify --quiet refs/remotes/origin/develop; then
-            BASE_BRANCH="develop"
-          elif git show-ref --verify --quiet refs/remotes/origin/main; then
-            BASE_BRANCH="main"
-          else
-            echo "ERROR: Neither develop nor main branch found!"
-            git branch -r
-            exit 1
-          fi
-          
-          echo "Base branch: $BASE_BRANCH"
+          BRANCH_NAME="${{ steps.extract_branch.outputs.branch_name }}"
           
           # 브랜치가 이미 존재하는지 확인
-          if git show-ref --verify --quiet refs/remotes/origin/"$BRANCH_NAME"; then
-            echo "WARNING: Branch $BRANCH_NAME already exists!"
-            exit 0
-          fi
-          
-          # 브랜치 생성
-          echo "Creating branch: $BRANCH_NAME"
-          git checkout -b "$BRANCH_NAME" origin/$BASE_BRANCH
-          
-          if [[ $? -ne 0 ]]; then
-            echo "ERROR: Failed to create branch!"
+          if git ls-remote --heads origin "$BRANCH_NAME" | grep -q "$BRANCH_NAME"; then
+            echo "브랜치 '$BRANCH_NAME'가 이미 존재합니다."
             exit 1
           fi
           
-          # 브랜치 푸시
-          echo "Pushing branch: $BRANCH_NAME"
+          # 새 브랜치 생성 및 푸시
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git checkout -b "$BRANCH_NAME"
           git push origin "$BRANCH_NAME"
           
-          if [[ $? -ne 0 ]]; then
-            echo "ERROR: Failed to push branch!"
-            exit 1
-          fi
-          
-          echo "SUCCESS: Branch created and pushed successfully!"
+          echo "✅ 브랜치 '$BRANCH_NAME'가 성공적으로 생성되었습니다."
 
-      - name: Add branch info to issue
-        if: success()
-        uses: peter-evans/create-or-update-comment@v4
+      - name: Comment on issue
+        uses: actions/github-script@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          body: |
-            🚀 **브랜치가 자동 생성되었습니다!**
+          script: |
+            const branchName = '${{ steps.extract_branch.outputs.branch_name }}';
+            const cleanTitle = '${{ steps.extract_branch.outputs.clean_title }}';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🎉 **브랜치가 자동으로 생성되었습니다!**
+              
+**브랜치명:** \`${branchName}\`
+**정리된 제목:** ${cleanTitle}
 
-            **브랜치명**: `${{ steps.create-branch-name.outputs.branch_name }}`
+이제 다음 명령어로 브랜치를 체크아웃할 수 있습니다:
+\`\`\`bash
+git fetch origin
+git checkout ${branchName}
+\`\`\`
 
-            ### 다음 단계
-            1. 로컬에서 브랜치 체크아웃:
-               ```bash
-               git fetch origin
-               git checkout ${{ steps.create-branch-name.outputs.branch_name }}
-               ```
-            2. 작업 완료 후 PR 생성
-            3. PR이 머지되면 브랜치와 이슈가 자동으로 정리됩니다
+또는 GitHub에서 직접 작업하실 수 있습니다.`
+            });
 
-            > 💡 **팁**: PR 제목에 `closes #${{ github.event.issue.number }}` 또는 `fixes #${{ github.event.issue.number }}`를 포함하면 이슈가 자동으로 닫힙니다.
-
-      - name: Add error info to issue
-        if: failure()
-        uses: peter-evans/create-or-update-comment@v4
+      - name: Add assignee and labels
+        uses: actions/github-script@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          body: |
-            ❌ **브랜치 생성 실패!**
-
-            **오류**: 브랜치 생성 중 문제가 발생했습니다.
-            **예상 브랜치명**: `${{ steps.create-branch-name.outputs.branch_name }}`
-
-            ### 확인사항
-            - 브랜치명에 특수문자가 포함되어 있는지 확인
-            - 동일한 브랜치가 이미 존재하는지 확인
-            - GitHub Actions 로그를 확인하여 자세한 오류 내용 확인
-
-            수동으로 브랜치를 생성하거나 이슈 제목을 수정 후 새 이슈를 생성해주세요.
-
-      - name: Add labels to issue
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          body: |
-            ---
-            🏷️ **브랜치 정보**
-            - **타입**: `${{ steps.extract-prefix.outputs.prefix }}`
-            - **브랜치**: `${{ steps.create-branch-name.outputs.branch_name }}`
-            - **상태**: 🔄 진행 중
-
-  cleanup-after-merge:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      issues: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Extract issue number from branch name
-        id: extract-issue
-        run: |
-          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
-          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
-
-          ISSUE_NUMBER=$(echo "$BRANCH_NAME" | grep -oE '/[0-9]+' | sed 's/\///')
-
-          if [[ "$ISSUE_NUMBER" =~ ^[0-9]+$ ]]; then
-            echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
-            echo "has_issue=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_issue=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Delete merged branch
-        if: steps.extract-issue.outputs.has_issue == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          BRANCH_NAME="${{ steps.extract-issue.outputs.branch_name }}"
-          git push origin --delete "$BRANCH_NAME" || echo "브랜치 삭제 실패 또는 이미 삭제됨"
-
-      - name: Close related issue
-        if: steps.extract-issue.outputs.has_issue == 'true'
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ steps.extract-issue.outputs.issue_number }}
-          body: |
-            ✅ **작업이 완료되었습니다!**
-
-            **PR**: #${{ github.event.pull_request.number }} - ${{ github.event.pull_request.title }}
-            **브랜치**: `${{ steps.extract-issue.outputs.branch_name }}` (삭제됨)
-            **머지 시간**: ${{ github.event.pull_request.merged_at }}
-
-            이 이슈는 자동으로 닫힙니다. 🎉
-
-      - name: Close issue
-        if: steps.extract-issue.outputs.has_issue == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ISSUE_NUMBER=${{ steps.extract-issue.outputs.issue_number }}
-          gh issue close $ISSUE_NUMBER --reason completed
+          script: |
+            // 이슈 작성자를 assignee로 추가
+            github.rest.issues.addAssignees({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              assignees: [context.payload.issue.user.login]
+            });
+            
+            // 'in-progress' 라벨 추가
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['in-progress']
+            });
