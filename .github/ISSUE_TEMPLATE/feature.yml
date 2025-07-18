@@ -12,8 +12,8 @@ body:
       placeholder: 어떤 기능을 개발하시나요?
     validations:
       required: true
-  
-   - type: textarea
+
+  - type: textarea
     id: task-list
     attributes:
       label: 작업 목록
@@ -24,7 +24,7 @@ body:
         - [ ] 작업 3
     validations:
       required: true
-  
+
   - type: textarea
     id: related-issues
     attributes:
@@ -33,7 +33,7 @@ body:
       placeholder: |
         - 관련 이슈: #
         - 의존하는 이슈: #
-  
+
   - type: textarea
     id: additional-info
     attributes:
