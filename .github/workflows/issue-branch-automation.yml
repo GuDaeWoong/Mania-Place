@@ -55,23 +55,39 @@ jobs:
             echo "Warning: Issue title is empty or contains only whitespace"
             SANITIZED_TITLE="issue"
           else
-            # 제목 정리: 소문자 변환, 특수문자를 하이픈으로 변경
-            SANITIZED_TITLE=$(echo "$ISSUE_TITLE" | \
-              tr '[:upper:]' '[:lower:]' | \
-              sed 's/[^a-z0-9가-힣ㄱ-ㅎㅏ-ㅣ]/-/g' | \
-              sed 's/--*/-/g' | \
-              sed 's/^-\+\|-\+$//g')
+            # 제목 정리 단계별 처리
+            # 1. 먼저 **를 제거하고 공백 정리
+            TEMP_TITLE=$(echo "$ISSUE_TITLE" | sed 's/\*\*//g' | sed 's/^ *//g' | sed 's/ *$//g')
+            echo "Debug - After removing **: '$TEMP_TITLE'"
             
-            # 길이 제한 (50자)
-            if [[ ${#SANITIZED_TITLE} -gt 50 ]]; then
-              SANITIZED_TITLE="${SANITIZED_TITLE:0:50}"
+            # 2. 소문자 변환
+            TEMP_TITLE=$(echo "$TEMP_TITLE" | tr '[:upper:]' '[:lower:]')
+            echo "Debug - After lowercase: '$TEMP_TITLE'"
+            
+            # 3. 허용되지 않는 문자를 하이픈으로 변경 (영문, 숫자, 한글, 하이픈, 언더스코어만 허용)
+            TEMP_TITLE=$(echo "$TEMP_TITLE" | sed 's/[^a-z0-9가-힣ㄱ-ㅎㅏ-ㅣ_-]/-/g')
+            echo "Debug - After char replacement: '$TEMP_TITLE'"
+            
+            # 4. 연속된 하이픈을 하나로 줄이기
+            TEMP_TITLE=$(echo "$TEMP_TITLE" | sed 's/-\+/-/g')
+            echo "Debug - After dash reduction: '$TEMP_TITLE'"
+            
+            # 5. 앞뒤 하이픈 제거
+            TEMP_TITLE=$(echo "$TEMP_TITLE" | sed 's/^-\+//' | sed 's/-\+$//')
+            echo "Debug - After trim dashes: '$TEMP_TITLE'"
+            
+            # 6. 길이 제한 (50자)
+            if [[ ${#TEMP_TITLE} -gt 50 ]]; then
+              TEMP_TITLE="${TEMP_TITLE:0:50}"
               # 끝에 하이픈이 있으면 제거
-              SANITIZED_TITLE=$(echo "$SANITIZED_TITLE" | sed 's/-\+$//')
+              TEMP_TITLE=$(echo "$TEMP_TITLE" | sed 's/-\+$//')
             fi
             
-            # 여전히 비어있으면 기본값 설정
-            if [[ -z "$SANITIZED_TITLE" ]]; then
+            # 7. 여전히 비어있으면 기본값 설정
+            if [[ -z "$TEMP_TITLE" || "$TEMP_TITLE" == "-" ]]; then
               SANITIZED_TITLE="issue"
+            else
+              SANITIZED_TITLE="$TEMP_TITLE"
             fi
           fi
 
