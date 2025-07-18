@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.user.entity.User;
 
 import jakarta.persistence.Entity;
@@ -15,7 +16,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 
@@ -31,16 +31,16 @@ public class Order {
 	@JoinColumn(name = "user_id")
 	private User user;
 
-	@OneToMany(mappedBy = "order")
-	private List<OrderItem> orderItems = new ArrayList<>();
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "item_id")
+	private Item item;
+	//상품 개수
+	private int quantity;
+	private double price;
+	private String deliveryAddress;
 
 	@Enumerated(EnumType.STRING)
 	private OrderStatus status;
-
-	private double price;
-
-	// 배송지
-	private String deliveryAddress;
 
 	private LocalDateTime creatAt;
 	private LocalDateTime completeAt;
