@@ -1,99 +1,31 @@
-name: Auto Create Branch from Issue
+name: Auto Branch From Issue
 
 on:
   issues:
-    types: [opened, labeled]
+    types: [opened]
 
 jobs:
   create-branch:
     runs-on: ubuntu-latest
-    if: contains(github.event.issue.labels.*.name, 'create-branch') || contains(github.event.issue.title, '[FEATURE]') || contains(github.event.issue.title, '[BUG]') || contains(github.event.issue.title, '[HOTFIX]')
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract branch name from issue title
-        id: extract_branch
+      - name: Generate branch name from issue
+        id: generate
         run: |
-          ISSUE_TITLE="${{ github.event.issue.title }}"
-          ISSUE_NUMBER="${{ github.event.issue.number }}"
-          
-          # 대괄호 안의 태그 제거 ([FEATURE], [BUG], [HOTFIX] 등)
-          CLEAN_TITLE=$(echo "$ISSUE_TITLE" | sed 's/\[[^]]*\]//g' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
-          
-          # 이슈 번호 추가
-          FINAL_BRANCH_NAME="issue-${ISSUE_NUMBER}-${BRANCH_NAME}"
-          
-          echo "branch_name=$FINAL_BRANCH_NAME" >> $GITHUB_OUTPUT
-          echo "clean_title=$CLEAN_TITLE" >> $GITHUB_OUTPUT
-          
-          echo "원본 제목: $ISSUE_TITLE"
-          echo "정리된 제목: $CLEAN_TITLE"
-          echo "생성될 브랜치명: $FINAL_BRANCH_NAME"
+          ISSUE_NUMBER=${{ github.event.issue.number }}
+          ISSUE_TITLE=${{ github.event.issue.title }}
+          SANITIZED_TITLE=$(echo "$ISSUE_TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//' | sed 's/-$//')
+          BRANCH_NAME="issue/${ISSUE_NUMBER}-${SANITIZED_TITLE}"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Create branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BRANCH_NAME="${{ steps.extract_branch.outputs.branch_name }}"
-          
-          # 브랜치가 이미 존재하는지 확인
-          if git ls-remote --heads origin "$BRANCH_NAME" | grep -q "$BRANCH_NAME"; then
-            echo "브랜치 '$BRANCH_NAME'가 이미 존재합니다."
-            exit 1
-          fi
-          
-          # 새 브랜치 생성 및 푸시
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
-          git checkout -b "$BRANCH_NAME"
-          git push origin "$BRANCH_NAME"
-          
-          echo "✅ 브랜치 '$BRANCH_NAME'가 성공적으로 생성되었습니다."
-
-      - name: Comment on issue
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const branchName = '${{ steps.extract_branch.outputs.branch_name }}';
-            const cleanTitle = '${{ steps.extract_branch.outputs.clean_title }}';
-            
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `🎉 **브랜치가 자동으로 생성되었습니다!**
-              
-**브랜치명:** \`${branchName}\`
-**정리된 제목:** ${cleanTitle}
-
-이제 다음 명령어로 브랜치를 체크아웃할 수 있습니다:
-\`\`\`bash
-git fetch origin
-git checkout ${branchName}
-\`\`\`
-
-또는 GitHub에서 직접 작업하실 수 있습니다.`
-            });
-
-      - name: Add assignee and labels
-        uses: actions/github-script@v7
-        with:
-          script: |
-            // 이슈 작성자를 assignee로 추가
-            github.rest.issues.addAssignees({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              assignees: [context.payload.issue.user.login]
-            });
-            
-            // 'in-progress' 라벨 추가
-            github.rest.issues.addLabels({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: ['in-progress']
-            });
+          gh repo clone ${{ github.repository }} repo
+          cd repo
+          git checkout -b ${{ steps.generate.outputs.BRANCH_NAME }}
+          git push origin ${{ steps.generate.outputs.BRANCH_NAME }}
