@@ -1,16 +1,19 @@
-name: Auto Branch From Issue
+name: Issue Branch & PR Automation
 
 on:
   issues:
     types: [opened]
 
+  pull_request:
+    types: [closed]
+
 jobs:
   create-branch:
+    if: github.event_name == 'issues' && github.event.action == 'opened'
     runs-on: ubuntu-latest
-
     permissions:
       contents: write
-      issues: read
+      issues: write
 
     steps:
       - name: Checkout repository
@@ -24,7 +27,7 @@ jobs:
           git config user.email "${{ github.actor }}@users.noreply.github.com"
 
       - name: Generate branch name
-        id: branch
+        id: generate_branch
         run: |
           ISSUE_NUMBER=${{ github.event.issue.number }}
           ISSUE_TITLE="${{ github.event.issue.title }}"
@@ -35,10 +38,9 @@ jobs:
             | sed 's/--*/-/g' \
             | sed 's/^-//' \
             | sed 's/-$//')
-
           BRANCH_NAME="issue/${ISSUE_NUMBER}-${SANITIZED_TITLE}"
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
-          echo "✅ Branch name will be: $BRANCH_NAME"
+          echo "Branch to create: $BRANCH_NAME"
 
       - name: Create and push branch
         run: |
@@ -46,3 +48,51 @@ jobs:
           git checkout develop
           git checkout -b "$BRANCH_NAME"
           git push origin "$BRANCH_NAME"
+
+      - name: Comment issue - 작업 시작 알림
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            👷 작업을 시작합니다! 브랜치 `${{ env.BRANCH_NAME }}` 가 생성되었습니다.
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "자동: 이슈 #${{ github.event.issue.number }} 작업 시작"
+          branch: ${{ env.BRANCH_NAME }}
+          base: develop
+          title: "이슈 #${{ github.event.issue.number }} 작업: ${{ github.event.issue.title }}"
+          body: |
+            자동 생성된 PR입니다. 이슈 #${{ github.event.issue.number }} 작업 내용입니다.
+
+            Fixes #${{ github.event.issue.number }}
+          labels: work-in-progress
+
+  delete-branch-and-close-issue:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+
+    steps:
+      - name: Get branch name from PR
+        id: get_branch
+        run: echo "BRANCH=${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
+
+      - name: Delete branch
+        uses: peter-evans/delete-branch@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ env.BRANCH }}
+
+      - name: Comment on issue - 완료 알림
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.body }}
+          body: |
+            ✅ PR이 머지되어 작업이 완료되었습니다. 브랜치 `${{ env.BRANCH }}` 는 삭제되었습니다.
