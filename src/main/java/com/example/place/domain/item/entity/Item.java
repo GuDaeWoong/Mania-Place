@@ -3,6 +3,8 @@ package com.example.place.domain.item.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.place.common.exception.enums.ExceptionCode;
+import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.user.entity.User;
 
@@ -15,6 +17,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Min;
 import lombok.Getter;
 
 @Getter
@@ -30,6 +33,7 @@ public class Item {
 	private User user;
 
 	private String productName;
+
 	private String productDescription;
 
 	private Boolean is_official;
@@ -38,5 +42,19 @@ public class Item {
 
 	@OneToMany(mappedBy = "item")
 	private List<Image> images = new ArrayList<>();
+
+	// 재고 감소
+	public void decreaseStock(int quantity){
+		if(this.count < quantity){
+			throw new CustomException(ExceptionCode.OUT_OF_STOCK);
+		}
+		this.count -= quantity;
+	}
+
+	// 주문 취소로 인한 재고 증가
+	public void increaseStock(int quantity) {
+		this.count += quantity;
+	}
+
 
 }
