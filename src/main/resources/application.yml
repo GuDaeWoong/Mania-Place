@@ -3,7 +3,7 @@ spring:
     type: redis
 
   application:
-    name: Plus-Project
+    name: Mania-Place
 
   datasource:
     url: jdbc:mysql://localhost:3306/mania_place
