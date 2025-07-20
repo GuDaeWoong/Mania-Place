@@ -55,7 +55,7 @@ public class OrderService {
 		orderRepository.save(order);
 
 		// 주문으로 인한 재고 차감
-		item.decreaseStock(requestDto.getQuantity());
+		itemService.decreaseStock(item.getId(),requestDto.getQuantity());
 
 		return CreateOrderResponseDto.from(order);
 	}
