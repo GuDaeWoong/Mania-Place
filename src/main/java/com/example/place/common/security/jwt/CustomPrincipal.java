@@ -5,6 +5,7 @@ import lombok.Getter;
 @Getter
 public class CustomPrincipal {
 
+	//추후에 필드는 회의를 통해서 수정 예정
 	private final Long id;
 	private final String name;
 	private final String nickname;
