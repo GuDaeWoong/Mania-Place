@@ -11,16 +11,20 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
 @Table(name = "posts")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
 	@ManyToOne
 	@JoinColumn(name = "user_id")
 	private User user;
@@ -33,5 +37,12 @@ public class Post {
 	private String content;
 
 	private String image;
+
+	public Post(User user, Item item, String content, String image) {
+		this.user = user;
+		this.item = item;
+		this.content = content;
+		this.image = image;
+	}
 
 }
