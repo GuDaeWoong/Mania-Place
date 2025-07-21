@@ -4,12 +4,12 @@ import java.time.LocalDateTime;
 
 import com.example.place.domain.order.entity.Order;
 
-import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 public class CreateOrderResponseDto {
 
+	private String mainImageUrl;
 	private String userNickname;
 	private String itemName;
 	private int quantity;
@@ -18,8 +18,9 @@ public class CreateOrderResponseDto {
 	private String deliveryAddress;
 	private LocalDateTime createdAt;
 
-	public CreateOrderResponseDto(String userNickname, String itemName, int quantity, double price,
+	public CreateOrderResponseDto(String mainImageUrl, String userNickname, String itemName, int quantity, double price,
 		String status, String deliveryAddress, LocalDateTime createdAt) {
+		this.mainImageUrl = mainImageUrl;
 		this.userNickname = userNickname;
 		this.itemName = itemName;
 		this.quantity = quantity;
@@ -29,8 +30,9 @@ public class CreateOrderResponseDto {
 		this.createdAt = createdAt;
 	}
 
-	public static CreateOrderResponseDto from(Order order) {
+	public static CreateOrderResponseDto from(Order order, String mainImageUrl) {
 		return new CreateOrderResponseDto(
+			mainImageUrl,
 			order.getUser().getNickname(),
 			order.getItem().getItemName(),
 			order.getQuantity(),

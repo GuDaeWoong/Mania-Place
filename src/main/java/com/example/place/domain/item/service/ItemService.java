@@ -1,5 +1,6 @@
 package com.example.place.domain.item.service;
 
+import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.item.dto.request.ItemRequest;
 import com.example.place.domain.item.dto.response.ItemResponse;
 import com.example.place.domain.item.entity.Item;
@@ -124,5 +125,16 @@ public class ItemService {
 				.stream()
 				.map(ItemResponse::from)
 				.toList();
+	}
+
+	public String getMainImageUrl(Long itemId) {
+		Item item =  itemRepository.findById(itemId)
+			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
+
+		return item.getImages().stream()
+			.filter(Image::getIsMain)
+			.findFirst()
+			.map(Image::getImageUrl)
+			.orElse(null);
 	}
 }
