@@ -17,6 +17,7 @@ public enum ExceptionCode {
 	PASSWORD_TOO_SHORT(HttpStatus.BAD_REQUEST, "비밀번호는 최소 4자 이상이어야 합니다."),
 	CONTENT_REQUIRED(HttpStatus.BAD_REQUEST, "내용을 입력해주세요."),
 	ADDRESS_REQUIRED(HttpStatus.BAD_REQUEST, "주소지가 입력되지 않았습니다."),
+	NOT_SALE_PERIOD(HttpStatus.BAD_REQUEST, "판매 기간이 아닙니다."),
 
 
 	// 401 Unauthorized

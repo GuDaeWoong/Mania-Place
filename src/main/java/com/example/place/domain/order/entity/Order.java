@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.place.common.entity.BaseEntity;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.user.entity.User;
 
@@ -17,12 +18,16 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
+@Builder
 @Getter
 @Entity
+@AllArgsConstructor
 @Table(name = "orders")
-public class Order {
+public class Order extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -42,6 +47,9 @@ public class Order {
 	@Enumerated(EnumType.STRING)
 	private OrderStatus status;
 
-	private LocalDateTime creatAt;
 	private LocalDateTime completeAt;
+
+	public Order() {
+
+	}
 }
