@@ -1,5 +1,6 @@
 package com.example.place.domain.user.service;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.place.common.exception.enums.ExceptionCode;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserService {
 	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 
 	public UserRegisterResponse register(UserRegisterRequest userRegisterRequest) {
 		// 이메일 중복 검증
@@ -26,13 +28,14 @@ public class UserService {
 		if(userRepository.existsByNickname(userRegisterRequest.getNickname())) {
 			throw new CustomException(ExceptionCode.EXISTS_NICKNAME);
 		}
-		// fixme : 패스워드 암호화
-		//String encodedPassword = passwordEncoder.encode(userRegisterRequest.getPassword());
+		// 패스워드 암호화
+		String encodedPassword = passwordEncoder.encode(userRegisterRequest.getPassword());
+
 		User user = new User(
 			userRegisterRequest.getName(),
 			userRegisterRequest.getNickname(),
 			userRegisterRequest.getEmail(),
-			userRegisterRequest.getPassword(),
+			encodedPassword,
 			userRegisterRequest.getImageUrl(),
 			UserRole.USER
 		);
