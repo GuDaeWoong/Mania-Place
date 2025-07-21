@@ -41,7 +41,7 @@ public class OrderService {
 	) {
 		User user = userService.findUserById(userId);
 
-		Item item = itemService.findItemById(requestDto.getItemId());
+		Item item = itemService.findByIdOrElseThrow(requestDto.getItemId());
 
 		// 수량 유무 확인
 		if (item.getCount() < requestDto.getQuantity()) {
