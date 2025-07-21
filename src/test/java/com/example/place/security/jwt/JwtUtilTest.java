@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
@@ -18,6 +19,7 @@ import io.jsonwebtoken.Claims;
 
 @SpringBootTest
 @DisplayName("JWT 유틸리티 테스트")
+@ActiveProfiles("test")
 public class JwtUtilTest {
 
 	private static final Long DEFAULT_USER_ID = 12345L;
