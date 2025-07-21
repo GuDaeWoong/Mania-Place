@@ -1,5 +1,8 @@
 package com.example.place.domain.order.controller;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -51,4 +54,19 @@ public class OrderController {
 		ApiResponseDto<SearchOrderResponseDto> success = new ApiResponseDto<>("단건 조회가 완료되었습니다.", searchOrder);
 		return ResponseEntity.ok(success);
 	}
+
+
+	@GetMapping
+	public ResponseEntity<ApiResponseDto> getAllMyOrders(
+		@AuthenticationPrincipal CustomPrincipal userDetails,
+		@PageableDefault Pageable pageable
+	){
+		Long userId = userDetails.getId();
+
+		Page<SearchOrderResponseDto> orders = orderService.getAllMyOrders(userId, pageable);
+
+		ApiResponseDto<Page<SearchOrderResponseDto>> success = new ApiResponseDto<>("전체 주문 조회가 완료되었습니다.", orders);
+		return ResponseEntity.ok(success);
+	}
+
 }

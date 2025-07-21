@@ -1,5 +1,11 @@
 package com.example.place.domain.order.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.place.common.exception.enums.ExceptionCode;
@@ -79,4 +85,25 @@ public class OrderService {
 
 	}
 
+
+	public Page<SearchOrderResponseDto> getAllMyOrders(Long userId, Pageable pageable) {
+
+		Page<Order> orders = orderRepository.findByUserId(userId, pageable);
+
+		List<SearchOrderResponseDto> responseDtoList = new ArrayList<>();
+
+		for (Order order : orders) {
+			SearchOrderResponseDto dto = new SearchOrderResponseDto(
+				order.getUser().getNickname(),
+				order.getItem().getItemName(),
+				order.getQuantity(),
+				order.getPrice(),
+				order.getDeliveryAddress(),
+				order.getStatus().name(),
+				order.getCreatedAt()
+			);
+			responseDtoList.add(dto);
+		}
+		return new PageImpl<>(responseDtoList, pageable, orders.getTotalElements());
+	}
 }
