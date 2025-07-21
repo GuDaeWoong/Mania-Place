@@ -25,6 +25,8 @@ public class ItemRequest {
     private Long count;
     private LocalDateTime salesStartAt;
     private LocalDateTime salesEndAt;
+    private List<String> images;
+    private int mainIndex;
     private List<String> itemTagNames;
 
 
