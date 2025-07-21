@@ -19,4 +19,4 @@ spring:
 
   jwt:
     secret:
-      key: ${SECRET_KEY}
+      key: "TestSecretKey01234567890123456789012"

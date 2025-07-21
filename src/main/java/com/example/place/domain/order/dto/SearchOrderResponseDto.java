@@ -22,5 +22,6 @@ public class SearchOrderResponseDto {
 		this.status = status;
 		this.deliveryAddress = deliveryAddress;
 		this.createdAt = createdAt;
+
 	}
 }

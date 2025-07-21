@@ -55,6 +55,7 @@ public class OrderController {
 		return ResponseEntity.ok(success);
 	}
 
+
 	@GetMapping
 	public ResponseEntity<ApiResponseDto> getAllMyOrders(
 		@AuthenticationPrincipal CustomPrincipal userDetails,
@@ -67,4 +68,5 @@ public class OrderController {
 		ApiResponseDto<Page<SearchOrderResponseDto>> success = new ApiResponseDto<>("전체 주문 조회가 완료되었습니다.", orders);
 		return ResponseEntity.ok(success);
 	}
+
 }
