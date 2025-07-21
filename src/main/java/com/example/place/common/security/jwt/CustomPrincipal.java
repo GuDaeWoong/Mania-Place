@@ -1,0 +1,20 @@
+package com.example.place.common.security.jwt;
+
+import lombok.Getter;
+
+@Getter
+public class CustomPrincipal {
+
+	//추후에 필드는 회의를 통해서 수정 예정
+	private final Long id;
+	private final String name;
+	private final String nickname;
+	private final String email;
+
+	public CustomPrincipal(Long id, String name, String nickname, String email) {
+		this.id = id;
+		this.name = name;
+		this.nickname = nickname;
+		this.email = email;
+	}
+}
