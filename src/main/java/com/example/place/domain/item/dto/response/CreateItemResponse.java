@@ -1,5 +1,6 @@
 package com.example.place.domain.item.dto.response;
 
+import com.example.place.domain.item.entity.Item;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,7 +10,6 @@ import java.util.List;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 public class CreateItemResponse {
     private String itemName;
     private String itemDescription;
@@ -18,4 +18,20 @@ public class CreateItemResponse {
     private LocalDateTime salesStartAt;
     private LocalDateTime salesEndAt;
     private List<String> tags;
+
+    public static CreateItemResponse from(Item item) {
+        List<String> tagNames = item.getItemTags().stream()
+                .map(itemTag -> itemTag.getTag().getTagName())
+                .toList();
+
+        CreateItemResponse response = new CreateItemResponse();
+        response.itemName = item.getItemName();         // getName → getItemName
+        response.itemDescription = item.getItemDescription(); // getDescription → getItemDescription
+        response.price = item.getPrice();
+        response.count = item.getCount();               // getStock → getCount
+        response.salesStartAt = item.getSalesStartAt();
+        response.salesEndAt = item.getSalesEndAt();
+        response.tags = tagNames;
+        return response;
+    }
 }
