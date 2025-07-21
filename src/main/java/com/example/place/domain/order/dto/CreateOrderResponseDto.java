@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@Builder
 public class CreateOrderResponseDto {
 
 	private String userNickname;
@@ -19,15 +18,27 @@ public class CreateOrderResponseDto {
 	private String deliveryAddress;
 	private LocalDateTime createdAt;
 
-	public static CreateOrderResponseDto from(Order order) {
-		return CreateOrderResponseDto.builder()
-			.userNickname(order.getUser().getNickname())
-			.itemName(order.getItem().getItemName())
-			.quantity(order.getQuantity())
-			.price(order.getPrice())
-			.status(order.getStatus().name()) // enum to string
-			.deliveryAddress(order.getDeliveryAddress())
-			.createdAt(order.getCreatedAt())
-			.build();
+	public CreateOrderResponseDto(String userNickname, String itemName, int quantity, double price,
+		String status, String deliveryAddress, LocalDateTime createdAt) {
+		this.userNickname = userNickname;
+		this.itemName = itemName;
+		this.quantity = quantity;
+		this.price = price;
+		this.status = status;
+		this.deliveryAddress = deliveryAddress;
+		this.createdAt = createdAt;
 	}
+
+	public static CreateOrderResponseDto from(Order order) {
+		return new CreateOrderResponseDto(
+			order.getUser().getNickname(),
+			order.getItem().getItemName(),
+			order.getQuantity(),
+			order.getPrice(),
+			order.getStatus().name(),
+			order.getDeliveryAddress(),
+			order.getCreatedAt()
+		);
+	}
+
 }
