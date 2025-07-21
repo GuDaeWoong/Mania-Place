@@ -1,5 +1,11 @@
 package com.example.place.domain.order.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.place.common.exception.enums.ExceptionCode;
@@ -8,6 +14,7 @@ import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.item.service.ItemService;
 import com.example.place.domain.order.dto.CreateOrderRequestDto;
 import com.example.place.domain.order.dto.CreateOrderResponseDto;
+import com.example.place.domain.order.dto.SearchOrderResponseDto;
 import com.example.place.domain.order.entity.Order;
 import com.example.place.domain.order.entity.OrderStatus;
 import com.example.place.domain.order.repository.OrderRepository;
@@ -55,5 +62,48 @@ public class OrderService {
 		itemService.decreaseStock(item.getId(),requestDto.getQuantity());
 
 		return CreateOrderResponseDto.from(order);
+	}
+
+	public SearchOrderResponseDto getMyOrder(Long orderId, Long userId) {
+
+		Order order = orderRepository.findById(orderId)
+			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ORDER));
+
+		if (!order.getUser().getId().equals(userId)) {
+			throw new CustomException(ExceptionCode.FORBIDDEN_ORDER_ACCESS);
+		}
+
+		return new SearchOrderResponseDto(
+			order.getUser().getNickname(),
+			order.getItem().getItemName(),
+			order.getQuantity(),
+			order.getPrice(),
+			order.getDeliveryAddress(),
+			order.getStatus().name(),
+			order.getCreatedAt()
+		);
+
+	}
+
+
+	public Page<SearchOrderResponseDto> getAllMyOrders(Long userId, Pageable pageable) {
+
+		Page<Order> orders = orderRepository.findByUserId(userId, pageable);
+
+		List<SearchOrderResponseDto> responseDtoList = new ArrayList<>();
+
+		for (Order order : orders) {
+			SearchOrderResponseDto dto = new SearchOrderResponseDto(
+				order.getUser().getNickname(),
+				order.getItem().getItemName(),
+				order.getQuantity(),
+				order.getPrice(),
+				order.getDeliveryAddress(),
+				order.getStatus().name(),
+				order.getCreatedAt()
+			);
+			responseDtoList.add(dto);
+		}
+		return new PageImpl<>(responseDtoList, pageable, orders.getTotalElements());
 	}
 }
