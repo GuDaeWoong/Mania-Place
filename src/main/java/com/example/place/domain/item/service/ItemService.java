@@ -120,6 +120,5 @@ public class ItemService {
 				.stream()
 				.map(ItemResponse::from)
 				.toList();
-
 	}
 }

@@ -24,10 +24,10 @@ public class ItemResponse {
                 .toList();
 
         ItemResponse response = new ItemResponse();
-        response.itemName = item.getItemName();         // getName → getItemName
-        response.itemDescription = item.getItemDescription(); // getDescription → getItemDescription
+        response.itemName = item.getItemName();
+        response.itemDescription = item.getItemDescription();
         response.price = item.getPrice();
-        response.count = item.getCount();               // getStock → getCount
+        response.count = item.getCount();
         response.salesStartAt = item.getSalesStartAt();
         response.salesEndAt = item.getSalesEndAt();
         response.tags = tagNames;
