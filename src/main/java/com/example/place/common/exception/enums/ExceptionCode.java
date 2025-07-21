@@ -33,6 +33,7 @@ public enum ExceptionCode {
 	FORBIDDEN_ITEM_ACCESS(HttpStatus.FORBIDDEN, "본인 외에 상품은 수정할 수 없습니다."),
 	FORBIDDEN_ITEM_DELETE(HttpStatus.FORBIDDEN, "본인 외에 상품은 삭제할 수 없습니다."),
 	ACCESS_DENIED(HttpStatus.FORBIDDEN, "관리자가 아니므로 수정할 수 없습니다."),
+	FORBIDDEN_ORDER_ACCESS(HttpStatus.FORBIDDEN, "해당 주문은 본인의 주문이 아닙니다."),
 
 
 	// 404 Not Found
