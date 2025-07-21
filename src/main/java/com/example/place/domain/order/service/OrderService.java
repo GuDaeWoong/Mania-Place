@@ -80,7 +80,11 @@ public class OrderService {
 			throw new CustomException(ExceptionCode.FORBIDDEN_ORDER_ACCESS);
 		}
 
+		Item item = itemService.findByIdOrElseThrow(order.getItem().getId());
+		String mainImageUrl = itemService.getMainImageUrl(item.getId());
+
 		return new SearchOrderResponseDto(
+			mainImageUrl,
 			order.getUser().getNickname(),
 			order.getItem().getItemName(),
 			order.getQuantity(),
@@ -100,7 +104,11 @@ public class OrderService {
 		List<SearchOrderResponseDto> responseDtoList = new ArrayList<>();
 
 		for (Order order : orders) {
+			Item item = itemService.findByIdOrElseThrow(order.getItem().getId());
+			String mainImageUrl = itemService.getMainImageUrl(item.getId());
+
 			SearchOrderResponseDto dto = new SearchOrderResponseDto(
+				mainImageUrl,
 				order.getUser().getNickname(),
 				order.getItem().getItemName(),
 				order.getQuantity(),
