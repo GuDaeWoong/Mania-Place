@@ -8,6 +8,7 @@ import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.item.service.ItemService;
 import com.example.place.domain.order.dto.CreateOrderRequestDto;
 import com.example.place.domain.order.dto.CreateOrderResponseDto;
+import com.example.place.domain.order.dto.SearchOrderResponseDto;
 import com.example.place.domain.order.entity.Order;
 import com.example.place.domain.order.entity.OrderStatus;
 import com.example.place.domain.order.repository.OrderRepository;
@@ -56,4 +57,26 @@ public class OrderService {
 
 		return CreateOrderResponseDto.from(order);
 	}
+
+	public SearchOrderResponseDto getMyOrder(Long orderId, Long userId) {
+
+		Order order = orderRepository.findById(orderId)
+			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ORDER));
+
+		if (!order.getUser().getId().equals(userId)) {
+			throw new CustomException(ExceptionCode.FORBIDDEN_ORDER_ACCESS);
+		}
+
+		return new SearchOrderResponseDto(
+			order.getUser().getNickname(),
+			order.getItem().getItemName(),
+			order.getQuantity(),
+			order.getPrice(),
+			order.getDeliveryAddress(),
+			order.getStatus().name(),
+			order.getCreatedAt()
+		);
+
+	}
+
 }
