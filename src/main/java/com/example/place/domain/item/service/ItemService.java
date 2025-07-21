@@ -21,6 +21,7 @@ import com.example.place.common.exception.exceptionclass.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -33,11 +34,6 @@ public class ItemService {
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
 
-	public Item findItemById(Long itemId){
-		Item item = itemRepository.findById(itemId)
-			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
-		return item;
-	}
 
 	// 재고 감소
 	@Transactional
@@ -61,14 +57,23 @@ public class ItemService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
 
+		LocalDateTime salesStartAt = request.getSalesStartAt() != null
+				? request.getSalesStartAt()
+				: LocalDateTime.now();
+
+		LocalDateTime salesEndAt = request.getSalesEndAt() != null
+				? request.getSalesEndAt()
+				: LocalDateTime.of(3000, 1, 1, 0, 0);
+//		:LocalDateTime.Max;
         Item item = new Item(
                 user,
 				request.getItemName(),
 				request.getItemDescription(),
 				request.getPrice(),
 				request.getCount(),
-				request.getSalesStartAt(),
-				request.getSalesEndAt());
+				salesStartAt,
+				salesEndAt
+				);
         itemRepository.save(item);
 
         for (String tagName: request.getItemTagNames()) {
@@ -115,7 +120,6 @@ public class ItemService {
 
 
 	public List<ItemResponse> searchItem(String keyword, List<String> tags, Long userId) {
-
 		return itemRepository.searchItems(keyword, tags, userId)
 				.stream()
 				.map(ItemResponse::from)
