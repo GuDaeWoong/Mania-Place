@@ -1,11 +1,14 @@
 package com.example.place.domain.item.entity;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.place.common.entity.BaseEntity;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.Image.entity.Image;
+import com.example.place.domain.itemtag.entity.ItemTag;
 import com.example.place.domain.user.entity.User;
 
 import jakarta.persistence.CascadeType;
@@ -17,13 +20,17 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Min;
+import lombok.AccessLevel;
+
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 
 @Getter
 @Entity
 @Table(name = "items")
-public class Item {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Item extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -32,13 +39,13 @@ public class Item {
 	@JoinColumn(name = "user_id")
 	private User user;
 
-	private String productName;
+	private String itemName;
+	private String itemDescription;
 
-	private String productDescription;
-
-	private Boolean is_official;
 	private double price;
-	private int count;
+	private Long count;
+	private LocalDateTime salesStartAt;
+	private LocalDateTime salesEndAt;
 
 	@OneToMany(mappedBy = "item")
 	private List<Image> images = new ArrayList<>();
@@ -56,5 +63,21 @@ public class Item {
 		this.count += quantity;
 	}
 
+
+	@OneToMany(mappedBy = "item")
+	private List<ItemTag> itemTags = new ArrayList<>();
+
+	/**
+	 * security 구현후 수정필요
+	 */
+	public Item(User user, String itemName, String itemDescription, Double price, Long count, LocalDateTime salesStartAt, LocalDateTime salesEndAt) {
+		this.user = user;
+		this.itemName = itemName;
+		this.itemDescription = itemDescription;
+		this.price = price;
+		this.count = count;
+		this.salesStartAt = salesStartAt;
+		this.salesEndAt = salesEndAt;
+	}
 
 }

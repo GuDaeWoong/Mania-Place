@@ -22,7 +22,7 @@ public class CreateOrderResponseDto {
 	public static CreateOrderResponseDto from(Order order) {
 		return CreateOrderResponseDto.builder()
 			.userNickname(order.getUser().getNickname())
-			.itemName(order.getItem().getProductName())
+			.itemName(order.getItem().getItemName())
 			.quantity(order.getQuantity())
 			.price(order.getPrice())
 			.status(order.getStatus().name()) // enum to string
