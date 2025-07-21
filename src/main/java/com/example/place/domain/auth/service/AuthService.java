@@ -11,7 +11,6 @@ import com.example.place.domain.auth.controller.dto.LoginResponseDto;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.repository.UserRepository;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -21,7 +20,7 @@ public class AuthService {
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
 
-	public LoginResponseDto login(@Valid LoginRequestDto requestDto) {
+	public LoginResponseDto login(LoginRequestDto requestDto) {
 		User user = userRepository.findByEmail(requestDto.getEmail())
 			.orElseThrow(() -> new CustomException(ExceptionCode.INVALID_EMAIL_OR_PASSWORD));
 
