@@ -8,6 +8,7 @@ import com.example.place.common.entity.BaseEntity;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.Image.entity.Image;
+import com.example.place.domain.item.dto.request.CreateItemRequest;
 import com.example.place.domain.itemtag.entity.ItemTag;
 import com.example.place.domain.user.entity.User;
 
@@ -50,6 +51,9 @@ public class Item extends BaseEntity {
 	@OneToMany(mappedBy = "item")
 	private List<Image> images = new ArrayList<>();
 
+	@OneToMany(mappedBy = "item")
+	private List<ItemTag> itemTags = new ArrayList<>();
+
 	// 재고 감소
 	public void decreaseStock(int quantity){
 		if(this.count < quantity){
@@ -64,8 +68,7 @@ public class Item extends BaseEntity {
 	}
 
 
-	@OneToMany(mappedBy = "item")
-	private List<ItemTag> itemTags = new ArrayList<>();
+
 
 	/**
 	 * security 구현후 수정필요
@@ -80,4 +83,24 @@ public class Item extends BaseEntity {
 		this.salesEndAt = salesEndAt;
 	}
 
+	public void updateItem(CreateItemRequest request) {
+		if(request.getItemName() != null) {
+			this.itemName = request.getItemName();
+		}
+		if (request.getItemDescription() != null) {
+			this.itemDescription = request.getItemDescription();
+		}
+		if (request.getPrice() != null) {
+			this.price = request.getPrice();
+		}
+		if (request.getCount() != null) {
+			this.count = request.getCount();
+		}
+		if (request.getSalesStartAt() != null) {
+			this.salesStartAt = request.getSalesStartAt();
+		}
+		if (request.getSalesEndAt() != null) {
+			this.salesEndAt = request.getSalesEndAt();
+		}
+	}
 }
