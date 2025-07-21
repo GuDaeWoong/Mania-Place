@@ -97,4 +97,11 @@ public class Item extends BaseEntity {
 			this.salesEndAt = request.getSalesEndAt();
 		}
 	}
+
+	public void validateSalesPeriod() {
+		LocalDateTime now = LocalDateTime.now();
+		if (now.isBefore(salesStartAt) || now.isAfter(salesEndAt)) {
+			throw new CustomException(ExceptionCode.NOT_SALE_PERIOD);
+		}
+	}
 }

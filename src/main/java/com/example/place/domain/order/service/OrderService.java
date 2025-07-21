@@ -47,6 +47,10 @@ public class OrderService {
 		if (item.getCount() < requestDto.getQuantity()) {
 			throw new CustomException(ExceptionCode.OUT_OF_STOCK);
 		}
+
+		// 판매 기간 유무 검증
+		item.validateSalesPeriod();
+
 		Order order = new Order(user,
 			item,
 			requestDto.getQuantity(),
@@ -61,7 +65,10 @@ public class OrderService {
 		// 주문으로 인한 재고 차감
 		itemService.decreaseStock(item.getId(),requestDto.getQuantity());
 
-		return CreateOrderResponseDto.from(order);
+		// 메인 이미지 추가
+		String mainImageUrl = itemService.getMainImageUrl(item.getId());
+
+		return CreateOrderResponseDto.from(order,mainImageUrl);
 	}
 
 	public SearchOrderResponseDto getMyOrder(Long orderId, Long userId) {
