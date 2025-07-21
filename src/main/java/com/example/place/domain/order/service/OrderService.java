@@ -1,7 +1,7 @@
 package com.example.place.domain.order.service;
 
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.item.entity.Item;
@@ -14,8 +14,6 @@ import com.example.place.domain.order.repository.OrderRepository;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.service.UserService;
 
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 
 @Service
 // @RequiredArgsConstructor
@@ -42,15 +40,14 @@ public class OrderService {
 		if (item.getCount() < requestDto.getQuantity()) {
 			throw new CustomException(ExceptionCode.OUT_OF_STOCK);
 		}
-		Order order = Order.builder()
-			.user(user)
-			.item(item)
-			.quantity(requestDto.getQuantity())
-			.price(item.getPrice() * requestDto.getQuantity())
-			.status(OrderStatus.PENDING)
-			.deliveryAddress(requestDto.getDeliveryAddress())
-			.completeAt(null)
-			.build();
+		Order order = new Order(user,
+			item,
+			requestDto.getQuantity(),
+			item.getPrice()*requestDto.getQuantity(),
+			OrderStatus.PENDING,
+			requestDto.getDeliveryAddress(),
+			null
+		);
 
 		orderRepository.save(order);
 
