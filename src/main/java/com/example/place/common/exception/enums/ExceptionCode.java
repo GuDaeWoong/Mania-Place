@@ -48,7 +48,8 @@ public enum ExceptionCode {
 	// 409 Conflict
 	OUT_OF_STOCK(HttpStatus.CONFLICT, "상품의 개수가 부족합니다."),
 	ALREADY_VOTED(HttpStatus.CONFLICT, "이미 투표한 게시글입니다."),
-	EXISTS_EMAIL(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다.");
+	EXISTS_EMAIL(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다."),
+	EXISTS_NICKNAME(HttpStatus.CONFLICT, "이미 존재하는 닉네임입니다.");
 
 	private final HttpStatus httpStatus;
 	private final String message;

@@ -1,8 +1,6 @@
 package com.example.place.domain.order.entity;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.example.place.common.entity.BaseEntity;
 import com.example.place.domain.item.entity.Item;
@@ -18,14 +16,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Builder
 @Getter
 @Entity
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "orders")
 public class Order extends BaseEntity {
 	@Id
@@ -49,7 +46,14 @@ public class Order extends BaseEntity {
 
 	private LocalDateTime completeAt;
 
-	public Order() {
-
+	public Order(User user, Item item, int quantity, double price, OrderStatus status,
+		String deliveryAddress, LocalDateTime completeAt) {
+		this.user = user;
+		this.item = item;
+		this.quantity = quantity;
+		this.price = price;
+		this.status = status;
+		this.deliveryAddress = deliveryAddress;
+		this.completeAt = completeAt;
 	}
 }

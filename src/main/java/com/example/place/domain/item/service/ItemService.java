@@ -55,27 +55,57 @@ public class ItemService {
 
 	//기본적인 태그 관리 흐름입니다
     @Transactional
-    public CreateItemResponse createItem(CreateItemRequest dto) {
-        User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("유저 x"));
+    public CreateItemResponse createItem(Long userId,CreateItemRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
 
         Item item = new Item(
                 user,
-                dto.getItemName(),
-                dto.getItemDescription(),
-                dto.getPrice(),
-                dto.getCount(),
-                dto.getSalesStartAt(),
-                dto.getSalesEndAt());
+				request.getItemName(),
+				request.getItemDescription(),
+				request.getPrice(),
+				request.getCount(),
+				request.getSalesStartAt(),
+				request.getSalesEndAt());
         itemRepository.save(item);
 
-        for (String tagName: dto.getItemTagNames()) {
+        for (String tagName: request.getItemTagNames()) {
             Tag tag = tagRepository.findByTagName(tagName)
                     .orElseGet(() -> tagRepository.save(new Tag(tagName)));
 
             ItemTag itemTag = new ItemTag(null, item, tag);
             itemTagRepository.save(itemTag);
         }
-        return new CreateItemResponse();
+        return CreateItemResponse.from(item);
     }
+
+	@Transactional(readOnly = true)
+	public CreateItemResponse readItem(Long itemId) {
+		Item item = findByIdOrElseThrow(itemId);
+		return CreateItemResponse.from(item);
+	}
+
+	@Transactional
+	public CreateItemResponse updateItem(Long itemId, CreateItemRequest request) {
+		Item item = findByIdOrElseThrow(itemId);
+		item.updateItem(request);
+		return CreateItemResponse.from(item);
+	}
+
+	@Transactional
+	public void deleteItem(Long itemId, Long userId) {
+		itemRepository.deleteById(itemId);
+
+//		if(!item.getUser.getId().equals(userId)) {
+//			throw new CustomException(ExceptionCode.FORBIDDEN_ITEM_DELETE);
+//		}
+	}
+
+
+	public Item findByIdOrElseThrow(Long id) {
+		return itemRepository.findById(id)
+				.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
+	}
+
+
 }
