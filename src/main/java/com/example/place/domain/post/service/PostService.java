@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.item.repository.ItemRepository;
-import com.example.place.domain.post.dto.PostCreateRequestDto;
-import com.example.place.domain.post.dto.PostResponseDto;
+import com.example.place.domain.post.dto.request.PostCreateRequestDto;
+import com.example.place.domain.post.dto.response.PostResponseDto;
 import com.example.place.domain.post.entity.Post;
 import com.example.place.domain.post.repository.PostRepository;
 import com.example.place.domain.user.entity.User;
@@ -24,8 +24,8 @@ public class PostService {
 	private final UserRepository userRepository;
 	private final ItemRepository itemRepository;
 
-	public PostResponseDto createPost(PostCreateRequestDto request) {
-		User user = userRepository.findById(request.getUserId())
+	public PostResponseDto createPost(Long userId, PostCreateRequestDto request) {
+		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
 		Item item = itemRepository.findById(request.getItemId())
@@ -34,7 +34,6 @@ public class PostService {
 		Post post = new Post(user, item, request.getContent(), request.getImage());
 		Post saved = postRepository.save(post);
 
-		//DTO 생성
 		PostResponseDto response = new PostResponseDto();
 		response.setId(saved.getId());
 		response.setContent(saved.getContent());
@@ -44,7 +43,7 @@ public class PostService {
 		return response;
 	}
 
-	public PostResponseDto findPostById(Long postId) {
+	public PostResponseDto readPost(Long postId) {
 		Post post = postRepository.findById(postId)
 			.orElseThrow(() -> new EntityNotFoundException("해당 게시글이 존재하지 않습니다."));
 
@@ -69,6 +68,14 @@ public class PostService {
 				dto.setItemId(post.getItem().getId());
 				return dto;
 			});
+	}
+
+	public Page<PostResponseDto> findMyPosts(Long userId, Pageable pageable) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+		return postRepository.findAllByUser(user, pageable)
+			.map(PostResponseDto::from);
 	}
 
 }
