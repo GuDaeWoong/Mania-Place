@@ -45,4 +45,9 @@ public class Post {
 		this.image = image;
 	}
 
+	public void update(String content, String image) {
+		this.content = content;
+		this.image = image;
+	}
+
 }
