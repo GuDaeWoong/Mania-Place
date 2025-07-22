@@ -1,4 +1,4 @@
-package com.example.place.domain.post.dto;
+package com.example.place.domain.post.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
