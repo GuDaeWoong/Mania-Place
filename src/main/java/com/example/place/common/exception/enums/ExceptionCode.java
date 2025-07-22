@@ -18,7 +18,8 @@ public enum ExceptionCode {
 	CONTENT_REQUIRED(HttpStatus.BAD_REQUEST, "내용을 입력해주세요."),
 	ADDRESS_REQUIRED(HttpStatus.BAD_REQUEST, "주소지가 입력되지 않았습니다."),
 	NOT_SALE_PERIOD(HttpStatus.BAD_REQUEST, "판매 기간이 아닙니다."),
-	INVALID_IMAGE_UPDATE_REQUEST(HttpStatus.BAD_REQUEST, "이미지 수정을 위해서는 이미지 URL 목록과 대표 이미지 인덱스를 함께 보내주세요"),
+	INVALID_ORDER_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "허용되지 않은 주문 상태 변환입니다."),
+  INVALID_IMAGE_UPDATE_REQUEST(HttpStatus.BAD_REQUEST, "이미지 수정을 위해서는 이미지 URL 목록과 대표 이미지 인덱스를 함께 보내주세요"),
 
 	// 401 Unauthorized
 	LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."),
@@ -36,7 +37,6 @@ public enum ExceptionCode {
 	FORBIDDEN_ORDER_ACCESS(HttpStatus.FORBIDDEN, "해당 주문은 본인의 주문이 아닙니다."),
 
 
-
 	// 404 Not Found
 	NOT_FOUND_USER(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."),
 	NOT_FOUND_ITEM(HttpStatus.NOT_FOUND, "상품이 존재하지 않습니다."),
@@ -51,7 +51,8 @@ public enum ExceptionCode {
 	OUT_OF_STOCK(HttpStatus.CONFLICT, "상품의 개수가 부족합니다."),
 	ALREADY_VOTED(HttpStatus.CONFLICT, "이미 투표한 게시글입니다."),
 	EXISTS_EMAIL(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다."),
-	EXISTS_NICKNAME(HttpStatus.CONFLICT, "이미 존재하는 닉네임입니다.");
+	EXISTS_NICKNAME(HttpStatus.CONFLICT, "이미 존재하는 닉네임입니다."),
+	BLACKLISTED_TOKEN(HttpStatus.CONFLICT, "다시 로그인 해주세요.");
 
 	private final HttpStatus httpStatus;
 	private final String message;

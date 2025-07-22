@@ -6,6 +6,7 @@ import com.example.place.common.entity.BaseEntity;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.user.entity.User;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -42,6 +43,7 @@ public class Order extends BaseEntity {
 	private String deliveryAddress;
 
 	@Enumerated(EnumType.STRING)
+	@Column(length = 20)
 	private OrderStatus status;
 
 	private LocalDateTime completeAt;
@@ -55,5 +57,9 @@ public class Order extends BaseEntity {
 		this.status = status;
 		this.deliveryAddress = deliveryAddress;
 		this.completeAt = completeAt;
+	}
+
+	public void updateStatus(OrderStatus toStatus) {
+		this.status = toStatus;
 	}
 }

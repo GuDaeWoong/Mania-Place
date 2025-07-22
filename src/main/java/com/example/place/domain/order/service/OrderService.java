@@ -15,6 +15,7 @@ import com.example.place.domain.item.service.ItemService;
 import com.example.place.domain.order.dto.CreateOrderRequestDto;
 import com.example.place.domain.order.dto.CreateOrderResponseDto;
 import com.example.place.domain.order.dto.SearchOrderResponseDto;
+import com.example.place.domain.order.dto.UpdateOrderStatusResponseDto;
 import com.example.place.domain.order.entity.Order;
 import com.example.place.domain.order.entity.OrderStatus;
 import com.example.place.domain.order.repository.OrderRepository;
@@ -55,7 +56,7 @@ public class OrderService {
 			item,
 			requestDto.getQuantity(),
 			item.getPrice()*requestDto.getQuantity(),
-			OrderStatus.PENDING,
+			OrderStatus.ORDERED,
 			requestDto.getDeliveryAddress(),
 			null
 		);
@@ -120,5 +121,33 @@ public class OrderService {
 			responseDtoList.add(dto);
 		}
 		return new PageImpl<>(responseDtoList, pageable, orders.getTotalElements());
+	}
+
+	@Transactional
+	public UpdateOrderStatusResponseDto updateOrderStatusToReady(Long orderId,OrderStatus status, Long userId) {
+		Order order = orderRepository.findById(orderId)
+			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ORDER));
+
+		// 상품 등록한 유저와 동일한지 검증
+		Item item = order.getItem();
+		if (!item.getUser().getId().equals(userId)) {
+			throw new CustomException(ExceptionCode.FORBIDDEN_ITEM_ACCESS);
+		}
+		OrderStatus.statusToReady(order.getStatus());
+
+		order.updateStatus(OrderStatus.READY);
+
+		String mainImageUrl = itemService.getMainImageUrl(item.getId());
+
+		return new UpdateOrderStatusResponseDto(
+			mainImageUrl,
+			order.getUser().getNickname(),
+			order.getItem().getItemName(),
+			order.getQuantity(),
+			order.getPrice(),
+			order.getDeliveryAddress(),
+			order.getStatus().name(),
+			order.getCreatedAt()
+		);
 	}
 }

@@ -47,4 +47,8 @@ public class User extends SoftDeleteEntity {
 		this.imageUrl = imageUrl != null ? imageUrl : DEFAULT_IMAGE_URL;
 		this.role = role;
 	}
+
+	public static User of(String name,String nickname,String email,String password , String imageUrl,UserRole role){
+		return new User(name,nickname,email,password,imageUrl,role);
+	}
 }

@@ -92,5 +92,4 @@ public class ImageService {
 			|| mainIndex >= listSize)
 			? 0 : mainIndex;
 	}
-
 }
