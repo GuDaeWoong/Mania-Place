@@ -119,6 +119,10 @@ public class ItemService {
 		if(!findByIdOrElseThrow(itemId).getUser().getId().equals(userId)) {
 			throw new CustomException(ExceptionCode.FORBIDDEN_ITEM_DELETE);
 		}
+
+		// 연관 이미지 삭제
+		imageService.deleteImageByItemId(itemId);
+
 		itemRepository.deleteById(itemId);
 	}
 
