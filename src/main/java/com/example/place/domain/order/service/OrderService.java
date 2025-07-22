@@ -124,7 +124,7 @@ public class OrderService {
 	}
 
 	@Transactional
-	public UpdateOrderStatusResponseDto updateOrderStatusToReady(Long orderId,OrderStatus status, Long userId) {
+	public UpdateOrderStatusResponseDto updateOrderStatusToReady(Long orderId, Long userId) {
 		Order order = orderRepository.findById(orderId)
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ORDER));
 
@@ -137,6 +137,34 @@ public class OrderService {
 
 		order.updateStatus(OrderStatus.READY);
 
+		String mainImageUrl = itemService.getMainImageUrl(item.getId());
+
+		return new UpdateOrderStatusResponseDto(
+			mainImageUrl,
+			order.getUser().getNickname(),
+			order.getItem().getItemName(),
+			order.getQuantity(),
+			order.getPrice(),
+			order.getDeliveryAddress(),
+			order.getStatus().name(),
+			order.getCreatedAt()
+		);
+	}
+
+	public UpdateOrderStatusResponseDto updateOrderStatusToCompleted(Long orderId, Long userId) {
+		Order order = orderRepository.findById(orderId)
+			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ORDER));
+
+		// 주문자 인지 아닌지 검증
+		if (!order.getUser().getId().equals(userId)) {
+			throw new CustomException(ExceptionCode.FORBIDDEN_ORDER_ACCESS);
+		}
+
+		OrderStatus.statusToCompleted(order.getStatus());
+
+		order.updateStatus(OrderStatus.COMPLETED);
+
+		Item item = order.getItem();
 		String mainImageUrl = itemService.getMainImageUrl(item.getId());
 
 		return new UpdateOrderStatusResponseDto(

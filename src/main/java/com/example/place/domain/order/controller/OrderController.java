@@ -77,10 +77,17 @@ public class OrderController {
 		@AuthenticationPrincipal CustomPrincipal userDetails
 	) {
 		Long userId = userDetails.getId();
-		UpdateOrderStatusResponseDto updatedOrder = orderService.updateOrderStatusToReady(orderId, OrderStatus.READY, userId);
+		UpdateOrderStatusResponseDto updatedOrder = orderService.updateOrderStatusToReady(orderId, userId);
 		return ResponseEntity.ok(new ApiResponseDto<>("주문 상태 변경 완료", updatedOrder));
 	}
 
-
-
+	@PostMapping("/user/orders/{orderId}/status/completed")
+	public ResponseEntity<ApiResponseDto> updateOrderStatusToCompleted(
+		@PathVariable Long orderId,
+		@AuthenticationPrincipal CustomPrincipal userDetails
+	) {
+		Long userId = userDetails.getId();
+		UpdateOrderStatusResponseDto updatedOrder = orderService.updateOrderStatusToCompleted(orderId, userId);
+		return ResponseEntity.ok(new ApiResponseDto<>("주문 상태 변경 완료", updatedOrder));
+	}
 }
