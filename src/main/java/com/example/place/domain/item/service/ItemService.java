@@ -1,7 +1,9 @@
 package com.example.place.domain.item.service;
 
-import com.example.place.domain.item.dto.request.CreateItemRequest;
-import com.example.place.domain.item.dto.response.CreateItemResponse;
+import com.example.place.domain.Image.service.ImageService;
+import com.example.place.domain.Image.entity.Image;
+import com.example.place.domain.item.dto.request.ItemRequest;
+import com.example.place.domain.item.dto.response.ItemResponse;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.item.repository.ItemRepository;
 import com.example.place.domain.itemtag.entity.ItemTag;
@@ -21,6 +23,9 @@ import com.example.place.common.exception.exceptionclass.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -30,12 +35,8 @@ public class ItemService {
     private final ItemTagRepository itemTagRepository;
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
+	private final ImageService imageService;
 
-	public Item findItemById(Long itemId){
-		Item item = itemRepository.findById(itemId)
-			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
-		return item;
-	}
 
 	// 재고 감소
 	@Transactional
@@ -55,20 +56,33 @@ public class ItemService {
 
 	//기본적인 태그 관리 흐름입니다
     @Transactional
-    public CreateItemResponse createItem(Long userId,CreateItemRequest request) {
+    public ItemResponse createItem(Long userId, ItemRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
 
+		LocalDateTime salesStartAt = request.getSalesStartAt() != null
+				? request.getSalesStartAt()
+				: LocalDateTime.now();
+
+		LocalDateTime salesEndAt = request.getSalesEndAt() != null
+				? request.getSalesEndAt()
+				: LocalDateTime.of(3000, 1, 1, 0, 0);
+//		:LocalDateTime.Max;
         Item item = new Item(
                 user,
 				request.getItemName(),
 				request.getItemDescription(),
 				request.getPrice(),
 				request.getCount(),
-				request.getSalesStartAt(),
-				request.getSalesEndAt());
+				salesStartAt,
+				salesEndAt
+				);
         itemRepository.save(item);
 
+		// 연관 이미지 저장
+		imageService.saveImages(item, request.getImages(), request.getMainIndex());
+
+		//	태그 저장 로직
         for (String tagName: request.getItemTagNames()) {
             Tag tag = tagRepository.findByTagName(tagName)
                     .orElseGet(() -> tagRepository.save(new Tag(tagName)));
@@ -76,29 +90,48 @@ public class ItemService {
             ItemTag itemTag = new ItemTag(null, item, tag);
             itemTagRepository.save(itemTag);
         }
-        return CreateItemResponse.from(item);
+        return ItemResponse.from(item);
     }
 
 	@Transactional(readOnly = true)
-	public CreateItemResponse readItem(Long itemId) {
+	public ItemResponse readItem(Long itemId) {
 		Item item = findByIdOrElseThrow(itemId);
-		return CreateItemResponse.from(item);
+		return ItemResponse.from(item);
 	}
 
 	@Transactional
-	public CreateItemResponse updateItem(Long itemId, CreateItemRequest request) {
+	public ItemResponse updateItem(Long itemId, ItemRequest request, Long userId) {
 		Item item = findByIdOrElseThrow(itemId);
+
+		if(!item.getUser().getId().equals(userId)) {
+			throw new CustomException(ExceptionCode.FORBIDDEN_ITEM_ACCESS);
+		}
 		item.updateItem(request);
-		return CreateItemResponse.from(item);
+
+		// 연관 이미지 수정
+		if ((request.getImages() == null && request.getMainIndex() != null)
+			|| (request.getImages() != null && request.getMainIndex() == null)) {
+			throw new CustomException(ExceptionCode.INVALID_IMAGE_UPDATE_REQUEST);
+		}
+
+		if (request.getImages() != null && request.getMainIndex() != null) {
+			imageService.updateImages(item, request.getImages(), request.getMainIndex());
+		}
+
+		return ItemResponse.from(item);
 	}
 
 	@Transactional
 	public void deleteItem(Long itemId, Long userId) {
-		itemRepository.deleteById(itemId);
 
-//		if(!item.getUser.getId().equals(userId)) {
-//			throw new CustomException(ExceptionCode.FORBIDDEN_ITEM_DELETE);
-//		}
+		if(!findByIdOrElseThrow(itemId).getUser().getId().equals(userId)) {
+			throw new CustomException(ExceptionCode.FORBIDDEN_ITEM_DELETE);
+		}
+
+		// 연관 이미지 삭제
+		imageService.deleteImageByItemId(itemId);
+
+		itemRepository.deleteById(itemId);
 	}
 
 
@@ -108,4 +141,21 @@ public class ItemService {
 	}
 
 
+	public List<ItemResponse> searchItem(String keyword, List<String> tags, Long userId) {
+		return itemRepository.searchItems(keyword, tags, userId)
+				.stream()
+				.map(ItemResponse::from)
+				.toList();
+	}
+
+	public String getMainImageUrl(Long itemId) {
+		Item item =  itemRepository.findById(itemId)
+			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
+
+		return item.getImages().stream()
+			.filter(Image::isMain)
+			.findFirst()
+			.map(Image::getImageUrl)
+			.orElse(null);
+	}
 }

@@ -8,11 +8,10 @@ import com.example.place.common.entity.BaseEntity;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.Image.entity.Image;
-import com.example.place.domain.item.dto.request.CreateItemRequest;
+import com.example.place.domain.item.dto.request.ItemRequest;
 import com.example.place.domain.itemtag.entity.ItemTag;
 import com.example.place.domain.user.entity.User;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -68,11 +67,6 @@ public class Item extends BaseEntity {
 	}
 
 
-
-
-	/**
-	 * security 구현후 수정필요
-	 */
 	public Item(User user, String itemName, String itemDescription, Double price, Long count, LocalDateTime salesStartAt, LocalDateTime salesEndAt) {
 		this.user = user;
 		this.itemName = itemName;
@@ -83,7 +77,7 @@ public class Item extends BaseEntity {
 		this.salesEndAt = salesEndAt;
 	}
 
-	public void updateItem(CreateItemRequest request) {
+	public void updateItem(ItemRequest request) {
 		if(request.getItemName() != null) {
 			this.itemName = request.getItemName();
 		}
@@ -101,6 +95,13 @@ public class Item extends BaseEntity {
 		}
 		if (request.getSalesEndAt() != null) {
 			this.salesEndAt = request.getSalesEndAt();
+		}
+	}
+
+	public void validateSalesPeriod() {
+		LocalDateTime now = LocalDateTime.now();
+		if (now.isBefore(salesStartAt) || now.isAfter(salesEndAt)) {
+			throw new CustomException(ExceptionCode.NOT_SALE_PERIOD);
 		}
 	}
 }

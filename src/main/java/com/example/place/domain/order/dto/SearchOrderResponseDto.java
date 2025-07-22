@@ -6,6 +6,8 @@ import lombok.Getter;
 
 @Getter
 public class SearchOrderResponseDto {
+
+	private String mainImageUrl;
 	private String userNickname;
 	private String itemName;
 	private int quantity;
@@ -14,7 +16,8 @@ public class SearchOrderResponseDto {
 	private String deliveryAddress;
 	private LocalDateTime createdAt;
 
-	public SearchOrderResponseDto(String nickname, String itemName, int quantity, double price, String deliveryAddress, String status, LocalDateTime createdAt) {
+	public SearchOrderResponseDto(String mainImageUrl, String nickname, String itemName, int quantity, double price, String deliveryAddress, String status, LocalDateTime createdAt) {
+		this.mainImageUrl = mainImageUrl;
 		this.userNickname = nickname;
 		this.itemName = itemName;
 		this.quantity = quantity;

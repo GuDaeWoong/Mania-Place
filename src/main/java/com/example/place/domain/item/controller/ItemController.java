@@ -1,14 +1,19 @@
 package com.example.place.domain.item.controller;
 
 import com.example.place.common.dto.ApiResponseDto;
-import com.example.place.domain.item.dto.request.CreateItemRequest;
-import com.example.place.domain.item.dto.response.CreateItemResponse;
+import com.example.place.common.security.jwt.CustomPrincipal;
+import com.example.place.domain.item.dto.request.ItemRequest;
+import com.example.place.domain.item.dto.response.ItemResponse;
 import com.example.place.domain.item.service.ItemService;
-import com.example.place.domain.user.entity.User;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,16 +25,16 @@ public class ItemController {
     /**
      * 상품 생성 기존 Tag가 있다면 사용 없다면 생성해서 상품등록
      * @param request
-     * @param user
+     * @param
      * @return
      */
     @PostMapping
-    public ApiResponseDto<CreateItemResponse> createItem(
-            @RequestBody CreateItemRequest request,
-            @AuthenticationPrincipal User user
+    public ResponseEntity<ApiResponseDto<ItemResponse>> createItem(
+        @Valid @RequestBody ItemRequest request,
+            @AuthenticationPrincipal CustomPrincipal principal
     ) {
-        CreateItemResponse item = itemService.createItem(user.getId(), request);
-        return new ApiResponseDto<>("상품 등록이 완료되었습니다.", item);
+        ItemResponse item = itemService.createItem(principal.getId(), request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponseDto<>("상품 등록이 완료되었습니다.", item)) ;
     }
 
     /**
@@ -38,8 +43,26 @@ public class ItemController {
      * @return
      */
     @GetMapping("/{itemId}")
-    public ApiResponseDto<CreateItemResponse> readItem(@PathVariable Long itemId) {
-        return new ApiResponseDto<>("상품 조회가 완료되었습니다.", itemService.readItem(itemId));
+    public ResponseEntity<ApiResponseDto<ItemResponse>> readItem(@PathVariable Long itemId) {
+        ItemResponse item = itemService.readItem(itemId);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto<>("상품 조회가 완료되었습니다.", item));
+    }
+
+    /**
+     * 원하는 값으로 조회
+     * @param keyword
+     * @param tags
+     * @param userId
+     * @return
+     */
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponseDto<List<ItemResponse>>> searchItem(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) List<String> tags,
+            @RequestParam(required = false) Long userId
+    ) {
+        List<ItemResponse> result = itemService.searchItem(keyword, tags, userId);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto<>("상품 조회가 완료되었습니다", result));
     }
 
     /**
@@ -48,24 +71,28 @@ public class ItemController {
      * @return
      */
     @PatchMapping("/{itemId}")
-    public ApiResponseDto<CreateItemResponse> updateItem(
+    public ResponseEntity<ApiResponseDto<ItemResponse>> updateItem(
             @PathVariable Long itemId,
-            @RequestBody CreateItemRequest request
+            @RequestBody ItemRequest request,
+            @AuthenticationPrincipal CustomPrincipal principal
     ) {
-        CreateItemResponse updateItem = itemService.updateItem(itemId, request);
-        return new ApiResponseDto<>("상품 수정이 완료되었습니다.", updateItem);
+        ItemResponse updateItem = itemService.updateItem(itemId, request, principal.getId());
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto<>("상품 수정이 완료되었습니다.", updateItem));
     }
 
+    /**
+     * 상품 삭제
+     * @param itemId
+     * @param principal
+     * @return
+     */
     @DeleteMapping("/{itemId}")
-    public ApiResponseDto<String> deleteItem(
+    public ResponseEntity<ApiResponseDto<Void>> deleteItem(
             @PathVariable Long itemId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal CustomPrincipal principal
     ) {
-        itemService.deleteItem(itemId, user.getId());
-        return new ApiResponseDto<>("상품 삭제가 완료되었습니다.", null);
+        itemService.deleteItem(itemId, principal.getId());
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto<>("상품 삭제가 완료되었습니다.", null));
     }
-
-
-
 
 }
