@@ -19,7 +19,7 @@ public enum ExceptionCode {
 	ADDRESS_REQUIRED(HttpStatus.BAD_REQUEST, "주소지가 입력되지 않았습니다."),
 	NOT_SALE_PERIOD(HttpStatus.BAD_REQUEST, "판매 기간이 아닙니다."),
 	INVALID_ORDER_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "허용되지 않은 주문 상태 변환입니다."),
-
+  INVALID_IMAGE_UPDATE_REQUEST(HttpStatus.BAD_REQUEST, "이미지 수정을 위해서는 이미지 URL 목록과 대표 이미지 인덱스를 함께 보내주세요"),
 
 	// 401 Unauthorized
 	LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."),

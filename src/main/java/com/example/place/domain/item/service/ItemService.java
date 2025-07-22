@@ -79,11 +79,8 @@ public class ItemService {
 				);
         itemRepository.save(item);
 
-		// 이미지 저장 로직
-		for (int i = 0; i < request.getImages().size(); i++) {
-			boolean isMain = (request.getMainIndex() == i);
-			imageService.saveImage(item, request.getImages().get(i), isMain);
-		}
+		// 연관 이미지 저장
+		imageService.saveImages(item, request.getImages(), request.getMainIndex());
 
 		//	태그 저장 로직
         for (String tagName: request.getItemTagNames()) {
@@ -110,6 +107,17 @@ public class ItemService {
 			throw new CustomException(ExceptionCode.FORBIDDEN_ITEM_ACCESS);
 		}
 		item.updateItem(request);
+
+		// 연관 이미지 수정
+		if ((request.getImages() == null && request.getMainIndex() != null)
+			|| (request.getImages() != null && request.getMainIndex() == null)) {
+			throw new CustomException(ExceptionCode.INVALID_IMAGE_UPDATE_REQUEST);
+		}
+
+		if (request.getImages() != null && request.getMainIndex() != null) {
+			imageService.updateImages(item, request.getImages(), request.getMainIndex());
+		}
+
 		return ItemResponse.from(item);
 	}
 
@@ -145,7 +153,7 @@ public class ItemService {
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
 
 		return item.getImages().stream()
-			.filter(Image::getIsMain)
+			.filter(Image::isMain)
 			.findFirst()
 			.map(Image::getImageUrl)
 			.orElse(null);
