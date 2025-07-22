@@ -44,7 +44,7 @@ public class OrderController {
 	return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
 
-	@GetMapping("/{orderId}")
+	@GetMapping("/my/{orderId}")
 	public ResponseEntity<ApiResponseDto> getMyOrder(
 		@PathVariable Long orderId,
 		@AuthenticationPrincipal CustomPrincipal userDetails
@@ -56,7 +56,7 @@ public class OrderController {
 	}
 
 
-	@GetMapping
+	@GetMapping("/my")
 	public ResponseEntity<ApiResponseDto> getAllMyOrders(
 		@AuthenticationPrincipal CustomPrincipal userDetails,
 		@PageableDefault Pageable pageable
@@ -68,5 +68,7 @@ public class OrderController {
 		ApiResponseDto<Page<SearchOrderResponseDto>> success = new ApiResponseDto<>("전체 주문 조회가 완료되었습니다.", orders);
 		return ResponseEntity.ok(success);
 	}
+
+
 
 }
