@@ -19,7 +19,6 @@ public enum ExceptionCode {
 	ADDRESS_REQUIRED(HttpStatus.BAD_REQUEST, "주소지가 입력되지 않았습니다."),
 	NOT_SALE_PERIOD(HttpStatus.BAD_REQUEST, "판매 기간이 아닙니다."),
 
-
 	// 401 Unauthorized
 	LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."),
 	PASSWORD_MISMATCH(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."),
@@ -32,8 +31,10 @@ public enum ExceptionCode {
 	LOGGED_OUT_TOKEN(HttpStatus.FORBIDDEN, "로그아웃 처리된 토큰입니다."),
 	FORBIDDEN_ITEM_ACCESS(HttpStatus.FORBIDDEN, "본인 외에 상품은 수정할 수 없습니다."),
 	FORBIDDEN_ITEM_DELETE(HttpStatus.FORBIDDEN, "본인 외에 상품은 삭제할 수 없습니다."),
-	ACCESS_DENIED(HttpStatus.FORBIDDEN, "관리자가 아니므로 수정할 수 없습니다."),
+	FORBIDDEN_POST_ACCESS(HttpStatus.FORBIDDEN, "본인 외의 게시글은 수정할 수 없습니다."),
+	FORBIDDEN_POST_DELETE(HttpStatus.FORBIDDEN, "본인 외의 게시글은 삭제할 수 없습니다."),
 
+	ACCESS_DENIED(HttpStatus.FORBIDDEN, "관리자가 아니므로 수정할 수 없습니다."),
 
 	// 404 Not Found
 	NOT_FOUND_USER(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."),
@@ -42,8 +43,6 @@ public enum ExceptionCode {
 	NOT_FOUND_COMMENT(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다."),
 	NOT_FOUND_POST(HttpStatus.NOT_FOUND, "게시물이 존재하지 않습니다."),
 	NOT_FOUND_ORDER(HttpStatus.NOT_FOUND, "존재하지 않는 오더id 입니다."),
-
-
 
 	// 409 Conflict
 	OUT_OF_STOCK(HttpStatus.CONFLICT, "상품의 개수가 부족합니다."),

@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.place.common.dto.ApiResponseDto;
-import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.post.dto.request.PostCreateRequestDto;
 import com.example.place.domain.post.dto.response.PostResponseDto;
 import com.example.place.domain.post.dto.request.PostUpdateRequestDto;
@@ -52,7 +51,7 @@ public class PostController {
 
 	//살까말까 전체 조회
 	@GetMapping
-	public ResponseEntity<ApiResponseDto<Page<PostResponseDto>>> getPosts(
+	public ResponseEntity<ApiResponseDto<Page<PostResponseDto>>> getALLPosts(
 		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
 	) {
 		Page<PostResponseDto> posts = postService.getAllPosts(pageable);
