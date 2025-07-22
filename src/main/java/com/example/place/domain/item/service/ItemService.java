@@ -109,7 +109,14 @@ public class ItemService {
 		item.updateItem(request);
 
 		// 연관 이미지 수정
-		imageService.updateImages(item, request.getImages(), request.getMainIndex());
+		if ((request.getImages() == null && request.getMainIndex() != null)
+			|| (request.getImages() != null && request.getMainIndex() == null)) {
+			throw new CustomException(ExceptionCode.INVALID_IMAGE_UPDATE_REQUEST);
+		}
+
+		if (request.getImages() != null && request.getMainIndex() != null) {
+			imageService.updateImages(item, request.getImages(), request.getMainIndex());
+		}
 
 		return ItemResponse.from(item);
 	}
