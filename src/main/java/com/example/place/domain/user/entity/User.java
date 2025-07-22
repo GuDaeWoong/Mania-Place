@@ -47,4 +47,14 @@ public class User extends SoftDeleteEntity {
 		this.imageUrl = imageUrl != null ? imageUrl : DEFAULT_IMAGE_URL;
 		this.role = role;
 	}
+
+	public void updateUserInfo(String name, String nickname, String imageUrl) {
+		this.name = name;
+		this.nickname = nickname;
+		this.imageUrl = imageUrl;
+	}
+
+	public void updateUserPassword(String password) {
+		this.password = password;
+	}
 }
