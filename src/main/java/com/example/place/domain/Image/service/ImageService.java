@@ -1,6 +1,5 @@
 package com.example.place.domain.Image.service;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,8 +23,12 @@ public class ImageService {
 	// 이미지 저장
 	@Transactional
 	public void saveImages(Item item, List<String> imageUrls, int mainIndex) {
+
+		int validatedMainIndex = validMainIndex(imageUrls.size(), mainIndex);
+
+		// 이미지 저장
 		for (int i = 0; i < imageUrls.size(); i++) {
-			boolean isMain = (mainIndex == i);
+			boolean isMain = (validatedMainIndex == i);
 			Image image = Image.of(item, imageUrls.get(i), isMain);
 			imageRepository.save(image);
 		}
@@ -33,9 +36,9 @@ public class ImageService {
 
 	// 이미지 수정
 	@Transactional
-	public void updateImages(Item item, List<String> newImages, int mainIndex) {
+	public void updateImages(Item item, List<String> newImageUrls, int mainIndex) {
 		// 새롭게 전달받은 이미지
-		Set<String> newImageSet = new HashSet<>(newImages);
+		Set<String> newImageSet = new HashSet<>(newImageUrls);
 
 		// 현재 저장되어 있는 이미지
 		List<Image> existingImages = imageRepository.findByItemId(item.getId());
@@ -63,7 +66,8 @@ public class ImageService {
 		}
 
 		// 대표 이미지 재설정
-		String mainImageUrl = newImages.get(mainIndex);
+		int validatedMainIndex = validMainIndex(newImageUrls.size(), mainIndex);
+		String mainImageUrl = newImageUrls.get(validatedMainIndex);
 		List<Image> images = imageRepository.findByItemId(item.getId());
 		for (Image image : images) {
 			image.updateIsMain(image.getImageUrl().equals(mainImageUrl));
@@ -73,7 +77,18 @@ public class ImageService {
 	// 특정 itemId와 연관된 이미지를 일괄로 삭제
 	@Transactional
 	public void deleteImageByItemId(Long itemId) {
+		// 연관 이미지들 삭제
 		List<Image> images = imageRepository.findByItemId(itemId);
 		imageRepository.deleteAll(images);
 	}
+
+	// 대표 이미지 인덱스 검증
+	private int validMainIndex(int listSize, Integer mainIndex) {
+
+		return (mainIndex == null
+			|| mainIndex < 0
+			|| mainIndex >= listSize)
+			? 0 : mainIndex;
+	}
+
 }

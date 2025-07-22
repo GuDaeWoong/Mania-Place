@@ -79,13 +79,8 @@ public class ItemService {
 				);
         itemRepository.save(item);
 
-		// 이미지 저장 로직
-		int mainIndex = (request.getMainIndex() == null
-			|| request.getMainIndex() < 0
-			|| request.getMainIndex() >= request.getImages().size())
-			? 0 : request.getMainIndex();
-
-		imageService.saveImages(item, request.getImages(), mainIndex);
+		// 연관 이미지 저장
+		imageService.saveImages(item, request.getImages(), request.getMainIndex());
 
 		//	태그 저장 로직
         for (String tagName: request.getItemTagNames()) {
