@@ -19,7 +19,9 @@ public class ItemCommentResponse {
 	}
 
 	public static ItemCommentResponse of(ItemComment itemComment) {
-		return new ItemCommentResponse(itemComment.getUser().getNickname(), itemComment.getContent(),
+		return new ItemCommentResponse(
+			itemComment.getUser().getNickname(),
+			itemComment.getContent(),
 			itemComment.getCreatedAt());
 	}
 }

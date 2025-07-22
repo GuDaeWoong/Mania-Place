@@ -26,10 +26,10 @@ public class ItemCommentController {
 	private final ItemCommentService itemCommentService;
 
 	@PostMapping
-	public ResponseEntity<ApiResponseDto<ItemCommentResponse>> saveItemComment(@PathVariable Long itemId,
+	public ResponseEntity<ApiResponseDto<ItemCommentResponse>> saveItemComment(
+		@PathVariable Long itemId,
 		@Valid @RequestBody ItemCommentRequest request,
-		@AuthenticationPrincipal
-		CustomPrincipal principal) {
+		@AuthenticationPrincipal CustomPrincipal principal) {
 
 		ItemCommentResponse response = itemCommentService.saveItemComment(itemId, request, principal);
 
