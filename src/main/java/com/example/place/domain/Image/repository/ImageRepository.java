@@ -8,4 +8,6 @@ import com.example.place.domain.Image.entity.Image;
 
 public interface ImageRepository extends JpaRepository<Image, Long> {
 	List<Image> findByItemId(Long itemId);
+
+	void deleteByItemIdAndImageUrl(Long itemId, String imageUrl);
 }

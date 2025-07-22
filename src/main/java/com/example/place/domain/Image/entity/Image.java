@@ -34,7 +34,7 @@ public class Image {
 
 	private String imageUrl;
 
-	private Boolean isMain = false;
+	private boolean isMain = false;
 
 	private Image(Item item, String imageUrl, Boolean isMain) {
 		this.item = item;
@@ -44,5 +44,9 @@ public class Image {
 
 	public static Image of(Item item, String imageUrl, Boolean isMain) {
 		return new Image(item, imageUrl, isMain);
+	}
+
+	public void updateIsMain(boolean isMain) {
+		this.isMain = isMain;
 	}
 }

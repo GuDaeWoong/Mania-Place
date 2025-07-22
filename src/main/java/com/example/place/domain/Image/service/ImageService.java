@@ -1,6 +1,10 @@
 package com.example.place.domain.Image.service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -19,9 +23,51 @@ public class ImageService {
 
 	// 이미지 저장
 	@Transactional
-	public void saveImage(Item item, String imageUrl, Boolean isMain) {
-		Image image = Image.of(item, imageUrl, isMain);
-		imageRepository.save(image);
+	public void saveImages(Item item, List<String> imageUrls, int mainIndex) {
+		for (int i = 0; i < imageUrls.size(); i++) {
+			boolean isMain = (mainIndex == i);
+			Image image = Image.of(item, imageUrls.get(i), isMain);
+			imageRepository.save(image);
+		}
+	}
+
+	// 이미지 수정
+	@Transactional
+	public void updateImages(Item item, List<String> newImages, int mainIndex) {
+		// 새롭게 전달받은 이미지
+		Set<String> newImageSet = new HashSet<>(newImages);
+
+		// 현재 저장되어 있는 이미지
+		List<Image> existingImages = imageRepository.findByItemId(item.getId());
+		Set<String> existingImageSet = existingImages.stream()
+			.map(Image::getImageUrl)
+			.collect(Collectors.toSet());
+
+		// 기존의 삭제할 이미지 판별 	(existing - new)
+		Set<String> toDelete = new HashSet<>(existingImageSet);
+		toDelete.removeAll(newImageSet);
+
+		// 삭제 처리
+		for (String imageUrl : toDelete) {
+			imageRepository.deleteByItemIdAndImageUrl(item.getId(), imageUrl);
+		}
+
+		// 새롭게 저장할 이미지 판별 	(new - existing)
+		Set<String> toSave = new HashSet<>(newImageSet);
+		toSave.removeAll(existingImageSet);
+
+		// 추가 처리
+		for (String imageUrl : toSave) {
+			Image image = Image.of(item, imageUrl, false);  // 임시로 대표 이미지 false로 세팅
+			imageRepository.save(image);
+		}
+
+		// 대표 이미지 재설정
+		String mainImageUrl = newImages.get(mainIndex);
+		List<Image> images = imageRepository.findByItemId(item.getId());
+		for (Image image : images) {
+			image.updateIsMain(image.getImageUrl().equals(mainImageUrl));
+		}
 	}
 
 	// 특정 itemId와 연관된 이미지를 일괄로 삭제
