@@ -18,6 +18,7 @@ public enum ExceptionCode {
 	CONTENT_REQUIRED(HttpStatus.BAD_REQUEST, "내용을 입력해주세요."),
 	ADDRESS_REQUIRED(HttpStatus.BAD_REQUEST, "주소지가 입력되지 않았습니다."),
 	NOT_SALE_PERIOD(HttpStatus.BAD_REQUEST, "판매 기간이 아닙니다."),
+	INVALID_ORDER_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "허용되지 않은 주문 상태 변환입니다."),
 
 
 	// 401 Unauthorized
@@ -34,7 +35,6 @@ public enum ExceptionCode {
 	FORBIDDEN_ITEM_DELETE(HttpStatus.FORBIDDEN, "본인 외에 상품은 삭제할 수 없습니다."),
 	ACCESS_DENIED(HttpStatus.FORBIDDEN, "관리자가 아니므로 수정할 수 없습니다."),
 	FORBIDDEN_ORDER_ACCESS(HttpStatus.FORBIDDEN, "해당 주문은 본인의 주문이 아닙니다."),
-
 
 
 	// 404 Not Found

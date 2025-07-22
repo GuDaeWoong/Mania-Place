@@ -18,13 +18,15 @@ import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.order.dto.CreateOrderRequestDto;
 import com.example.place.domain.order.dto.CreateOrderResponseDto;
 import com.example.place.domain.order.dto.SearchOrderResponseDto;
+import com.example.place.domain.order.dto.UpdateOrderStatusResponseDto;
+import com.example.place.domain.order.entity.OrderStatus;
 import com.example.place.domain.order.service.OrderService;
 
 import jakarta.validation.Valid;
 
 @RestController
 // @RequiredArgsConstructor
-@RequestMapping("/api/orders")
+@RequestMapping("/api")
 public class OrderController {
 	private final OrderService orderService;
 
@@ -32,7 +34,7 @@ public class OrderController {
 		this.orderService = orderService;
 	}
 
-	@PostMapping
+	@PostMapping("/orders")
 	public ResponseEntity<ApiResponseDto> createOrder(
 		@Valid @RequestBody CreateOrderRequestDto requestDto,
 		@AuthenticationPrincipal CustomPrincipal userDetails
@@ -44,7 +46,7 @@ public class OrderController {
 	return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
 
-	@GetMapping("/my/{orderId}")
+	@GetMapping("/orders/my/{orderId}")
 	public ResponseEntity<ApiResponseDto> getMyOrder(
 		@PathVariable Long orderId,
 		@AuthenticationPrincipal CustomPrincipal userDetails
@@ -56,7 +58,7 @@ public class OrderController {
 	}
 
 
-	@GetMapping("/my")
+	@GetMapping("/orders/my")
 	public ResponseEntity<ApiResponseDto> getAllMyOrders(
 		@AuthenticationPrincipal CustomPrincipal userDetails,
 		@PageableDefault Pageable pageable
@@ -67,6 +69,16 @@ public class OrderController {
 
 		ApiResponseDto<Page<SearchOrderResponseDto>> success = new ApiResponseDto<>("전체 주문 조회가 완료되었습니다.", orders);
 		return ResponseEntity.ok(success);
+	}
+
+	@PostMapping("/user/orders/{orderId}/status/ready")
+	public ResponseEntity<ApiResponseDto> updateOrderStatusToReady(
+		@PathVariable Long orderId,
+		@AuthenticationPrincipal CustomPrincipal userDetails
+	) {
+		Long userId = userDetails.getId();
+		UpdateOrderStatusResponseDto updatedOrder = orderService.updateOrderStatusToReady(orderId, OrderStatus.READY, userId);
+		return ResponseEntity.ok(new ApiResponseDto<>("주문 상태 변경 완료", updatedOrder));
 	}
 
 
