@@ -20,6 +20,7 @@ import com.example.place.domain.order.entity.Order;
 import com.example.place.domain.order.entity.OrderStatus;
 import com.example.place.domain.order.repository.OrderRepository;
 import com.example.place.domain.user.entity.User;
+import com.example.place.domain.user.entity.UserRole;
 import com.example.place.domain.user.service.UserService;
 
 
@@ -136,6 +137,39 @@ public class OrderService {
 		OrderStatus.statusToReady(order.getStatus());
 
 		order.updateStatus(OrderStatus.READY);
+
+		String mainImageUrl = itemService.getMainImageUrl(item.getId());
+
+		return new UpdateOrderStatusResponseDto(
+			mainImageUrl,
+			order.getUser().getNickname(),
+			order.getItem().getItemName(),
+			order.getQuantity(),
+			order.getPrice(),
+			order.getDeliveryAddress(),
+			order.getStatus().name(),
+			order.getCreatedAt()
+		);
+	}
+
+	@Transactional
+	public UpdateOrderStatusResponseDto updateOrderStatusToCanceled(Long orderId, Long userId) {
+		Order order = orderRepository.findById(orderId)
+			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ORDER));
+
+		if (!order.getUser().getId().equals(userId) && !order.getUser().getRole().equals(UserRole.ADMIN)) {
+			throw new CustomException(ExceptionCode.ORDER_CANCEL_ACCESS_DENIED);
+		}
+
+		// 메서드명 추후 변경예정
+		OrderStatus.statusToReady(order.getStatus());
+
+		order.updateStatus(OrderStatus.CANCELLED);
+
+		Item item = order.getItem();
+
+		// 주문취소 인한 재고 증가
+		itemService.increaseStock(item.getId(),order.getQuantity());
 
 		String mainImageUrl = itemService.getMainImageUrl(item.getId());
 
