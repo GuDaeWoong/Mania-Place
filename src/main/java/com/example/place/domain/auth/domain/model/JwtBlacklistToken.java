@@ -23,7 +23,7 @@ public class JwtBlacklistToken {
 	@Column(nullable = false)
 	private LocalDateTime blacklistedAt;
 
-	public JwtBlacklistToken(String token, LocalDateTime blacklistedAt) {
+	private JwtBlacklistToken(String token, LocalDateTime blacklistedAt) {
 		this.token = token;
 		this.blacklistedAt = blacklistedAt;
 	}
