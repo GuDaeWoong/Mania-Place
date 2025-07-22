@@ -1,10 +1,11 @@
 package com.example.place.domain.post.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
 
+@Getter
 public class PostUpdateRequestDto {
-	@NotBlank
+	private String title;
 	private String content;
-
 	private String image;
 }
+
