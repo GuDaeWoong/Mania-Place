@@ -51,8 +51,10 @@ public class ImageService {
 		toDelete.removeAll(newImageSet);
 
 		// 삭제 처리
-		for (String imageUrl : toDelete) {
-			imageRepository.deleteByItemIdAndImageUrl(item.getId(), imageUrl);
+		for (Image image : existingImages) {
+			if (toDelete.contains(image.getImageUrl())) {
+				imageRepository.delete(image);
+			}
 		}
 
 		// 새롭게 저장할 이미지 판별 	(new - existing)
