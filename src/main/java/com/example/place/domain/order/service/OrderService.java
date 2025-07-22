@@ -55,7 +55,7 @@ public class OrderService {
 			item,
 			requestDto.getQuantity(),
 			item.getPrice()*requestDto.getQuantity(),
-			OrderStatus.PENDING,
+			OrderStatus.ORDERED,
 			requestDto.getDeliveryAddress(),
 			null
 		);
