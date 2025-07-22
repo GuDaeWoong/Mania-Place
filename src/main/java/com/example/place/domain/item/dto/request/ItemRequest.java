@@ -1,6 +1,7 @@
 package com.example.place.domain.item.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
@@ -25,6 +26,10 @@ public class ItemRequest {
     private Long count;
     private LocalDateTime salesStartAt;
     private LocalDateTime salesEndAt;
+    @NotEmpty(message = "최소 1개의 이미지가 있어야합니다.")
+    private List<String> images;
+    @NotNull(message = "대표 이미지 번호를 입력해주세요")
+    private int mainIndex;
     private List<String> itemTagNames;
 
 

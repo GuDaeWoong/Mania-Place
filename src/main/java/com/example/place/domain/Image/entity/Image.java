@@ -25,13 +25,21 @@ public class Image {
 	@JoinColumn(name = "item_id")
 	private Item item;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "newsfeed_id")
-	private NewsFeed newsFeed;
+	// @ManyToOne(fetch = FetchType.LAZY)
+	// @JoinColumn(name = "newsfeed_id")
+	// private NewsFeed newsFeed;
 
 	private String imageUrl;
 
 	private Boolean isMain = false;
 
+	private Image(Item item, String imageUrl, Boolean isMain) {
+		this.item = item;
+		this.imageUrl = imageUrl;
+		this.isMain = isMain;
+	}
 
+	public static Image of(Item item, String imageUrl, Boolean isMain) {
+		return new Image(item, imageUrl, isMain);
+	}
 }

@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -29,7 +30,7 @@ public class ItemController {
      */
     @PostMapping
     public ResponseEntity<ApiResponseDto<ItemResponse>> createItem(
-            @RequestBody ItemRequest request,
+        @Valid @RequestBody ItemRequest request,
             @AuthenticationPrincipal CustomPrincipal principal
     ) {
         ItemResponse item = itemService.createItem(principal.getId(), request);

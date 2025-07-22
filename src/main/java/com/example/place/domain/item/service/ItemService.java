@@ -1,5 +1,6 @@
 package com.example.place.domain.item.service;
 
+import com.example.place.domain.Image.service.ImageService;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.item.dto.request.ItemRequest;
 import com.example.place.domain.item.dto.response.ItemResponse;
@@ -34,6 +35,7 @@ public class ItemService {
     private final ItemTagRepository itemTagRepository;
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
+	private final ImageService imageService;
 
 
 	// 재고 감소
@@ -77,6 +79,13 @@ public class ItemService {
 				);
         itemRepository.save(item);
 
+		// 이미지 저장 로직
+		for (int i = 0; i < request.getImages().size(); i++) {
+			boolean isMain = (request.getMainIndex() == i);
+			imageService.saveImage(item, request.getImages().get(i), isMain);
+		}
+
+		//	태그 저장 로직
         for (String tagName: request.getItemTagNames()) {
             Tag tag = tagRepository.findByTagName(tagName)
                     .orElseGet(() -> tagRepository.save(new Tag(tagName)));
