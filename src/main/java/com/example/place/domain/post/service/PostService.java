@@ -1,5 +1,7 @@
 package com.example.place.domain.post.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.place.domain.item.entity.Item;
@@ -55,6 +57,20 @@ public class PostService {
 
 		return response;
 	}
+
+	public Page<PostResponseDto> findAllPosts(Pageable pageable) {
+		return postRepository.findAll(pageable)
+			.map(post -> {
+				PostResponseDto dto = new PostResponseDto();
+				dto.setId(post.getId());
+				dto.setContent(post.getContent());
+				dto.setImage(post.getImage());
+				dto.setUserId(post.getUser().getId());
+				dto.setItemId(post.getItem().getId());
+				return dto;
+			});
+	}
+
 }
 
 
