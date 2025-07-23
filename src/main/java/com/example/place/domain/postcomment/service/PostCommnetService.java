@@ -79,21 +79,3 @@ public class PostCommnetService {
 
 	}
 }
-// 		for (
-// Order order : orders) {
-// Item item = itemService.findByIdOrElseThrow(order.getItem().getId());
-// String mainImageUrl = itemService.getMainImageUrl(item.getId());
-//
-// SearchOrderResponseDto dto = new SearchOrderResponseDto(
-// 	mainImageUrl,
-// 	order.getUser().getNickname(),
-// 	order.getItem().getItemName(),
-// 	order.getQuantity(),
-// 	order.getPrice(),
-// 	order.getDeliveryAddress(),
-// 	order.getStatus().name(),
-// 	order.getCreatedAt()
-// );
-// 			responseDtoList.add(dto);
-// 		}
-// 			return new PageImpl<>(responseDtoList, pageable, orders.getTotalElements());
