@@ -47,7 +47,7 @@ public class Item extends BaseEntity {
 	private List<ItemTag> itemTags = new ArrayList<>();
 
 	// 재고 감소
-	public void decreaseStock(int quantity){
+	public void decreaseStock(Long quantity){
 		if(this.count < quantity){
 			throw new CustomException(ExceptionCode.OUT_OF_STOCK);
 		}
@@ -55,7 +55,7 @@ public class Item extends BaseEntity {
 	}
 
 	// 주문 취소로 인한 재고 증가
-	public void increaseStock(int quantity) {
+	public void increaseStock(Long quantity) {
 		this.count += quantity;
 	}
 
