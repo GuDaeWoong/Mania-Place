@@ -52,9 +52,8 @@ public class SecurityConfig {
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.formLogin(AbstractHttpConfigurer::disable)
 
-			// 필터 등록 순서 중요
 			.addFilterBefore(jwtBlacklistFilter(), UsernamePasswordAuthenticationFilter.class)
-			.addFilterBefore(jwtFilter(), JwtBlacklistFilter.class)  // 순서를 이렇게 맞춰줘야 함
+			.addFilterBefore(jwtFilter(), JwtBlacklistFilter.class)
 
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/api/**").permitAll()

@@ -39,7 +39,7 @@ public class JwtBlacklistFilter extends OncePerRequestFilter implements Ordered 
 				response.setStatus(HttpStatus.UNAUTHORIZED.value());
 				response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 				response.setCharacterEncoding("UTF-8");
-				response.getWriter().write("{\"status\":401,\"message\":\"이미 로그아웃된 토큰입니다.\"}");
+				response.getWriter().write("{\"status\":401,\"message\":\"다시 로그인해주세요.\"}");
 				return;
 			}
 		}
