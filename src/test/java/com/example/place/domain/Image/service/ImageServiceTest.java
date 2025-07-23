@@ -121,6 +121,23 @@ class ImageServiceTest {
 	}
 
 	@Test
+	void 이미지_수정_대표이미지변경_성공() {
+		Image image1 = spy(Image.of(TEST_ITEM, "file1.jpg", true));
+		Image image2 = spy(Image.of(TEST_ITEM, "file2.jpg", false));
+
+		when(imageRepository.findByItemId(TEST_ITEM.getId()))
+			.thenReturn(List.of(image1, image2))  // 수정 전 조회
+			.thenReturn(List.of(image1, image2)); // 수정 후 재조회 (이미지 삭제 및 추가 저장 후, 대표 이미지 변경 전 재조회 발생)
+
+		// when
+		imageService.updateImages(TEST_ITEM, List.of("file1.jpg", "file2.jpg"), 1);
+
+		// then
+		verify(image1).updateIsMain(false);
+		verify(image2).updateIsMain(true);
+	}
+
+	@Test
 	void 이미지_삭제_성공() {
 		// given
 		List<Image> images = List.of(Image.of(TEST_ITEM, "file1.jpg", true));
