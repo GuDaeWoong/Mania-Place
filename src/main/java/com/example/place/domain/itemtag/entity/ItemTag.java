@@ -11,7 +11,6 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Setter
 @Table(name = "item_tags")
 public class ItemTag {
 
@@ -27,5 +26,8 @@ public class ItemTag {
     @ManyToOne(fetch = FetchType.LAZY)
     private Tag tag;
 
+    public void setItem(Item item) {
+        this.item = item;
+    }
 
 }
