@@ -28,6 +28,8 @@ public enum ExceptionCode {
 	INVALID_OR_MISSING_TOKEN(HttpStatus.UNAUTHORIZED, "인증에 실패했습니다."),
 	INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "잘못된 토큰 정보입니다."),
 	EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 만료됐습니다."),
+	INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED,"리프레시 토큰이 유효하지 않습니다."),
+	EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "리프레시 토큰이 만료되었습니다."),
 	INVALID_EMAIL_OR_PASSWORD(HttpStatus.UNAUTHORIZED, "잘못된 이메일 또는 비밀번호입니다."),
 
 	// 403 Forbidden
