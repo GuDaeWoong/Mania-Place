@@ -38,7 +38,7 @@ public class User extends SoftDeleteEntity {
 	private UserRole role;
 	//private String tags;
 
-	public User(String name, String nickname, String email, String password, String imageUrl,
+	private User(String name, String nickname, String email, String password, String imageUrl,
 		UserRole role) {
 		this.name = name;
 		this.nickname = nickname;
