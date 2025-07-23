@@ -2,12 +2,16 @@ package com.example.place.domain.user.service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
+import com.example.place.domain.user.dto.UserDeleteRequest;
+import com.example.place.domain.user.dto.UserPasswordRequest;
 import com.example.place.domain.user.dto.UserRegisterRequest;
 import com.example.place.domain.user.dto.UserRegisterResponse;
 import com.example.place.domain.user.dto.UserResponse;
+import com.example.place.domain.user.dto.UserUpdateRequest;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.entity.UserRole;
 import com.example.place.domain.user.repository.UserRepository;
@@ -46,6 +50,7 @@ public class UserService {
 		return new UserRegisterResponse(savedUser.getEmail());
 	}
 
+	// 어드민 검색용
 	public UserResponse findUser(Long userId) {
 		User foundUser = findUserById(userId);
 		return new UserResponse(
@@ -55,6 +60,83 @@ public class UserService {
 			foundUser.getImageUrl(),
 			foundUser.getEmail()
 		);
+	}
+
+	// 마이페이지 조회용
+	public UserResponse findMyInfo(Long userId) {
+		User myInfo = findUserById(userId);
+		return new UserResponse(
+			myInfo.getId(),
+			myInfo.getName(),
+			myInfo.getNickname(),
+			myInfo.getImageUrl(),
+			myInfo.getEmail()
+		);
+	}
+
+	@Transactional
+	public UserResponse modifyUser(Long userId, UserUpdateRequest userUpdateRequest) {
+		User foundUser = findUserById(userId);
+
+		// 닉네임이 변경되었을 때만 중복 검증
+		if (!foundUser.getNickname().equals(userUpdateRequest.getNickname()) &&
+			userRepository.existsByNickname(userUpdateRequest.getNickname())) {
+			throw new CustomException(ExceptionCode.EXISTS_NICKNAME);
+		}
+
+		foundUser.updateUserInfo(
+			userUpdateRequest.getName(),
+			userUpdateRequest.getNickname(),
+			userUpdateRequest.getImageUrl());
+
+		return new UserResponse(
+			foundUser.getId(),
+			foundUser.getName(),
+			foundUser.getNickname(),
+			foundUser.getImageUrl(),
+			foundUser.getEmail()
+		);
+	}
+
+	@Transactional
+	public Void modifyPassword(Long userId, UserPasswordRequest userPasswordRequest) {
+		User foundUser = findUserById(userId);
+
+		// 이전 비밀번호가 맞는지 확인
+		if (!passwordEncoder.matches(userPasswordRequest.getOldPassword(), foundUser.getPassword())) {
+			throw new CustomException(ExceptionCode.INCORRECT_PASSWORD);
+		}
+
+		// 이전 비밀번호와 새 비밀번호가 동일한지 확인
+		if(userPasswordRequest.getNewPassword().equals(userPasswordRequest.getOldPassword())){
+			throw new CustomException(ExceptionCode.DUPLICATE_NEW_PASSWORD);
+		}
+
+		// 비밀번호 확인 일치 여부
+		if(!userPasswordRequest.getNewPassword().equals(userPasswordRequest.getNewPasswordCheck())) {
+			throw new CustomException(ExceptionCode.PASSWORD_CONFIRM_MISMATCH);
+		}
+
+		String encodedPassword = passwordEncoder.encode(userPasswordRequest.getNewPassword());
+
+		foundUser.updateUserPassword(encodedPassword);
+
+		return null;
+	}
+
+	@Transactional
+	public Void deleteUser(Long userId, UserDeleteRequest userDeleteRequest) {
+		User foundUser = findUserById(userId);
+
+		// 비밀번호가 일치하는지 확인
+		if (!passwordEncoder.matches(userDeleteRequest.getPassword(), foundUser.getPassword())) {
+			throw new CustomException(ExceptionCode.INCORRECT_PASSWORD);
+		}
+
+		// Soft Delete
+		foundUser.delete();
+
+		return null;
 	}
 
 	public User findUserById(Long userId) {

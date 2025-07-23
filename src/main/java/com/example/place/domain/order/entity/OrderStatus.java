@@ -19,4 +19,10 @@ public enum OrderStatus {
 			throw new CustomException(ExceptionCode.INVALID_ORDER_STATUS_TRANSITION);
 		}
 	}
+
+	public static void statusToCompleted(OrderStatus current) {
+		if (current != READY) {
+			throw new CustomException(ExceptionCode.INVALID_ORDER_STATUS_TRANSITION);
+		}
+	}
 }

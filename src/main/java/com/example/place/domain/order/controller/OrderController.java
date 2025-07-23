@@ -19,7 +19,6 @@ import com.example.place.domain.order.dto.CreateOrderRequestDto;
 import com.example.place.domain.order.dto.CreateOrderResponseDto;
 import com.example.place.domain.order.dto.SearchOrderResponseDto;
 import com.example.place.domain.order.dto.UpdateOrderStatusResponseDto;
-import com.example.place.domain.order.entity.OrderStatus;
 import com.example.place.domain.order.service.OrderService;
 
 import jakarta.validation.Valid;
@@ -77,7 +76,17 @@ public class OrderController {
 		@AuthenticationPrincipal CustomPrincipal userDetails
 	) {
 		Long userId = userDetails.getId();
-		UpdateOrderStatusResponseDto updatedOrder = orderService.updateOrderStatusToReady(orderId, OrderStatus.READY, userId);
+		UpdateOrderStatusResponseDto updatedOrder = orderService.updateOrderStatusToReady(orderId, userId);
+		return ResponseEntity.ok(new ApiResponseDto<>("주문 상태 변경 완료", updatedOrder));
+	}
+
+	@PostMapping("/user/orders/{orderId}/status/completed")
+	public ResponseEntity<ApiResponseDto> updateOrderStatusToCompleted(
+		@PathVariable Long orderId,
+		@AuthenticationPrincipal CustomPrincipal userDetails
+	) {
+		Long userId = userDetails.getId();
+		UpdateOrderStatusResponseDto updatedOrder = orderService.updateOrderStatusToCompleted(orderId, userId);
 		return ResponseEntity.ok(new ApiResponseDto<>("주문 상태 변경 완료", updatedOrder));
 	}
 
