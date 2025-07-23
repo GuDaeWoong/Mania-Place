@@ -32,7 +32,7 @@ class ImageServiceTest {
 		null,
 		UserRole.USER
 	);
-	private static final Item TEST_ITEM = new Item(
+	private static final Item TEST_ITEM = Item.of(
 		TEST_USER,
 		"testItem",
 		"testDescription",
