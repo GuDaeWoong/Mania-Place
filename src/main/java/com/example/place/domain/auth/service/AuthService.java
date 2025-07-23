@@ -29,15 +29,43 @@ public class AuthService {
 		if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
 			throw new CustomException(ExceptionCode.PASSWORD_MISMATCH);
 		}
+
 		String accessToken = jwtUtil.createAccessToken(user.getId());
-		return new LoginResponseDto(accessToken);
+		String refreshToken = jwtUtil.createRefreshToken(user.getId());
+
+		return new LoginResponseDto(accessToken,refreshToken);
 	}
 
 	@Transactional
-	public void logout(String bearerToken) {
+	public void logout(String bearerToken, String refreshToken) {
 
 		String accessToken = jwtUtil.subStringToken(bearerToken);
-
 		jwtBlacklistService.addBlacklist(accessToken);
+
+		if (refreshToken != null && !refreshToken.isEmpty()) {
+			jwtBlacklistService.addBlacklist(refreshToken);
+		}
+	}
+
+	@Transactional
+	public LoginResponseDto refreshAccessToken(String refreshToken) {
+
+		if (!jwtUtil.validateToken(refreshToken)) {
+			throw new CustomException(ExceptionCode.EXPIRED_REFRESH_TOKEN);
+		}
+
+		if (jwtBlacklistService.isBlacklisted(refreshToken)) {
+			throw new CustomException(ExceptionCode.BLACKLISTED_TOKEN);
+		}
+
+		String userIdStr = jwtUtil.extractUserId(refreshToken);
+		Long userId = Long.parseLong(userIdStr);
+
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
+
+		String newAccessToken = jwtUtil.createAccessToken(user.getId());
+
+		return new LoginResponseDto(newAccessToken, refreshToken);
 	}
 }
