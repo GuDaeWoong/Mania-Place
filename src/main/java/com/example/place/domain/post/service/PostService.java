@@ -7,15 +7,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
+import com.example.place.domain.user.entity.User;
+import com.example.place.domain.user.service.UserService;
 import com.example.place.domain.item.entity.Item;
-import com.example.place.domain.item.repository.ItemRepository;
+import com.example.place.domain.item.service.ItemService;
 import com.example.place.domain.post.dto.request.PostCreateRequestDto;
 import com.example.place.domain.post.dto.request.PostUpdateRequestDto;
 import com.example.place.domain.post.dto.response.PostResponseDto;
 import com.example.place.domain.post.entity.Post;
 import com.example.place.domain.post.repository.PostRepository;
-import com.example.place.domain.user.entity.User;
-import com.example.place.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,16 +24,13 @@ import lombok.RequiredArgsConstructor;
 public class PostService {
 
 	private final PostRepository postRepository;
-	private final UserRepository userRepository;
-	private final ItemRepository itemRepository;
+	private final UserService userService;
+	private final ItemService itemService;
 
 	//살까말까 생성
 	public PostResponseDto createPost(Long userId, PostCreateRequestDto request) {
-		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
-
-		Item item = itemRepository.findById(request.getItemId())
-			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
+		User user = userService.findUserById(userId);
+		Item item = itemService.findByIdOrElseThrow(request.getItemId());
 
 		Post post = new Post(user, item, request.getContent(), request.getImage());
 		Post saved = postRepository.save(post);
@@ -43,9 +40,7 @@ public class PostService {
 
 	//살까말까 단건 조회
 	public PostResponseDto readPost(Long postId) {
-		Post post = postRepository.findById(postId)
-			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_POST));
-
+		Post post = findByIdOrElseThrow(postId);
 		return PostResponseDto.from(post);
 	}
 
@@ -57,8 +52,7 @@ public class PostService {
 
 	//살까말까 내 글 조회
 	public Page<PostResponseDto> findMyPosts(Long userId, Pageable pageable) {
-		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
+		User user = userService.findUserById(userId);
 
 		return postRepository.findAllByUser(user, pageable)
 			.map(PostResponseDto::from);
@@ -67,8 +61,7 @@ public class PostService {
 	//살까말까 수정
 	@Transactional
 	public PostResponseDto updatePost(Long postId, PostUpdateRequestDto request, Long userId) {
-		Post post = postRepository.findById(postId)
-			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_POST));
+		Post post = findByIdOrElseThrow(postId);
 
 		if (!post.getUser().getId().equals(userId)) {
 			throw new CustomException(ExceptionCode.FORBIDDEN_POST_ACCESS);
@@ -81,8 +74,7 @@ public class PostService {
 	//살까말까 삭제
 	@Transactional
 	public void deletePost(Long postId, Long userId) {
-		Post post = postRepository.findById(postId)
-			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_POST));
+		Post post = findByIdOrElseThrow(postId);
 
 		if (!post.getUser().getId().equals(userId)) {
 			throw new CustomException(ExceptionCode.FORBIDDEN_POST_DELETE);
@@ -91,6 +83,10 @@ public class PostService {
 		postRepository.delete(post);
 	}
 
+	public Post findByIdOrElseThrow(Long id) {
+		return postRepository.findById(id)
+			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_POST));
+	}
 }
 
 

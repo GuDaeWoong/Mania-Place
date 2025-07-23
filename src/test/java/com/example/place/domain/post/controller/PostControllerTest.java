@@ -1,7 +1,7 @@
 package com.example.place.domain.post.controller;
 
-import com.example.place.domain.post.dto.PostCreateRequestDto;
-import com.example.place.domain.post.dto.PostResponseDto;
+import com.example.place.domain.post.dto.request.PostCreateRequestDto;
+import com.example.place.domain.post.dto.response.PostResponseDto;
 import com.example.place.domain.post.service.PostService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
