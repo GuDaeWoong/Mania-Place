@@ -142,4 +142,30 @@ class ImageServiceTest {
 		// then
 		verify(imageRepository).deleteAll(images);
 	}
+
+	@Test
+	void 이미지_저장_대표인덱스_음수_기본값적용_성공() {
+		// when
+		imageService.saveImages(TEST_ITEM, List.of("file1.jpg", "file2.jpg"), -1);
+
+		// then
+		verify(imageRepository, times(2)).save(imageCaptor.capture());
+		List<Image> savedImages = imageCaptor.getAllValues();
+
+		assertTrue(savedImages.get(0).isMain());
+		assertFalse(savedImages.get(1).isMain());
+	}
+
+	@Test
+	void 이미지_저장_대표인덱스_범위초과_기본값적용_성공() {
+		// when
+		imageService.saveImages(TEST_ITEM, List.of("file1.jpg", "file2.jpg"), 2);
+
+		// then
+		verify(imageRepository, times(2)).save(imageCaptor.capture());
+		List<Image> savedImages = imageCaptor.getAllValues();
+
+		assertTrue(savedImages.get(0).isMain());
+		assertFalse(savedImages.get(1).isMain());
+	}
 }
