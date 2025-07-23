@@ -88,7 +88,6 @@ public class ItemService {
                     .orElseGet(() -> tagRepository.save(new Tag(tagName)));
 
             ItemTag itemTag = new ItemTag(null, item, tag);
-            itemTagRepository.save(itemTag);
 
 			item.addItemTag(itemTag);
         }

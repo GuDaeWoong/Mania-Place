@@ -12,14 +12,7 @@ import com.example.place.domain.item.dto.request.ItemRequest;
 import com.example.place.domain.itemtag.entity.ItemTag;
 import com.example.place.domain.user.entity.User;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 
 import lombok.Getter;
@@ -50,7 +43,7 @@ public class Item extends BaseEntity {
 	@OneToMany(mappedBy = "item")
 	private List<Image> images = new ArrayList<>();
 
-	@OneToMany(mappedBy = "item")
+	@OneToMany(mappedBy = "item", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
 	private List<ItemTag> itemTags = new ArrayList<>();
 
 	// 재고 감소
