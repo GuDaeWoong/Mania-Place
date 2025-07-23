@@ -1,6 +1,7 @@
 package com.example.place.domain.order.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.item.service.ItemService;
 import com.example.place.domain.order.dto.CreateOrderRequestDto;
@@ -25,7 +27,7 @@ import com.example.place.domain.user.service.UserService;
 @ExtendWith(MockitoExtension.class)
 public class OrderServiceTest {
 
-	private static final User TEST_USER = new User(
+	private static final User TEST_USER = User.of(
 		"testName",
 		"testNickname",
 		"test@email.com",
@@ -34,7 +36,7 @@ public class OrderServiceTest {
 		UserRole.USER
 	);
 
-	private static final Item TEST_ITEM = new Item(
+	private static final Item TEST_ITEM = Item.of(
 		TEST_USER,
 		"testItem",
 		"testDescription",
@@ -90,4 +92,21 @@ public class OrderServiceTest {
 		assertThat(responseDto.getMainImageUrl()).isEqualTo("image1url");
 	}
 
+
+	@Test
+	void 상품_재고부족_주문_실패() {
+		//given
+		Long userId = 1L;
+		Long itemId = 2L;
+		Long quantity = 3L;
+		CreateOrderRequestDto requestDto = new CreateOrderRequestDto(itemId, quantity, "부산");
+
+		given(userService.findUserById(userId)).willReturn(TEST_USER);
+		given(itemService.findByIdOrElseThrow(itemId)).willReturn(TEST_ITEM);
+
+		CustomException exception = assertThrows(CustomException.class, () ->
+			orderService.createOrder(requestDto, userId)
+		);
+		assertThat(exception.getExceptionCode().name()).isEqualTo("OUT_OF_STOCK");
+	}
 }
