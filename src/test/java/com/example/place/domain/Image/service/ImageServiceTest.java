@@ -53,14 +53,11 @@ class ImageServiceTest {
 
 	@Test
 	void 이미지_저장_성공() {
-		// given
-		List<String> imageUrls = Arrays.asList("file1.jpg", "file2.jpg");
-
 		// when
-		imageService.saveImages(TEST_ITEM, imageUrls, 0);
+		imageService.saveImages(TEST_ITEM, List.of("file1.jpg", "file2.jpg"), 0);
 
 		// then
-		verify(imageRepository, times(imageUrls.size())).save(imageCaptor.capture());
+		verify(imageRepository, times(2)).save(imageCaptor.capture());
 		List<Image> savedImages = imageCaptor.getAllValues();
 
 		// -- file1에 관한 검증
@@ -81,8 +78,6 @@ class ImageServiceTest {
 			Image.of(TEST_ITEM, "file1.jpg", true),
 			Image.of(TEST_ITEM, "file2.jpg", false));
 
-		List<String> newImageUrls = List.of("file1.jpg");
-
 		List<Image> newimages = List.of(Image.of(TEST_ITEM, "file1.jpg", true));
 
 		when(imageRepository.findByItemId(TEST_ITEM.getId()))
@@ -90,7 +85,7 @@ class ImageServiceTest {
 			.thenReturn(newimages);     // 수정 후 재조회
 
 		// when
-		imageService.updateImages(TEST_ITEM, newImageUrls, 0);
+		imageService.updateImages(TEST_ITEM, List.of("file1.jpg"), 0);
 
 		// then
 		verify(imageRepository).delete(argThat(img -> img.getImageUrl().equals("file2.jpg")));
@@ -102,8 +97,6 @@ class ImageServiceTest {
 		// given
 		List<Image> existingimages = List.of(Image.of(TEST_ITEM, "file1.jpg", true));
 
-		List<String> newImageUrls = List.of("file1.jpg", "file2.jpg");
-
 		List<Image> newimages = List.of(
 			Image.of(TEST_ITEM, "file1.jpg", true),
 			Image.of(TEST_ITEM, "file2.jpg", false));
@@ -113,7 +106,7 @@ class ImageServiceTest {
 			.thenReturn(newimages);     // 수정 후 재조회
 
 		// when
-		imageService.updateImages(TEST_ITEM, newImageUrls, 0);
+		imageService.updateImages(TEST_ITEM, List.of("file1.jpg", "file2.jpg"), 0);
 
 		// then
 		verify(imageRepository).save(argThat(img -> img.getImageUrl().equals("file2.jpg")));
