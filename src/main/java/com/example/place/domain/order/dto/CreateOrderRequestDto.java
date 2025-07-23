@@ -11,8 +11,14 @@ public class CreateOrderRequestDto {
 	private Long itemId;
 
 	@Min(value = 1, message = "상품 개수는 1개 이상이어야 합니다.")
-	private int quantity;
+	private Long quantity;
 
 	@NotBlank(message = "배송지 주소는 필수입니다.")
 	private String deliveryAddress;
+
+	public CreateOrderRequestDto(Long itemId, Long quantity, String deliveryAddress) {
+		this.itemId = itemId;
+		this.quantity = quantity;
+		this.deliveryAddress = deliveryAddress;
+	}
 }

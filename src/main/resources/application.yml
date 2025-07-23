@@ -12,7 +12,7 @@ spring:
     password: ${DB_PASSWORD}
 
   jpa:
-    hibernate.ddl-auto: create-drop
+    hibernate.ddl-auto: create
 #    hibernate.ddl-auto: update
     show-sql: false
     properties:
@@ -23,5 +23,4 @@ spring:
 
 jwt:
   secret:
-    key: ${JWT_SECRET_KEY}
-
+    key: ${SECRET_KEY}

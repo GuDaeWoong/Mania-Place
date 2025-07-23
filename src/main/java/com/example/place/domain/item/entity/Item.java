@@ -1,14 +1,17 @@
 package com.example.place.domain.item.entity;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.place.common.entity.BaseEntity;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.Image.entity.Image;
+import com.example.place.domain.item.dto.request.ItemRequest;
+import com.example.place.domain.itemtag.entity.ItemTag;
 import com.example.place.domain.user.entity.User;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,13 +20,17 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Min;
+import lombok.AccessLevel;
+
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 
 @Getter
 @Entity
 @Table(name = "items")
-public class Item {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Item extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -32,19 +39,22 @@ public class Item {
 	@JoinColumn(name = "user_id")
 	private User user;
 
-	private String productName;
+	private String itemName;
+	private String itemDescription;
 
-	private String productDescription;
-
-	private Boolean is_official;
 	private double price;
-	private int count;
+	private Long count;
+	private LocalDateTime salesStartAt;
+	private LocalDateTime salesEndAt;
 
 	@OneToMany(mappedBy = "item")
 	private List<Image> images = new ArrayList<>();
 
+	@OneToMany(mappedBy = "item")
+	private List<ItemTag> itemTags = new ArrayList<>();
+
 	// 재고 감소
-	public void decreaseStock(int quantity){
+	public void decreaseStock(Long quantity){
 		if(this.count < quantity){
 			throw new CustomException(ExceptionCode.OUT_OF_STOCK);
 		}
@@ -52,9 +62,55 @@ public class Item {
 	}
 
 	// 주문 취소로 인한 재고 증가
-	public void increaseStock(int quantity) {
+	public void increaseStock(Long quantity) {
 		this.count += quantity;
 	}
 
 
+	private Item(User user, String itemName, String itemDescription, Double price, Long count, LocalDateTime salesStartAt, LocalDateTime salesEndAt) {
+		this.user = user;
+		this.itemName = itemName;
+		this.itemDescription = itemDescription;
+		this.price = price;
+		this.count = count;
+		this.salesStartAt = salesStartAt;
+		this.salesEndAt = salesEndAt;
+	}
+	public static Item of(User user, String itemName, String itemDescription, Double price, Long count, LocalDateTime salesStartAt, LocalDateTime salesEndAt) {
+		return new Item(user, itemName, itemDescription, price, count, salesStartAt, salesEndAt);
+	}
+
+
+	public void updateItem(ItemRequest request) {
+		if(request.getItemName() != null) {
+			this.itemName = request.getItemName();
+		}
+		if (request.getItemDescription() != null) {
+			this.itemDescription = request.getItemDescription();
+		}
+		if (request.getPrice() != null) {
+			this.price = request.getPrice();
+		}
+		if (request.getCount() != null) {
+			this.count = request.getCount();
+		}
+		if (request.getSalesStartAt() != null) {
+			this.salesStartAt = request.getSalesStartAt();
+		}
+		if (request.getSalesEndAt() != null) {
+			this.salesEndAt = request.getSalesEndAt();
+		}
+	}
+
+	public void validateSalesPeriod() {
+		LocalDateTime now = LocalDateTime.now();
+		if (now.isBefore(salesStartAt) || now.isAfter(salesEndAt)) {
+			throw new CustomException(ExceptionCode.NOT_SALE_PERIOD);
+		}
+	}
+
+	public void addItemTag(ItemTag itemTag) {
+		this.itemTags.add(itemTag);
+		itemTag.setItem(this);
+	}
 }

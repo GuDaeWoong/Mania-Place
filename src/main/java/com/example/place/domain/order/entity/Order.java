@@ -1,13 +1,12 @@
 package com.example.place.domain.order.entity;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.example.place.common.entity.BaseEntity;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.user.entity.User;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -18,14 +17,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Builder
 @Getter
 @Entity
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "orders")
 public class Order extends BaseEntity {
 	@Id
@@ -40,16 +38,28 @@ public class Order extends BaseEntity {
 	@JoinColumn(name = "item_id")
 	private Item item;
 	//상품 개수
-	private int quantity;
+	private Long quantity;
 	private double price;
 	private String deliveryAddress;
 
 	@Enumerated(EnumType.STRING)
+	@Column(length = 20)
 	private OrderStatus status;
 
 	private LocalDateTime completeAt;
 
-	public Order() {
+	public Order(User user, Item item, Long quantity, double price, OrderStatus status,
+		String deliveryAddress, LocalDateTime completeAt) {
+		this.user = user;
+		this.item = item;
+		this.quantity = quantity;
+		this.price = price;
+		this.status = status;
+		this.deliveryAddress = deliveryAddress;
+		this.completeAt = completeAt;
+	}
 
+	public void updateStatus(OrderStatus toStatus) {
+		this.status = toStatus;
 	}
 }
