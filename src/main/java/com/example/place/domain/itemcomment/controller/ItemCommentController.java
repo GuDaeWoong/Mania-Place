@@ -29,6 +29,14 @@ public class ItemCommentController {
 
 	private final ItemCommentService itemCommentService;
 
+	/**
+	 * 상품 댓글 등록
+	 *
+	 * @param itemId
+	 * @param request
+	 * @param principal
+	 * @return 등록된 상품 댓글
+	 */
 	@PostMapping
 	public ResponseEntity<ApiResponseDto<ItemCommentResponse>> saveItemComment(
 		@PathVariable Long itemId,
@@ -40,6 +48,13 @@ public class ItemCommentController {
 		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto<>("댓글이 등록되었습니다.", response));
 	}
 
+	/**
+	 * 상품별 댓글 조회
+	 *
+	 * @param itemId
+	 * @param pageable
+	 * @return 조회된 상품 댓글들
+	 */
 	@GetMapping
 	public ResponseEntity<ApiResponseDto<Page<ItemCommentResponse>>> readItemComment(
 		@PathVariable Long itemId,
@@ -47,7 +62,6 @@ public class ItemCommentController {
 
 		Page<ItemCommentResponse> response = itemCommentService.readItemComment(itemId, pageable);
 
-		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto("조회되었습니다.", response));
+		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto("댓글이 조회되었습니다.", response));
 	}
-
 }

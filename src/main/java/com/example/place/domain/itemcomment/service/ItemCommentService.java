@@ -44,8 +44,10 @@ public class ItemCommentService {
 
 	@Transactional(readOnly = true)
 	public Page<ItemCommentResponse> readItemComment(Long itemId, Pageable pageable) {
+		// 댓글 조회
 		Page<ItemComment> comments = itemCommentRepository.findByItemId(itemId, pageable);
 
+		// 응답 DTO로 반환
 		return comments.map(ItemCommentResponse::of);
 	}
 }
