@@ -11,7 +11,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.example.place.common.filter.JwtBlacklistFilter;
 import com.example.place.common.filter.JwtFilter;
+import com.example.place.common.security.jwt.JwtUtil;
+import com.example.place.domain.auth.service.JwtBlacklistService;
+import com.example.place.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,11 +24,26 @@ import lombok.RequiredArgsConstructor;
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
-	private final JwtFilter jwtFilter;
+
+	private final JwtUtil jwtUtil;
+	private final UserRepository userRepository;
+	private final JwtBlacklistService jwtBlacklistService;
 	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
 	@Bean
-	public PasswordEncoder passwordEncoder() {return new BCryptPasswordEncoder();}
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
+	@Bean
+	public JwtBlacklistFilter jwtBlacklistFilter() {
+		return new JwtBlacklistFilter(jwtBlacklistService);
+	}
+
+	@Bean
+	public JwtFilter jwtFilter() {
+		return new JwtFilter(jwtUtil, userRepository);
+	}
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -32,7 +51,11 @@ public class SecurityConfig {
 			.csrf(AbstractHttpConfigurer::disable)
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.formLogin(AbstractHttpConfigurer::disable)
-			.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+
+			// 필터 등록 순서 중요
+			.addFilterBefore(jwtBlacklistFilter(), UsernamePasswordAuthenticationFilter.class)
+			.addFilterBefore(jwtFilter(), JwtBlacklistFilter.class)  // 순서를 이렇게 맞춰줘야 함
+
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/api/**").permitAll()
 				.anyRequest().authenticated()
@@ -41,7 +64,6 @@ public class SecurityConfig {
 			.exceptionHandling(configurer -> configurer
 				.authenticationEntryPoint(customAuthenticationEntryPoint)
 			)
-
 			.build();
 	}
 }
