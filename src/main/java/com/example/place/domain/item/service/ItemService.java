@@ -41,7 +41,7 @@ public class ItemService {
 
 	// 재고 감소
 	@Transactional
-	public void decreaseStock(Long itemId, int quantity) {
+	public void decreaseStock(Long itemId, Long quantity) {
 		Item item = itemRepository.findById(itemId)
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
 		item.decreaseStock(quantity);
@@ -49,7 +49,7 @@ public class ItemService {
 
 	// 재고 증가
 	@Transactional
-	public void increaseStock(Long itemId, int quantity) {
+	public void increaseStock(Long itemId, Long quantity) {
 		Item item = itemRepository.findById(itemId)
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
 		item.increaseStock(quantity);

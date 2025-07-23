@@ -12,13 +12,13 @@ public class CreateOrderResponseDto {
 	private String mainImageUrl;
 	private String userNickname;
 	private String itemName;
-	private int quantity;
+	private Long quantity;
 	private double price;
 	private String status;
 	private String deliveryAddress;
 	private LocalDateTime createdAt;
 
-	public CreateOrderResponseDto(String mainImageUrl, String userNickname, String itemName, int quantity, double price,
+	public CreateOrderResponseDto(String mainImageUrl, String userNickname, String itemName, Long quantity, double price,
 		String status, String deliveryAddress, LocalDateTime createdAt) {
 		this.mainImageUrl = mainImageUrl;
 		this.userNickname = userNickname;
