@@ -16,6 +16,7 @@ import com.example.place.common.filter.JwtFilter;
 import com.example.place.common.security.jwt.JwtUtil;
 import com.example.place.domain.auth.service.JwtBlacklistService;
 import com.example.place.domain.user.repository.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
 	private final JwtUtil jwtUtil;
+	private final ObjectMapper objectMapper;
 	private final UserRepository userRepository;
 	private final JwtBlacklistService jwtBlacklistService;
 	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
@@ -37,7 +39,7 @@ public class SecurityConfig {
 
 	@Bean
 	public JwtBlacklistFilter jwtBlacklistFilter() {
-		return new JwtBlacklistFilter(jwtBlacklistService);
+		return new JwtBlacklistFilter(jwtBlacklistService, objectMapper);
 	}
 
 	@Bean
