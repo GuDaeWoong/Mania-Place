@@ -38,7 +38,7 @@ public class Order extends BaseEntity {
 	@JoinColumn(name = "item_id")
 	private Item item;
 	//상품 개수
-	private int quantity;
+	private Long quantity;
 	private double price;
 	private String deliveryAddress;
 
@@ -48,7 +48,7 @@ public class Order extends BaseEntity {
 
 	private LocalDateTime completeAt;
 
-	public Order(User user, Item item, int quantity, double price, OrderStatus status,
+	public Order(User user, Item item, Long quantity, double price, OrderStatus status,
 		String deliveryAddress, LocalDateTime completeAt) {
 		this.user = user;
 		this.item = item;

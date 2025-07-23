@@ -13,6 +13,7 @@ import com.example.place.domain.tag.repository.TagRepository;
 
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.repository.UserRepository;
+import com.example.place.domain.user.service.UserService;
 import org.springframework.stereotype.Service;
 
 import com.example.place.common.exception.enums.ExceptionCode;
@@ -34,13 +35,13 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final ItemTagRepository itemTagRepository;
     private final TagRepository tagRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
 	private final ImageService imageService;
 
 
 	// 재고 감소
 	@Transactional
-	public void decreaseStock(Long itemId, int quantity) {
+	public void decreaseStock(Long itemId, Long quantity) {
 		Item item = itemRepository.findById(itemId)
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
 		item.decreaseStock(quantity);
@@ -48,7 +49,7 @@ public class ItemService {
 
 	// 재고 증가
 	@Transactional
-	public void increaseStock(Long itemId, int quantity) {
+	public void increaseStock(Long itemId, Long quantity) {
 		Item item = itemRepository.findById(itemId)
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
 		item.increaseStock(quantity);
@@ -57,8 +58,7 @@ public class ItemService {
 	//기본적인 태그 관리 흐름입니다
     @Transactional
     public ItemResponse createItem(Long userId, ItemRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
+        User user = userService.findUserById(userId);
 
 		LocalDateTime salesStartAt = request.getSalesStartAt() != null
 				? request.getSalesStartAt()
@@ -68,7 +68,7 @@ public class ItemService {
 				? request.getSalesEndAt()
 				: LocalDateTime.of(3000, 1, 1, 0, 0);
 //		:LocalDateTime.Max;
-        Item item = new Item(
+        Item item = Item.of(
                 user,
 				request.getItemName(),
 				request.getItemDescription(),
@@ -88,7 +88,6 @@ public class ItemService {
                     .orElseGet(() -> tagRepository.save(new Tag(tagName)));
 
             ItemTag itemTag = new ItemTag(null, item, tag);
-            itemTagRepository.save(itemTag);
 
 			item.addItemTag(itemTag);
         }

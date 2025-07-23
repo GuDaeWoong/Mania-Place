@@ -12,14 +12,7 @@ import com.example.place.domain.item.dto.request.ItemRequest;
 import com.example.place.domain.itemtag.entity.ItemTag;
 import com.example.place.domain.user.entity.User;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 
 import lombok.Getter;
@@ -50,11 +43,11 @@ public class Item extends BaseEntity {
 	@OneToMany(mappedBy = "item")
 	private List<Image> images = new ArrayList<>();
 
-	@OneToMany(mappedBy = "item")
+	@OneToMany(mappedBy = "item", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
 	private List<ItemTag> itemTags = new ArrayList<>();
 
 	// 재고 감소
-	public void decreaseStock(int quantity){
+	public void decreaseStock(Long quantity){
 		if(this.count < quantity){
 			throw new CustomException(ExceptionCode.OUT_OF_STOCK);
 		}
@@ -62,12 +55,12 @@ public class Item extends BaseEntity {
 	}
 
 	// 주문 취소로 인한 재고 증가
-	public void increaseStock(int quantity) {
+	public void increaseStock(Long quantity) {
 		this.count += quantity;
 	}
 
 
-	public Item(User user, String itemName, String itemDescription, Double price, Long count, LocalDateTime salesStartAt, LocalDateTime salesEndAt) {
+	private Item(User user, String itemName, String itemDescription, Double price, Long count, LocalDateTime salesStartAt, LocalDateTime salesEndAt) {
 		this.user = user;
 		this.itemName = itemName;
 		this.itemDescription = itemDescription;
@@ -76,6 +69,10 @@ public class Item extends BaseEntity {
 		this.salesStartAt = salesStartAt;
 		this.salesEndAt = salesEndAt;
 	}
+	public static Item of(User user, String itemName, String itemDescription, Double price, Long count, LocalDateTime salesStartAt, LocalDateTime salesEndAt) {
+		return new Item(user, itemName, itemDescription, price, count, salesStartAt, salesEndAt);
+	}
+
 
 	public void updateItem(ItemRequest request) {
 		if(request.getItemName() != null) {
