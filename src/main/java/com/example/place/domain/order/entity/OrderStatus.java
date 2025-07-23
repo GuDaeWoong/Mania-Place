@@ -14,13 +14,13 @@ public enum OrderStatus {
 	CANCELLED;
 
 
-	public static void statusToReady(OrderStatus current) {
+	public static void statusIsReady(OrderStatus current) {
 		if (current != ORDERED) {
 			throw new CustomException(ExceptionCode.INVALID_ORDER_STATUS_TRANSITION);
 		}
 	}
 
-	public static void statusToCompleted(OrderStatus current) {
+	public static void statusIsCompleted(OrderStatus current) {
 		if (current != READY) {
 			throw new CustomException(ExceptionCode.INVALID_ORDER_STATUS_TRANSITION);
 		}
