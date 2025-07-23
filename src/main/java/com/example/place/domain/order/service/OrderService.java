@@ -125,7 +125,7 @@ public class OrderService {
 	}
 
 	@Transactional
-	public UpdateOrderStatusResponseDto updateOrderStatusToReady(Long orderId,OrderStatus status, Long userId) {
+	public UpdateOrderStatusResponseDto updateOrderStatusToReady(Long orderId, Long userId) {
 		Order order = orderRepository.findById(orderId)
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ORDER));
 
@@ -212,4 +212,5 @@ public class OrderService {
 			order.getCreatedAt()
 		);
 	}
+
 }
