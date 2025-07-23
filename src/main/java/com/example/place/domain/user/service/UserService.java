@@ -36,7 +36,7 @@ public class UserService {
 		// 패스워드 암호화
 		String encodedPassword = passwordEncoder.encode(userRegisterRequest.getPassword());
 
-		User user = new User(
+		User user = User.of(
 			userRegisterRequest.getName(),
 			userRegisterRequest.getNickname(),
 			userRegisterRequest.getEmail(),
@@ -53,25 +53,13 @@ public class UserService {
 	// 어드민 검색용
 	public UserResponse findUser(Long userId) {
 		User foundUser = findUserById(userId);
-		return new UserResponse(
-			foundUser.getId(),
-			foundUser.getName(),
-			foundUser.getNickname(),
-			foundUser.getImageUrl(),
-			foundUser.getEmail()
-		);
+		return UserResponse.from(foundUser);
 	}
 
 	// 마이페이지 조회용
 	public UserResponse findMyInfo(Long userId) {
 		User myInfo = findUserById(userId);
-		return new UserResponse(
-			myInfo.getId(),
-			myInfo.getName(),
-			myInfo.getNickname(),
-			myInfo.getImageUrl(),
-			myInfo.getEmail()
-		);
+		return UserResponse.from(myInfo);
 	}
 
 	@Transactional
@@ -89,13 +77,7 @@ public class UserService {
 			userUpdateRequest.getNickname(),
 			userUpdateRequest.getImageUrl());
 
-		return new UserResponse(
-			foundUser.getId(),
-			foundUser.getName(),
-			foundUser.getNickname(),
-			foundUser.getImageUrl(),
-			foundUser.getEmail()
-		);
+		return UserResponse.from(foundUser);
 	}
 
 	@Transactional
@@ -140,7 +122,14 @@ public class UserService {
 	}
 
 	public User findUserById(Long userId) {
-		return userRepository.findById(userId)
+		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
+
+		// 탈퇴한 사용자인지 확인
+		if(user.isDeleted()) {
+			throw new CustomException(ExceptionCode.DELETED_USER);
+		}
+
+		return user;
 	}
 }

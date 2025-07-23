@@ -36,6 +36,7 @@ public enum ExceptionCode {
 	ACCESS_DENIED(HttpStatus.FORBIDDEN, "관리자가 아니므로 수정할 수 없습니다."),
 	FORBIDDEN_ORDER_ACCESS(HttpStatus.FORBIDDEN, "해당 주문은 본인의 주문이 아닙니다."),
 	ORDER_CANCEL_ACCESS_DENIED(HttpStatus.FORBIDDEN, "주문을 취소할 권한이 없습니다."),
+	DELETED_USER(HttpStatus.FORBIDDEN, "탈퇴한 사용자 입니다."),
 
 
 	// 404 Not Found
