@@ -5,8 +5,7 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 
 @Getter
-public class SearchOrderResponseDto {
-
+public class UpdateOrderStatusResponseDto {
 	private String mainImageUrl;
 	private String userNickname;
 	private String itemName;
@@ -16,7 +15,7 @@ public class SearchOrderResponseDto {
 	private String deliveryAddress;
 	private LocalDateTime createdAt;
 
-	public SearchOrderResponseDto(String mainImageUrl, String nickname, String itemName, int quantity, double price, String deliveryAddress, String status, LocalDateTime createdAt) {
+	public UpdateOrderStatusResponseDto(String mainImageUrl, String nickname, String itemName, int quantity, double price, String deliveryAddress, String status, LocalDateTime createdAt) {
 		this.mainImageUrl = mainImageUrl;
 		this.userNickname = nickname;
 		this.itemName = itemName;
@@ -25,6 +24,5 @@ public class SearchOrderResponseDto {
 		this.status = status;
 		this.deliveryAddress = deliveryAddress;
 		this.createdAt = createdAt;
-
 	}
 }

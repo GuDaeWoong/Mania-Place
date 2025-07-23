@@ -1,9 +1,9 @@
 package com.example.place.domain.item.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -12,7 +12,7 @@ import java.util.List;
 
 @Getter
 @NoArgsConstructor
-public class CreateItemRequest {
+public class ItemRequest {
     @NotNull(message = "사용자 ID는 필수입니다.")
     private Long userId;
     @NotBlank(message = "사용자 이름은 필수입니다")
@@ -26,8 +26,10 @@ public class CreateItemRequest {
     private Long count;
     private LocalDateTime salesStartAt;
     private LocalDateTime salesEndAt;
+    @NotEmpty(message = "최소 1개의 이미지가 있어야합니다.")
+    private List<String> images;
+    private Integer mainIndex;
     private List<String> itemTagNames;
-
 
 
 }

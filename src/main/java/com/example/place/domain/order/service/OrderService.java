@@ -15,6 +15,7 @@ import com.example.place.domain.item.service.ItemService;
 import com.example.place.domain.order.dto.CreateOrderRequestDto;
 import com.example.place.domain.order.dto.CreateOrderResponseDto;
 import com.example.place.domain.order.dto.SearchOrderResponseDto;
+import com.example.place.domain.order.dto.UpdateOrderStatusResponseDto;
 import com.example.place.domain.order.entity.Order;
 import com.example.place.domain.order.entity.OrderStatus;
 import com.example.place.domain.order.repository.OrderRepository;
@@ -41,17 +42,21 @@ public class OrderService {
 	) {
 		User user = userService.findUserById(userId);
 
-		Item item = itemService.findItemById(requestDto.getItemId());
+		Item item = itemService.findByIdOrElseThrow(requestDto.getItemId());
 
 		// 수량 유무 확인
 		if (item.getCount() < requestDto.getQuantity()) {
 			throw new CustomException(ExceptionCode.OUT_OF_STOCK);
 		}
+
+		// 판매 기간 유무 검증
+		item.validateSalesPeriod();
+
 		Order order = new Order(user,
 			item,
 			requestDto.getQuantity(),
 			item.getPrice()*requestDto.getQuantity(),
-			OrderStatus.PENDING,
+			OrderStatus.ORDERED,
 			requestDto.getDeliveryAddress(),
 			null
 		);
@@ -61,7 +66,10 @@ public class OrderService {
 		// 주문으로 인한 재고 차감
 		itemService.decreaseStock(item.getId(),requestDto.getQuantity());
 
-		return CreateOrderResponseDto.from(order);
+		// 메인 이미지 추가
+		String mainImageUrl = itemService.getMainImageUrl(item.getId());
+
+		return CreateOrderResponseDto.from(order,mainImageUrl);
 	}
 
 	public SearchOrderResponseDto getMyOrder(Long orderId, Long userId) {
@@ -73,7 +81,11 @@ public class OrderService {
 			throw new CustomException(ExceptionCode.FORBIDDEN_ORDER_ACCESS);
 		}
 
+		Item item = itemService.findByIdOrElseThrow(order.getItem().getId());
+		String mainImageUrl = itemService.getMainImageUrl(item.getId());
+
 		return new SearchOrderResponseDto(
+			mainImageUrl,
 			order.getUser().getNickname(),
 			order.getItem().getItemName(),
 			order.getQuantity(),
@@ -93,7 +105,11 @@ public class OrderService {
 		List<SearchOrderResponseDto> responseDtoList = new ArrayList<>();
 
 		for (Order order : orders) {
+			Item item = itemService.findByIdOrElseThrow(order.getItem().getId());
+			String mainImageUrl = itemService.getMainImageUrl(item.getId());
+
 			SearchOrderResponseDto dto = new SearchOrderResponseDto(
+				mainImageUrl,
 				order.getUser().getNickname(),
 				order.getItem().getItemName(),
 				order.getQuantity(),
@@ -105,5 +121,61 @@ public class OrderService {
 			responseDtoList.add(dto);
 		}
 		return new PageImpl<>(responseDtoList, pageable, orders.getTotalElements());
+	}
+
+	@Transactional
+	public UpdateOrderStatusResponseDto updateOrderStatusToReady(Long orderId, Long userId) {
+		Order order = orderRepository.findById(orderId)
+			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ORDER));
+
+		// 상품 등록한 유저와 동일한지 검증
+		Item item = order.getItem();
+		if (!item.getUser().getId().equals(userId)) {
+			throw new CustomException(ExceptionCode.FORBIDDEN_ITEM_ACCESS);
+		}
+		OrderStatus.statusToReady(order.getStatus());
+
+		order.updateStatus(OrderStatus.READY);
+
+		String mainImageUrl = itemService.getMainImageUrl(item.getId());
+
+		return new UpdateOrderStatusResponseDto(
+			mainImageUrl,
+			order.getUser().getNickname(),
+			order.getItem().getItemName(),
+			order.getQuantity(),
+			order.getPrice(),
+			order.getDeliveryAddress(),
+			order.getStatus().name(),
+			order.getCreatedAt()
+		);
+	}
+
+	public UpdateOrderStatusResponseDto updateOrderStatusToCompleted(Long orderId, Long userId) {
+		Order order = orderRepository.findById(orderId)
+			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ORDER));
+
+		// 주문자 인지 아닌지 검증
+		if (!order.getUser().getId().equals(userId)) {
+			throw new CustomException(ExceptionCode.FORBIDDEN_ORDER_ACCESS);
+		}
+
+		OrderStatus.statusToCompleted(order.getStatus());
+
+		order.updateStatus(OrderStatus.COMPLETED);
+
+		Item item = order.getItem();
+		String mainImageUrl = itemService.getMainImageUrl(item.getId());
+
+		return new UpdateOrderStatusResponseDto(
+			mainImageUrl,
+			order.getUser().getNickname(),
+			order.getItem().getItemName(),
+			order.getQuantity(),
+			order.getPrice(),
+			order.getDeliveryAddress(),
+			order.getStatus().name(),
+			order.getCreatedAt()
+		);
 	}
 }

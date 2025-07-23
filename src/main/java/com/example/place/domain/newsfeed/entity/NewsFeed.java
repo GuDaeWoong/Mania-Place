@@ -24,7 +24,7 @@ public class NewsFeed {
 	private String title;
 	private String content;
 
-	@OneToMany(mappedBy = "newsFeed")
-	private List<Image> images = new ArrayList<>();
+	// @OneToMany(mappedBy = "newsFeed")
+	// private List<Image> images = new ArrayList<>();
 
 }
