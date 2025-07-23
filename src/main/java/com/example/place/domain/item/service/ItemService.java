@@ -89,6 +89,8 @@ public class ItemService {
 
             ItemTag itemTag = new ItemTag(null, item, tag);
             itemTagRepository.save(itemTag);
+
+			item.addItemTag(itemTag);
         }
         return ItemResponse.from(item);
     }

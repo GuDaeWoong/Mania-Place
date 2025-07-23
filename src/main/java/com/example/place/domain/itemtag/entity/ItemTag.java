@@ -5,10 +5,8 @@ import com.example.place.domain.tag.entity.Tag;
 import com.example.place.domain.user.entity.User;
 import jakarta.persistence.*;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -28,5 +26,8 @@ public class ItemTag {
     @ManyToOne(fetch = FetchType.LAZY)
     private Tag tag;
 
+    public void setItem(Item item) {
+        this.item = item;
+    }
 
 }
