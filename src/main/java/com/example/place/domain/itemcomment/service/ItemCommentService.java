@@ -55,6 +55,7 @@ public class ItemCommentService {
 		return comments.map(ItemCommentResponse::of);
 	}
 
+	@Transactional
 	public ItemCommentResponse updateItemComment(Long itemId, Long itemCommentId, ItemCommentRequest request,
 		CustomPrincipal principal) {
 		// 수정할 댓글 조회
