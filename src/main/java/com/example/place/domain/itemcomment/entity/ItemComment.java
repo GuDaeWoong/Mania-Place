@@ -44,4 +44,8 @@ public class ItemComment extends BaseEntity {
 	public static ItemComment of(User user, Item item, String content) {
 		return new ItemComment(user, item, content);
 	}
+
+	public void updateItemComment(String content) {
+		this.content = content;
+	}
 }
