@@ -98,6 +98,29 @@ class ImageServiceTest {
 	}
 
 	@Test
+	void 이미지_수정_이미지저장_성공() {
+		// given
+		List<Image> existingimages = List.of(Image.of(TEST_ITEM, "file1.jpg", true));
+
+		List<String> newImageUrls = List.of("file1.jpg", "file2.jpg");
+
+		List<Image> newimages = List.of(
+			Image.of(TEST_ITEM, "file1.jpg", true),
+			Image.of(TEST_ITEM, "file2.jpg", false));
+
+		when(imageRepository.findByItemId(TEST_ITEM.getId()))
+			.thenReturn(existingimages) // 수정 전 조회
+			.thenReturn(newimages);     // 수정 후 재조회
+
+		// when
+		imageService.updateImages(TEST_ITEM, newImageUrls, 0);
+
+		// then
+		verify(imageRepository).save(argThat(img -> img.getImageUrl().equals("file2.jpg")));
+		verify(imageRepository, never()).delete(any());
+	}
+
+	@Test
 	void 이미지_삭제_성공() {
 		// given
 		List<Image> images = List.of(Image.of(TEST_ITEM, "file1.jpg", true));
