@@ -1,5 +1,7 @@
 package com.example.place.domain.user.dto;
 
+import com.example.place.domain.user.entity.User;
+
 import lombok.Getter;
 
 @Getter
@@ -16,5 +18,15 @@ public class UserResponse {
 		this.nickname = nickname;
 		this.imageUrl = imageUrl;
 		this.email = email;
+	}
+
+	public static UserResponse from(User user) {
+		return new UserResponse(
+			user.getId(),
+			user.getName(),
+			user.getNickname(),
+			user.getImageUrl(),
+			user.getEmail()
+		);
 	}
 }

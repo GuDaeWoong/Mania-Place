@@ -63,7 +63,7 @@ public class UserController {
 		@Valid @RequestBody UserUpdateRequest userUpdateRequest
 	) {
 		Long userId = principal.getId();
-		return ResponseEntity.ok(new ApiResponseDto<>("수정 성공", userService.modifyUser(userId, userUpdateRequest)));
+		return ResponseEntity.ok(new ApiResponseDto<>("회원 정보가 수정되었습니다.", userService.modifyUser(userId, userUpdateRequest)));
 	}
 
 	//내 비밀번호 수정
