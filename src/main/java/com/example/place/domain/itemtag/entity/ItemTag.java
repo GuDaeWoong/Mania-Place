@@ -5,14 +5,13 @@ import com.example.place.domain.tag.entity.Tag;
 import com.example.place.domain.user.entity.User;
 import jakarta.persistence.*;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Setter
 @Table(name = "item_tags")
 public class ItemTag {
 

@@ -104,4 +104,9 @@ public class Item extends BaseEntity {
 			throw new CustomException(ExceptionCode.NOT_SALE_PERIOD);
 		}
 	}
+
+	public void addItemTag(ItemTag itemTag) {
+		this.itemTags.add(itemTag);
+		itemTag.setItem(this);
+	}
 }
