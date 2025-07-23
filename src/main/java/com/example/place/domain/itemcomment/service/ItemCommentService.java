@@ -1,5 +1,7 @@
 package com.example.place.domain.itemcomment.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.place.common.security.jwt.CustomPrincipal;
@@ -12,7 +14,7 @@ import com.example.place.domain.itemcomment.repository.ItemCommentRepository;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.service.UserService;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -38,5 +40,12 @@ public class ItemCommentService {
 
 		// 응답 DTO로 반환
 		return ItemCommentResponse.of(saveItemComment);
+	}
+
+	@Transactional(readOnly = true)
+	public Page<ItemCommentResponse> readItemComment(Long itemId, Pageable pageable) {
+		Page<ItemComment> comments = itemCommentRepository.findByItemId(itemId, pageable);
+
+		return comments.map(ItemCommentResponse::of);
 	}
 }
