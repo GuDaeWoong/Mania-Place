@@ -134,7 +134,7 @@ public class OrderService {
 		if (!item.getUser().getId().equals(userId)) {
 			throw new CustomException(ExceptionCode.FORBIDDEN_ITEM_ACCESS);
 		}
-		OrderStatus.statusToReady(order.getStatus());
+		OrderStatus.statusIsReady(order.getStatus());
 
 		order.updateStatus(OrderStatus.READY);
 
@@ -161,7 +161,7 @@ public class OrderService {
 			throw new CustomException(ExceptionCode.FORBIDDEN_ORDER_ACCESS);
 		}
 
-		OrderStatus.statusToCompleted(order.getStatus());
+		OrderStatus.statusIsCompleted(order.getStatus());
 
 		order.updateStatus(OrderStatus.COMPLETED);
 
@@ -190,7 +190,7 @@ public class OrderService {
 		}
 
 		// 메서드명 추후 변경예정
-		OrderStatus.statusToReady(order.getStatus());
+		OrderStatus.statusIsReady(order.getStatus());
 
 		order.updateStatus(OrderStatus.CANCELLED);
 
