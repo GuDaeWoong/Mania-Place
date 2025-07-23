@@ -67,7 +67,7 @@ public class Item extends BaseEntity {
 	}
 
 
-	public Item(User user, String itemName, String itemDescription, Double price, Long count, LocalDateTime salesStartAt, LocalDateTime salesEndAt) {
+	private Item(User user, String itemName, String itemDescription, Double price, Long count, LocalDateTime salesStartAt, LocalDateTime salesEndAt) {
 		this.user = user;
 		this.itemName = itemName;
 		this.itemDescription = itemDescription;
@@ -76,6 +76,10 @@ public class Item extends BaseEntity {
 		this.salesStartAt = salesStartAt;
 		this.salesEndAt = salesEndAt;
 	}
+	public static Item of(User user, String itemName, String itemDescription, Double price, Long count, LocalDateTime salesStartAt, LocalDateTime salesEndAt) {
+		return new Item(user, itemName, itemDescription, price, count, salesStartAt, salesEndAt);
+	}
+
 
 	public void updateItem(ItemRequest request) {
 		if(request.getItemName() != null) {
