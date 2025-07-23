@@ -57,7 +57,6 @@ public class User extends SoftDeleteEntity {
 	public void updateUserPassword(String password) {
 		this.password = password;
 	}
-}
 
 	public static User of(String name,String nickname,String email,String password , String imageUrl,UserRole role){
 		return new User(name,nickname,email,password,imageUrl,role);
