@@ -30,7 +30,7 @@ public class ItemComment extends BaseEntity {
 	private User user;
 
 	@ManyToOne
-	@JoinColumn(name = "post_id")
+	@JoinColumn(name = "item_id")
 	private Item item;
 
 	private String content;
