@@ -74,4 +74,16 @@ class ImageServiceTest {
 		assertFalse(savedImages.get(1).isMain());
 	}
 
+	@Test
+	void 이미지_삭제_성공() {
+		// given
+		List<Image> images = List.of(Image.of(TEST_ITEM, "file1.jpg", true));
+		when(imageRepository.findByItemId(TEST_ITEM.getId())).thenReturn(images);
+
+		// when
+		imageService.deleteImageByItemId(TEST_ITEM.getId());
+
+		// then
+		verify(imageRepository).deleteAll(images);
+	}
 }
