@@ -35,19 +35,19 @@ public class PostService {
 		Post post = new Post(user, item, request.getContent(), request.getImage());
 		Post saved = postRepository.save(post);
 
-		return PostResponseDto.from(saved);
+		return new PostResponseDto(saved);
 	}
 
 	//살까말까 단건 조회
 	public PostResponseDto readPost(Long postId) {
 		Post post = findByIdOrElseThrow(postId);
-		return PostResponseDto.from(post);
+		return new PostResponseDto(post);
 	}
 
 	//살까말까 전체 조회
 	public Page<PostResponseDto> getAllPosts(Pageable pageable) {
 		return postRepository.findAll(pageable)
-			.map(PostResponseDto::from);
+			.map(PostResponseDto::new);
 	}
 
 	//살까말까 내 글 조회
@@ -55,7 +55,7 @@ public class PostService {
 		User user = userService.findUserById(userId);
 
 		return postRepository.findAllByUser(user, pageable)
-			.map(PostResponseDto::from);
+			.map(PostResponseDto::new);
 	}
 
 	//살까말까 수정
@@ -68,7 +68,7 @@ public class PostService {
 		}
 
 		post.update(request.getContent(), request.getImage());
-		return PostResponseDto.from(post);
+		return new PostResponseDto(post);
 	}
 
 	//살까말까 삭제

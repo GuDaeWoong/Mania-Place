@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.place.common.dto.ApiResponseDto;
+import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.post.dto.request.PostCreateRequestDto;
 import com.example.place.domain.post.dto.response.PostResponseDto;
 import com.example.place.domain.post.dto.request.PostUpdateRequestDto;
@@ -55,7 +56,8 @@ public class PostController {
 		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
 	) {
 		Page<PostResponseDto> posts = postService.getAllPosts(pageable);
-		return ResponseEntity.ok(ApiResponseDto.success(posts));
+		return ResponseEntity.ok(new ApiResponseDto<>("성공", posts));
+
 	}
 
 	//살까말까 내 글 조회
@@ -65,7 +67,7 @@ public class PostController {
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
 		Page<PostResponseDto> response = postService.findMyPosts(principal.getId(), pageable);
-		return ResponseEntity.ok(ApiResponseDto.success(response));
+		return ResponseEntity.ok(new ApiResponseDto<>("성공", response));
 	}
 
 	//살까말까 수정
