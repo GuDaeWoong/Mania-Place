@@ -36,7 +36,7 @@ public class AuthController {
 
 		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", loginResponse.getRefreshToken())
 			.httpOnly(true)
-			.secure(false)
+			.secure(true)
 			.path("/")
 			.maxAge(7 * 24 * 60 * 60)
 			.sameSite("Strict")
