@@ -19,6 +19,7 @@ import com.example.place.domain.user.dto.UserRegisterRequest;
 import com.example.place.domain.user.dto.UserRegisterResponse;
 import com.example.place.domain.user.dto.UserResponse;
 import com.example.place.domain.user.dto.UserUpdateRequest;
+import com.example.place.domain.user.entity.UserRole;
 import com.example.place.domain.user.service.UserService;
 
 import jakarta.validation.Valid;
@@ -36,7 +37,15 @@ public class UserController {
 	public ResponseEntity<ApiResponseDto<UserRegisterResponse>> register(
 		@Valid @RequestBody UserRegisterRequest userRegisterRequest
 	) {
-		return ResponseEntity.ok(new ApiResponseDto<>("회원가입이 완료되었습니다.", userService.register(userRegisterRequest)));
+		return ResponseEntity.ok(new ApiResponseDto<>("회원가입이 완료되었습니다.", userService.register(userRegisterRequest, UserRole.USER)));
+	}
+
+	//어드민 회원가입
+	@PostMapping("/admin")
+	public ResponseEntity<ApiResponseDto<UserRegisterResponse>> registerAdmin(
+		@Valid @RequestBody UserRegisterRequest userRegisterRequest
+	) {
+		return ResponseEntity.ok(new ApiResponseDto<>("어드민 가입이 완료되었습니다.", userService.register(userRegisterRequest, UserRole.ADMIN)));
 	}
 
 	//유저 조회 일단은 어드민용?

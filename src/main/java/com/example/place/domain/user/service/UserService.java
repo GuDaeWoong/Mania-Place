@@ -24,7 +24,7 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 
-	public UserRegisterResponse register(UserRegisterRequest userRegisterRequest) {
+	public UserRegisterResponse register(UserRegisterRequest userRegisterRequest, UserRole userRole) {
 		// 이메일 중복 검증
 		if (userRepository.existsByEmail(userRegisterRequest.getEmail())) {
 			throw new CustomException(ExceptionCode.EXISTS_EMAIL);
@@ -42,7 +42,7 @@ public class UserService {
 			userRegisterRequest.getEmail(),
 			encodedPassword,
 			userRegisterRequest.getImageUrl(),
-			UserRole.USER
+			userRole
 		);
 
 		User savedUser = userRepository.save(user);
