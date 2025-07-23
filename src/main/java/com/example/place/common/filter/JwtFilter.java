@@ -52,7 +52,8 @@ public class JwtFilter extends OncePerRequestFilter implements Ordered {
 		String jwt = jwtUtil.subStringToken(bearerJwt);
 
 		if (!jwtUtil.validateToken(jwt)) {
-			throw new CustomException(ExceptionCode.INVALID_OR_MISSING_TOKEN);
+			filterChain.doFilter(request, response);
+			return;
 		}
 
 		String subject = jwtUtil.extractUserId(jwt);
