@@ -109,4 +109,5 @@ public class OrderServiceTest {
 		);
 		assertThat(exception.getExceptionCode().name()).isEqualTo("OUT_OF_STOCK");
 	}
+
 }
