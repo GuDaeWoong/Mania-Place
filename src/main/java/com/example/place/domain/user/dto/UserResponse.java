@@ -12,7 +12,7 @@ public class UserResponse {
 	private final String imageUrl;
 	private final String email;
 
-	public UserResponse(Long id, String name, String nickname, String imageUrl, String email) {
+	private UserResponse(Long id, String name, String nickname, String imageUrl, String email) {
 		this.id = id;
 		this.name = name;
 		this.nickname = nickname;
