@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -64,4 +65,25 @@ public class ItemCommentController {
 
 		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto("댓글이 조회되었습니다.", response));
 	}
+
+	/**
+	 * 댓글 수정
+	 *
+	 * @param itemCommentId
+	 * @param request
+	 * @param principal
+	 * @return
+	 */
+	@PatchMapping("/{itemCommentId}")
+	public ResponseEntity<ApiResponseDto<ItemCommentResponse>> updateItemComment(
+		@PathVariable Long itemId,
+		@PathVariable Long itemCommentId,
+		@Valid @RequestBody ItemCommentRequest request,
+		@AuthenticationPrincipal CustomPrincipal principal) {
+
+		ItemCommentResponse response = itemCommentService.updateItemComment(itemId, itemCommentId, request, principal);
+
+		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto<>("댓글을 수정하였습니다.", response));
+	}
+
 }
