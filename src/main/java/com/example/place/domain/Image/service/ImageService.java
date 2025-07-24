@@ -22,7 +22,7 @@ public class ImageService {
 
 	// 이미지 저장
 	@Transactional
-	public void saveImages(Item item, List<String> imageUrls, int mainIndex) {
+	public void createImages(Item item, List<String> imageUrls, int mainIndex) {
 
 		int validatedMainIndex = validMainIndex(imageUrls.size(), mainIndex);
 

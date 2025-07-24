@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -54,7 +53,7 @@ class ImageServiceTest {
 	@Test
 	void 이미지_저장_성공() {
 		// when
-		imageService.saveImages(TEST_ITEM, List.of("file1.jpg", "file2.jpg"), 0);
+		imageService.createImages(TEST_ITEM, List.of("file1.jpg", "file2.jpg"), 0);
 
 		// then
 		verify(imageRepository, times(2)).save(imageCaptor.capture());
@@ -146,7 +145,7 @@ class ImageServiceTest {
 	@Test
 	void 이미지_저장_대표인덱스_음수_기본값적용_성공() {
 		// when
-		imageService.saveImages(TEST_ITEM, List.of("file1.jpg", "file2.jpg"), -1);
+		imageService.createImages(TEST_ITEM, List.of("file1.jpg", "file2.jpg"), -1);
 
 		// then
 		verify(imageRepository, times(2)).save(imageCaptor.capture());
@@ -159,7 +158,7 @@ class ImageServiceTest {
 	@Test
 	void 이미지_저장_대표인덱스_범위초과_기본값적용_성공() {
 		// when
-		imageService.saveImages(TEST_ITEM, List.of("file1.jpg", "file2.jpg"), 2);
+		imageService.createImages(TEST_ITEM, List.of("file1.jpg", "file2.jpg"), 2);
 
 		// then
 		verify(imageRepository, times(2)).save(imageCaptor.capture());
