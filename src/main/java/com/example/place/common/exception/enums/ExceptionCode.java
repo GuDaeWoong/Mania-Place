@@ -22,6 +22,7 @@ public enum ExceptionCode {
 	INVALID_IMAGE_UPDATE_REQUEST(HttpStatus.BAD_REQUEST, "이미지 수정을 위해서는 이미지 URL 목록과 대표 이미지 인덱스를 함께 보내주세요"),
 	INVALID_PATH(HttpStatus.BAD_REQUEST, "유효하지 않는 주소입니다."),
 
+
 	// 401 Unauthorized
 	LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."),
 	PASSWORD_MISMATCH(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."),
@@ -43,7 +44,6 @@ public enum ExceptionCode {
 	ORDER_CANCEL_ACCESS_DENIED(HttpStatus.FORBIDDEN, "주문을 취소할 권한이 없습니다."),
 	FORBIDDEN_COMMENT_ACCESS(HttpStatus.FORBIDDEN, "본인 외에 댓글은 수정할 수 없습니다."),
 	DELETED_USER(HttpStatus.FORBIDDEN, "탈퇴한 사용자 입니다."),
-
 
 
 	// 404 Not Found
