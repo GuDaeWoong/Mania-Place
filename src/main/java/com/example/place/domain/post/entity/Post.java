@@ -38,16 +38,19 @@ public class Post {
 
 	private String image;
 
-	public Post(User user, Item item, String content, String image) {
+	private Post(User user, Item item, String content, String image) {
 		this.user = user;
 		this.item = item;
 		this.content = content;
 		this.image = image;
 	}
 
+	public static Post of(User user, Item item, String content, String image){
+		return new Post(user, item, content, image);
+	}
+
 	public void update(String content, String image) {
 		this.content = content;
 		this.image = image;
 	}
-
 }

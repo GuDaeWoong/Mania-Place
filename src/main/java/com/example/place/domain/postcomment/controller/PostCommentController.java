@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.place.common.dto.ApiResponseDto;
+import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.postcomment.dto.PostCommentRequest;
 import com.example.place.domain.postcomment.dto.PostCommentResponse;
@@ -39,29 +40,30 @@ public class PostCommentController {
 
 		PostCommentResponse response = postCommnetService.savePostComment(postId, request, principal);
 
-		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto<>("댓글이 등록되었습니다.", response));
+		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("댓글이 등록되었습니다.", response));
 	}
 
-	@PutMapping("/comments/{commentId}")
+	@PutMapping("{postId}/comments/{commentId}")
 	public ResponseEntity<ApiResponseDto<PostCommentResponse>> updatePostComment(
+		@PathVariable Long postId,
 		@PathVariable Long commentId,
 		@Valid @RequestBody PostCommentRequest request,
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
-		PostCommentResponse response = postCommnetService.updatePostComment(commentId, request, principal);
+		PostCommentResponse response = postCommnetService.updatePostComment(postId, commentId, request, principal);
 
-		return ResponseEntity.ok(new ApiResponseDto<>("게시글이 수정이 완료되었습니다.", response));
+		return ResponseEntity.ok(ApiResponseDto.of("게시글이 수정이 완료되었습니다.", response));
 	}
 
 	@GetMapping("/{postId}/comments")
-	public ResponseEntity<ApiResponseDto<Page<PostCommentResponse>>> getCommentsByPost(
+	public ResponseEntity<ApiResponseDto<PageResponseDto<PostCommentResponse>>> getCommentsByPost(
 		@PathVariable Long postId,
 		@PageableDefault Pageable pageable
 	) {
-		Page<PostCommentResponse> responses = postCommnetService.getCommentsByPost(postId, pageable);
-		return ResponseEntity.ok(new ApiResponseDto<>("댓글 목록 조회 완료", responses));
-	}
+		PageResponseDto<PostCommentResponse> responses = postCommnetService.getCommentsByPost(postId, pageable);
 
+		return ResponseEntity.ok(ApiResponseDto.of("댓글 목록 조회 완료", responses));
+	}
 
 	@DeleteMapping("/{postId}/comments/{commentId}")
 	public ResponseEntity<ApiResponseDto<Void>> deletePostComment(

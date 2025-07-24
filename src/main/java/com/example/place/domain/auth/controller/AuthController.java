@@ -43,7 +43,7 @@ public class AuthController {
 			.build();
 
 		response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
-		return ResponseEntity.ok(new ApiResponseDto<>("로그인에 성공했습니다.", loginResponse));
+		return ResponseEntity.ok(ApiResponseDto.of("로그인에 성공했습니다.", loginResponse));
 	}
 
 	@PostMapping("/logout")
@@ -62,7 +62,7 @@ public class AuthController {
 			.build();
 		response.addHeader(HttpHeaders.SET_COOKIE, deleteRefreshTokenCookie.toString());
 
-		return ResponseEntity.ok(new ApiResponseDto<>("로그아웃 성공", null));
+		return ResponseEntity.ok(ApiResponseDto.of("로그아웃 성공", null));
 	}
 
 	@PostMapping("/refresh")
@@ -78,6 +78,6 @@ public class AuthController {
 
 		response.setHeader(HttpHeaders.AUTHORIZATION, newTokens.getAccessToken());
 
-		return ResponseEntity.ok(new ApiResponseDto<>("토큰 재발급 성공", newTokens));
+		return ResponseEntity.ok(ApiResponseDto.of("토큰 재발급 성공", newTokens));
 	}
 }

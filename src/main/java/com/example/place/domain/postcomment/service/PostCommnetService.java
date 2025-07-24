@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.common.security.jwt.CustomPrincipal;
@@ -45,7 +46,10 @@ public class PostCommnetService {
 	}
 
 	@Transactional
-	public PostCommentResponse updatePostComment(Long commentId, PostCommentRequest request, CustomPrincipal principal) {
+	public PostCommentResponse updatePostComment(Long postId ,Long commentId, PostCommentRequest request, CustomPrincipal principal) {
+
+		postService.findByIdOrElseThrow(postId);
+
 		User user = userService.findUserById(principal.getId());
 
 		PostComment postComment = postCommentRepository.findById(commentId)
@@ -66,18 +70,19 @@ public class PostCommnetService {
 		);
 	}
 
-	public Page<PostCommentResponse> getCommentsByPost(Long postId, Pageable pageable) {
+	public PageResponseDto<PostCommentResponse> getCommentsByPost(Long postId, Pageable pageable
+	){
 		Post post = postService.findByIdOrElseThrow(postId);
 
 		Page<PostComment> commentPage = postCommentRepository.findAllByPost(post, pageable);
 
-		return commentPage.map(comment -> new PostCommentResponse(
+		Page<PostCommentResponse> responsePage = commentPage.map(comment -> new PostCommentResponse(
 			comment.getUser().getNickname(),
 			comment.getUser().getImageUrl(),
 			comment.getContent(),
 			comment.getCreatedAt()
 		));
-
+		return new PageResponseDto<>(responsePage);
 	}
 
 	@Transactional
