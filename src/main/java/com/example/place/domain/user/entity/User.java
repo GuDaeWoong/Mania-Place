@@ -1,7 +1,12 @@
 package com.example.place.domain.user.entity;
 
-import com.example.place.common.entity.SoftDeleteEntity;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.example.place.common.entity.SoftDeleteEntity;
+import com.example.place.domain.usertag.entity.UserTag;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -9,6 +14,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -36,7 +42,10 @@ public class User extends SoftDeleteEntity {
 	private String imageUrl;
 	@Enumerated(EnumType.STRING)
 	private UserRole role;
-	//private String tags;
+
+	@OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+	private List<UserTag> userTags = new ArrayList<>();
+
 
 	private User(String name, String nickname, String email, String password, String imageUrl,
 		UserRole role) {
@@ -60,5 +69,10 @@ public class User extends SoftDeleteEntity {
 
 	public static User of(String name,String nickname,String email,String password , String imageUrl,UserRole role){
 		return new User(name,nickname,email,password,imageUrl,role);
+	}
+
+	// 태그 추가 메서드
+	public void addUserTag(UserTag userTag) {
+		this.userTags.add(userTag);
 	}
 }
