@@ -104,5 +104,3 @@ public class PostService {
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_POST));
 	}
 }
-
-
