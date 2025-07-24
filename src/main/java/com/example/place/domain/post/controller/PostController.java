@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.place.common.dto.ApiResponseDto;
+import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.post.dto.request.PostCreateRequestDto;
 import com.example.place.domain.post.dto.request.PostUpdateRequestDto;
@@ -55,23 +56,22 @@ public class PostController {
 
 	//살까말까 전체 조회
 	@GetMapping
-	public ResponseEntity<ApiResponseDto<Page<PostWithUserResponseDto>>> getAllPosts(
+	public ResponseEntity<ApiResponseDto<PageResponseDto<PostWithUserResponseDto>>> getAllPosts(
 		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
-		Page<PostWithUserResponseDto> posts = postService.getAllPosts(pageable,principal.getId());
+		PageResponseDto<PostWithUserResponseDto> posts = postService.getAllPosts(pageable, principal.getId());
 		return ResponseEntity.ok(ApiResponseDto.of("성공", posts));
-
 	}
 
 	//살까말까 내 글 조회
 	@GetMapping("/me")
-	public ResponseEntity<ApiResponseDto<Page<PostWithUserResponseDto>>> getMyPosts(
+	public ResponseEntity<ApiResponseDto<PageResponseDto<PostWithUserResponseDto>>> getMyPosts(
 		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
-		Page<PostWithUserResponseDto> response = postService.findMyPosts(principal.getId(), pageable);
-		return ResponseEntity.ok(ApiResponseDto.of("성공", response));
+		PageResponseDto<PostWithUserResponseDto> posts = postService.findMyPosts(principal.getId(), pageable);
+		return ResponseEntity.ok(ApiResponseDto.of("성공", posts));
 	}
 
 	//살까말까 수정

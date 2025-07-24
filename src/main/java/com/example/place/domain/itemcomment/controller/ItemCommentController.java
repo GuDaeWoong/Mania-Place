@@ -6,6 +6,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.place.common.dto.ApiResponseDto;
+import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.itemcomment.dto.request.ItemCommentRequest;
 import com.example.place.domain.itemcomment.dto.response.ItemCommentResponse;
@@ -57,11 +59,11 @@ public class ItemCommentController {
 	 * @return 조회된 상품 댓글들
 	 */
 	@GetMapping
-	public ResponseEntity<ApiResponseDto<Page<ItemCommentResponse>>> readItemComment(
+	public ResponseEntity<ApiResponseDto<PageResponseDto<ItemCommentResponse>>> readItemComment(
 		@PathVariable Long itemId,
 		@PageableDefault Pageable pageable) {
 
-		Page<ItemCommentResponse> response = itemCommentService.readItemComment(itemId, pageable);
+		PageResponseDto<ItemCommentResponse> response = itemCommentService.readItemComment(itemId, pageable);
 
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("댓글이 조회되었습니다.", response));
 	}
@@ -86,4 +88,22 @@ public class ItemCommentController {
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("댓글을 수정하였습니다.", response));
 	}
 
+	/**
+	 * 상품 댓글 삭제
+	 *
+	 * @param itemId
+	 * @param itemCommentId
+	 * @param principal
+	 * @return
+	 */
+	@DeleteMapping("/{itemCommentId}")
+	public ResponseEntity<ApiResponseDto> deleteItemComment(
+		@PathVariable Long itemId,
+		@PathVariable Long itemCommentId,
+		@AuthenticationPrincipal CustomPrincipal principal) {
+
+		itemCommentService.deleteItemComment(itemId, itemCommentId, principal);
+
+		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("댓글을 삭제하였습니다.", null));
+	}
 }

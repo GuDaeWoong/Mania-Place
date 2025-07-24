@@ -28,7 +28,7 @@ public class PostCommnetService {
 	private final UserService userService;
 
 	@Transactional
-	public PostCommentResponse savePostComment(Long postId, PostCommentRequest request, CustomPrincipal principal) {
+	public PostCommentResponse createPostComment(Long postId, PostCommentRequest request, CustomPrincipal principal) {
 		User user = userService.findUserById(principal.getId());
 
 		Post post = postService.findByIdOrElseThrow(postId);
@@ -59,7 +59,7 @@ public class PostCommnetService {
 		return PostCommentResponse.from(user, postComment);
 	}
 
-	public PageResponseDto<PostCommentResponse> getCommentsByPost(Long postId, Pageable pageable
+	public PageResponseDto<PostCommentResponse> getAllCommentsByPosts(Long postId, Pageable pageable
 	){
 		Post post = postService.findByIdOrElseThrow(postId);
 

@@ -5,6 +5,7 @@ import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.item.dto.request.ItemRequest;
 import com.example.place.domain.item.dto.response.ItemResponse;
+import com.example.place.domain.item.service.ItemDeleteService;
 import com.example.place.domain.item.service.ItemService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -24,6 +25,7 @@ import java.util.List;
 public class ItemController {
 
     private final ItemService itemService;
+    private final ItemDeleteService itemDeleteService;
 
     /**
      * 상품 생성 기존 Tag가 있다면 사용 없다면 생성해서 상품등록
@@ -97,7 +99,7 @@ public class ItemController {
             @PathVariable Long itemId,
             @AuthenticationPrincipal CustomPrincipal principal
     ) {
-        itemService.deleteItem(itemId, principal.getId());
+        itemDeleteService.deleteItemAndclearItemPK(itemId, principal.getId());
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("상품 삭제가 완료되었습니다.", null));
     }
 

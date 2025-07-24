@@ -1,13 +1,12 @@
 package com.example.place.domain.order.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.item.entity.Item;
@@ -85,44 +84,23 @@ public class OrderService {
 		Item item = itemService.findByIdOrElseThrow(order.getItem().getId());
 		String mainImageUrl = itemService.getMainImageUrl(item.getId());
 
-		return new SearchOrderResponseDto(
-			mainImageUrl,
-			order.getUser().getNickname(),
-			order.getItem().getItemName(),
-			order.getQuantity(),
-			order.getPrice(),
-			order.getDeliveryAddress(),
-			order.getStatus().name(),
-			order.getCreatedAt()
-		);
-
+		return SearchOrderResponseDto.from(order,mainImageUrl);
 	}
 
+	public PageResponseDto<SearchOrderResponseDto> getAllMyOrders(Long userId, Pageable pageable
+	) {
+		Page<Order> orders = orderRepository.findAllByUserIdWithItemAndUser(userId, pageable);
 
-	public Page<SearchOrderResponseDto> getAllMyOrders(Long userId, Pageable pageable) {
-
-		Page<Order> orders = orderRepository.findByUserId(userId, pageable);
-
-		List<SearchOrderResponseDto> responseDtoList = new ArrayList<>();
-
-		for (Order order : orders) {
-			Item item = itemService.findByIdOrElseThrow(order.getItem().getId());
+		Page<SearchOrderResponseDto> dtoPage = orders.map(order -> {
+			Item item = order.getItem();
 			String mainImageUrl = itemService.getMainImageUrl(item.getId());
 
-			SearchOrderResponseDto dto = new SearchOrderResponseDto(
-				mainImageUrl,
-				order.getUser().getNickname(),
-				order.getItem().getItemName(),
-				order.getQuantity(),
-				order.getPrice(),
-				order.getDeliveryAddress(),
-				order.getStatus().name(),
-				order.getCreatedAt()
+			return SearchOrderResponseDto.from(order,mainImageUrl
 			);
-			responseDtoList.add(dto);
-		}
-		return new PageImpl<>(responseDtoList, pageable, orders.getTotalElements());
+		});
+		return new PageResponseDto<>(dtoPage);
 	}
+
 
 	@Transactional
 	public UpdateOrderStatusResponseDto updateOrderStatusToReady(Long orderId, Long userId) {
@@ -132,7 +110,7 @@ public class OrderService {
 		// 상품 등록한 유저와 동일한지 검증
 		Item item = order.getItem();
 		if (!item.getUser().getId().equals(userId)) {
-			throw new CustomException(ExceptionCode.FORBIDDEN_ITEM_ACCESS);
+			throw new CustomException(ExceptionCode.UNAUTHORIZED_STATUS_CHANGE);
 		}
 		OrderStatus.statusIsReady(order.getStatus());
 
@@ -140,25 +118,17 @@ public class OrderService {
 
 		String mainImageUrl = itemService.getMainImageUrl(item.getId());
 
-		return new UpdateOrderStatusResponseDto(
-			mainImageUrl,
-			order.getUser().getNickname(),
-			order.getItem().getItemName(),
-			order.getQuantity(),
-			order.getPrice(),
-			order.getDeliveryAddress(),
-			order.getStatus().name(),
-			order.getCreatedAt()
-		);
+		return UpdateOrderStatusResponseDto.from(order,mainImageUrl);
 	}
 
+	@Transactional
 	public UpdateOrderStatusResponseDto updateOrderStatusToCompleted(Long orderId, Long userId) {
 		Order order = orderRepository.findById(orderId)
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ORDER));
 
 		// 주문자 인지 아닌지 검증
 		if (!order.getUser().getId().equals(userId)) {
-			throw new CustomException(ExceptionCode.FORBIDDEN_ORDER_ACCESS);
+			throw new CustomException(ExceptionCode.NOT_SELLER);
 		}
 
 		OrderStatus.statusIsCompleted(order.getStatus());
@@ -168,16 +138,7 @@ public class OrderService {
 		Item item = order.getItem();
 		String mainImageUrl = itemService.getMainImageUrl(item.getId());
 
-		return new UpdateOrderStatusResponseDto(
-			mainImageUrl,
-			order.getUser().getNickname(),
-			order.getItem().getItemName(),
-			order.getQuantity(),
-			order.getPrice(),
-			order.getDeliveryAddress(),
-			order.getStatus().name(),
-			order.getCreatedAt()
-		);
+		return UpdateOrderStatusResponseDto.from(order,mainImageUrl);
 	}
 
 	@Transactional
@@ -201,16 +162,15 @@ public class OrderService {
 
 		String mainImageUrl = itemService.getMainImageUrl(item.getId());
 
-		return new UpdateOrderStatusResponseDto(
-			mainImageUrl,
-			order.getUser().getNickname(),
-			order.getItem().getItemName(),
-			order.getQuantity(),
-			order.getPrice(),
-			order.getDeliveryAddress(),
-			order.getStatus().name(),
-			order.getCreatedAt()
-		);
+		return UpdateOrderStatusResponseDto.from(order,mainImageUrl);
+	}
+
+	@Transactional
+	public void clearItemFromOrders(Long itemId) {
+		List<Order> orders = orderRepository.findByItemId(itemId);
+		for (Order order : orders) {
+			order.clearItem();
+		}
 	}
 
 }

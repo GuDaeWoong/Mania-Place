@@ -83,7 +83,7 @@ public class ItemService {
         itemRepository.save(item);
 
 		// 연관 이미지 저장
-		imageService.saveImages(item, request.getImages(), request.getMainIndex());
+		imageService.saveImages(item, request.getImageUrls(), request.getMainIndex());
 
 		//	태그 저장 로직
         for (String tagName: request.getItemTagNames()) {
@@ -113,13 +113,13 @@ public class ItemService {
 		item.updateItem(request);
 
 		// 연관 이미지 수정
-		if ((request.getImages() == null && request.getMainIndex() != null)
-			|| (request.getImages() != null && request.getMainIndex() == null)) {
+		if ((request.getImageUrls() == null && request.getMainIndex() != null)
+			|| (request.getImageUrls() != null && request.getMainIndex() == null)) {
 			throw new CustomException(ExceptionCode.INVALID_IMAGE_UPDATE_REQUEST);
 		}
 
-		if (request.getImages() != null && request.getMainIndex() != null) {
-			imageService.updateImages(item, request.getImages(), request.getMainIndex());
+		if (request.getImageUrls() != null && request.getMainIndex() != null) {
+			imageService.updateImages(item, request.getImageUrls(), request.getMainIndex());
 		}
 
 		return ItemResponse.from(item);
@@ -131,9 +131,6 @@ public class ItemService {
 		if(!findByIdOrElseThrow(itemId).getUser().getId().equals(userId)) {
 			throw new CustomException(ExceptionCode.FORBIDDEN_ITEM_DELETE);
 		}
-
-		// 연관 이미지 삭제
-		imageService.deleteImageByItemId(itemId);
 
 		itemRepository.deleteById(itemId);
 	}

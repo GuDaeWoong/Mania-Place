@@ -32,12 +32,12 @@ public class PostCommentController {
 	private final PostCommnetService postCommnetService;
 
 	@PostMapping("/{postId}/comments")
-	public ResponseEntity<ApiResponseDto<PostCommentResponse>> savePostComment(
+	public ResponseEntity<ApiResponseDto<PostCommentResponse>> createPostComment(
 		@PathVariable Long postId,
 		@Valid @RequestBody PostCommentRequest request,
 		@AuthenticationPrincipal CustomPrincipal principal) {
 
-		PostCommentResponse response = postCommnetService.savePostComment(postId, request, principal);
+		PostCommentResponse response = postCommnetService.createPostComment(postId, request, principal);
 		ApiResponseDto<PostCommentResponse> success = ApiResponseDto.of("댓글이 등록되었습니다.", response);
 		return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
@@ -55,11 +55,11 @@ public class PostCommentController {
 	}
 
 	@GetMapping("/{postId}/comments")
-	public ResponseEntity<ApiResponseDto<PageResponseDto>> getCommentsByPost(
+	public ResponseEntity<ApiResponseDto<PageResponseDto>> getAllCommentsByPosts(
 		@PathVariable Long postId,
 		@PageableDefault Pageable pageable
 	) {
-		PageResponseDto<PostCommentResponse> response = postCommnetService.getCommentsByPost(postId, pageable);
+		PageResponseDto<PostCommentResponse> response = postCommnetService.getAllCommentsByPosts(postId, pageable);
 		ApiResponseDto<PageResponseDto> success = ApiResponseDto.of("댓글 목록 조회가 완료되었습니다.", response);
 		return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
