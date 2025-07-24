@@ -62,7 +62,7 @@ public class PostCommentController {
 	) {
 		PageResponseDto<PostCommentResponse> responses = postCommnetService.getCommentsByPost(postId, pageable);
 
-		return ResponseEntity.ok(new ApiResponseDto<>("댓글 목록 조회 완료", responses));
+		return ResponseEntity.ok(ApiResponseDto.of("댓글 목록 조회 완료", responses));
 	}
 
 }
