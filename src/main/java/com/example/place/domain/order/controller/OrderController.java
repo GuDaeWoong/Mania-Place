@@ -41,7 +41,7 @@ public class OrderController {
 		Long userId =  userDetails.getId();
 
 		CreateOrderResponseDto createOrder = orderService.createOrder(requestDto,userId);
-		ApiResponseDto<CreateOrderResponseDto> success = new ApiResponseDto<>("주문이 완료되었습니다", createOrder);
+		ApiResponseDto<CreateOrderResponseDto> success = ApiResponseDto.of("주문이 완료되었습니다", createOrder);
 	return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
 
@@ -52,7 +52,7 @@ public class OrderController {
 	){
 		Long userId =  userDetails.getId();
 		SearchOrderResponseDto searchOrder = orderService.getMyOrder(orderId, userId);
-		ApiResponseDto<SearchOrderResponseDto> success = new ApiResponseDto<>("단건 조회가 완료되었습니다.", searchOrder);
+		ApiResponseDto<SearchOrderResponseDto> success = ApiResponseDto.of("단건 조회가 완료되었습니다.", searchOrder);
 		return ResponseEntity.ok(success);
 	}
 
@@ -66,7 +66,7 @@ public class OrderController {
 
 		Page<SearchOrderResponseDto> orders = orderService.getAllMyOrders(userId, pageable);
 
-		ApiResponseDto<Page<SearchOrderResponseDto>> success = new ApiResponseDto<>("전체 주문 조회가 완료되었습니다.", orders);
+		ApiResponseDto<Page<SearchOrderResponseDto>> success = ApiResponseDto.of("전체 주문 조회가 완료되었습니다.", orders);
 		return ResponseEntity.ok(success);
 	}
 
@@ -77,7 +77,7 @@ public class OrderController {
 	) {
 		Long userId = userDetails.getId();
 		UpdateOrderStatusResponseDto updatedOrder = orderService.updateOrderStatusToReady(orderId, userId);
-		return ResponseEntity.ok(new ApiResponseDto<>("주문 상태 변경 완료", updatedOrder));
+		return ResponseEntity.ok(ApiResponseDto.of("주문 상태 변경 완료", updatedOrder));
 	}
 
 	@PostMapping("/user/orders/{orderId}/status/completed")
@@ -87,7 +87,7 @@ public class OrderController {
 	) {
 		Long userId = userDetails.getId();
 		UpdateOrderStatusResponseDto updatedOrder = orderService.updateOrderStatusToCompleted(orderId, userId);
-		return ResponseEntity.ok(new ApiResponseDto<>("주문 상태 변경 완료", updatedOrder));
+		return ResponseEntity.ok(ApiResponseDto.of("주문 상태 변경 완료", updatedOrder));
 	}
 
 	@PostMapping("/user/orders/{orderId}/status/canceled")
@@ -97,7 +97,7 @@ public class OrderController {
 	) {
 		Long userId = userDetails.getId();
 		UpdateOrderStatusResponseDto canceledOrder = orderService.updateOrderStatusToCanceled(orderId, userId);
-		return ResponseEntity.ok(new ApiResponseDto<>("주문 취소 완료", canceledOrder));
+		return ResponseEntity.ok(ApiResponseDto.of("주문 취소 완료", canceledOrder));
 	}
 
 

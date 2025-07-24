@@ -38,7 +38,7 @@ public class PostCommentController {
 
 		PostCommentResponse response = postCommnetService.savePostComment(postId, request, principal);
 
-		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto<>("댓글이 등록되었습니다.", response));
+		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("댓글이 등록되었습니다.", response));
 	}
 
 	@PutMapping("{postId}/comments/{commentId}")
@@ -50,7 +50,7 @@ public class PostCommentController {
 	) {
 		PostCommentResponse response = postCommnetService.updatePostComment(postId, commentId, request, principal);
 
-		return ResponseEntity.ok(new ApiResponseDto<>("게시글이 수정이 완료되었습니다.", response));
+		return ResponseEntity.ok(ApiResponseDto.of("게시글이 수정이 완료되었습니다.", response));
 	}
 
 	@GetMapping("/{postId}/comments")
@@ -60,7 +60,7 @@ public class PostCommentController {
 
 	) {
 		Page<PostCommentResponse> responses = postCommnetService.getCommentsByPost(postId, pageable);
-		return ResponseEntity.ok(new ApiResponseDto<>("댓글 목록 조회 완료", responses));
+		return ResponseEntity.ok(ApiResponseDto.of("댓글 목록 조회 완료", responses));
 	}
 
 }

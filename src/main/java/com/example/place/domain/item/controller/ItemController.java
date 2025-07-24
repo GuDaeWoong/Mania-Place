@@ -34,7 +34,7 @@ public class ItemController {
             @AuthenticationPrincipal CustomPrincipal principal
     ) {
         ItemResponse item = itemService.createItem(principal.getId(), request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponseDto<>("상품 등록이 완료되었습니다.", item)) ;
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponseDto.of("상품 등록이 완료되었습니다.", item)) ;
     }
 
     /**
@@ -45,7 +45,7 @@ public class ItemController {
     @GetMapping("/{itemId}")
     public ResponseEntity<ApiResponseDto<ItemResponse>> readItem(@PathVariable Long itemId) {
         ItemResponse item = itemService.readItem(itemId);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto<>("상품 조회가 완료되었습니다.", item));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("상품 조회가 완료되었습니다.", item));
     }
 
     /**
@@ -62,7 +62,7 @@ public class ItemController {
             @RequestParam(required = false) Long userId
     ) {
         List<ItemResponse> result = itemService.searchItem(keyword, tags, userId);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto<>("상품 조회가 완료되었습니다", result));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("상품 조회가 완료되었습니다", result));
     }
 
     /**
@@ -77,7 +77,7 @@ public class ItemController {
             @AuthenticationPrincipal CustomPrincipal principal
     ) {
         ItemResponse updateItem = itemService.updateItem(itemId, request, principal.getId());
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto<>("상품 수정이 완료되었습니다.", updateItem));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("상품 수정이 완료되었습니다.", updateItem));
     }
 
     /**
@@ -92,7 +92,7 @@ public class ItemController {
             @AuthenticationPrincipal CustomPrincipal principal
     ) {
         itemService.deleteItem(itemId, principal.getId());
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto<>("상품 삭제가 완료되었습니다.", null));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("상품 삭제가 완료되었습니다.", null));
     }
 
 }

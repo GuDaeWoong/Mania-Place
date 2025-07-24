@@ -37,7 +37,7 @@ public class UserController {
 	public ResponseEntity<ApiResponseDto<UserRegisterResponse>> register(
 		@Valid @RequestBody UserRegisterRequest userRegisterRequest
 	) {
-		return ResponseEntity.ok(new ApiResponseDto<>("회원가입이 완료되었습니다.", userService.register(userRegisterRequest, UserRole.USER)));
+		return ResponseEntity.ok(ApiResponseDto.of("회원가입이 완료되었습니다.", userService.register(userRegisterRequest, UserRole.USER)));
 	}
 
 	//어드민 회원가입
@@ -45,7 +45,7 @@ public class UserController {
 	public ResponseEntity<ApiResponseDto<UserRegisterResponse>> registerAdmin(
 		@Valid @RequestBody UserRegisterRequest userRegisterRequest
 	) {
-		return ResponseEntity.ok(new ApiResponseDto<>("어드민 가입이 완료되었습니다.", userService.register(userRegisterRequest, UserRole.ADMIN)));
+		return ResponseEntity.ok(ApiResponseDto.of("어드민 가입이 완료되었습니다.", userService.register(userRegisterRequest, UserRole.ADMIN)));
 	}
 
 	//유저 조회 일단은 어드민용?
@@ -53,7 +53,7 @@ public class UserController {
 	public ResponseEntity<ApiResponseDto<UserResponse>> getUser(
 		@PathVariable Long id
 	) {
-		return ResponseEntity.ok(new ApiResponseDto<>("회원 조회 성공", userService.findUser(id)));
+		return ResponseEntity.ok(ApiResponseDto.of("회원 조회 성공", userService.findUser(id)));
 	}
 
 	//마이페이지 조회
@@ -62,7 +62,7 @@ public class UserController {
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
 		Long userId = principal.getId();
-		return ResponseEntity.ok(new ApiResponseDto<>("마이페이지 조회 성공", userService.findMyInfo(userId)));
+		return ResponseEntity.ok(ApiResponseDto.of("마이페이지 조회 성공", userService.findMyInfo(userId)));
 	}
 
 	//내 정보 수정
@@ -72,7 +72,7 @@ public class UserController {
 		@Valid @RequestBody UserUpdateRequest userUpdateRequest
 	) {
 		Long userId = principal.getId();
-		return ResponseEntity.ok(new ApiResponseDto<>("회원 정보가 수정되었습니다.", userService.modifyUser(userId, userUpdateRequest)));
+		return ResponseEntity.ok(ApiResponseDto.of("회원 정보가 수정되었습니다.", userService.modifyUser(userId, userUpdateRequest)));
 	}
 
 	//내 비밀번호 수정
@@ -82,7 +82,7 @@ public class UserController {
 		@Valid @RequestBody UserPasswordRequest userPasswordRequest
 	) {
 		Long userId = principal.getId();
-		return ResponseEntity.ok(new ApiResponseDto<>("비밀번호가 수정되었습니다.", userService.modifyPassword(userId, userPasswordRequest)));
+		return ResponseEntity.ok(ApiResponseDto.of("비밀번호가 수정되었습니다.", userService.modifyPassword(userId, userPasswordRequest)));
 	}
 
 	//회원 삭제
@@ -92,6 +92,6 @@ public class UserController {
 		@Valid @RequestBody UserDeleteRequest userDeleteRequest
 	) {
 		Long userId = principal.getId();
-		return ResponseEntity.ok(new ApiResponseDto<>("회원 탈퇴가 완료되었습니다.", userService.deleteUser(userId, userDeleteRequest)));
+		return ResponseEntity.ok(ApiResponseDto.of("회원 탈퇴가 완료되었습니다.", userService.deleteUser(userId, userDeleteRequest)));
 	}
 }
