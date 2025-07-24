@@ -1,6 +1,5 @@
 package com.example.place.domain.itemcomment.controller;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -41,12 +40,12 @@ public class ItemCommentController {
 	 * @return 등록된 상품 댓글
 	 */
 	@PostMapping
-	public ResponseEntity<ApiResponseDto<ItemCommentResponse>> saveItemComment(
+	public ResponseEntity<ApiResponseDto<ItemCommentResponse>> createItemComment(
 		@PathVariable Long itemId,
 		@Valid @RequestBody ItemCommentRequest request,
 		@AuthenticationPrincipal CustomPrincipal principal) {
 
-		ItemCommentResponse response = itemCommentService.saveItemComment(itemId, request, principal);
+		ItemCommentResponse response = itemCommentService.createItemComment(itemId, request, principal);
 
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("댓글이 등록되었습니다.", response));
 	}
@@ -59,11 +58,11 @@ public class ItemCommentController {
 	 * @return 조회된 상품 댓글들
 	 */
 	@GetMapping
-	public ResponseEntity<ApiResponseDto<PageResponseDto<ItemCommentResponse>>> readItemComment(
+	public ResponseEntity<ApiResponseDto<PageResponseDto<ItemCommentResponse>>> getAllItemComments(
 		@PathVariable Long itemId,
 		@PageableDefault Pageable pageable) {
 
-		PageResponseDto<ItemCommentResponse> response = itemCommentService.readItemComment(itemId, pageable);
+		PageResponseDto<ItemCommentResponse> response = itemCommentService.getAllItemComments(itemId, pageable);
 
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("댓글이 조회되었습니다.", response));
 	}

@@ -93,7 +93,7 @@ public class ItemController {
             @PathVariable Long itemId,
             @AuthenticationPrincipal CustomPrincipal principal
     ) {
-        itemDeleteService.deleteItemAndclearItemPK(itemId, principal.getId());
+        itemDeleteService.removeReferencesAndDeleteItem(itemId, principal.getId());
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("상품 삭제가 완료되었습니다.", null));
     }
 

@@ -16,8 +16,8 @@ public class ItemDeleteService {
 	private final ItemService itemService;
 
 	@Transactional
-	public void deleteItemAndclearItemPK(Long itemId, Long userId) {
-		orderService.clearItemFromOrders(itemId);
+	public void removeReferencesAndDeleteItem(Long itemId, Long userId) {
+		orderService.removeItemReferenceFromOrders(itemId);
 		itemService.deleteItem(itemId, userId);
 	}
 }

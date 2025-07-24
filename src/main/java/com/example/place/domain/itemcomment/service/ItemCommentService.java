@@ -31,7 +31,7 @@ public class ItemCommentService {
 
 	// 상품 댓글 저장
 	@Transactional
-	public ItemCommentResponse saveItemComment(Long itemId, ItemCommentRequest request,
+	public ItemCommentResponse createItemComment(Long itemId, ItemCommentRequest request,
 		CustomPrincipal principal) {
 		// 로그인 유저 조회
 		User user = userService.findUserById(principal.getId());
@@ -49,7 +49,7 @@ public class ItemCommentService {
 
 	// 상품 댓글 조회
 	@Transactional(readOnly = true)
-	public PageResponseDto<ItemCommentResponse> readItemComment(Long itemId, Pageable pageable) {
+	public PageResponseDto<ItemCommentResponse> getAllItemComments(Long itemId, Pageable pageable) {
 		// 댓글 조회
 		Page<ItemComment> comments = itemCommentRepository.findByItemId(itemId, pageable);
 
