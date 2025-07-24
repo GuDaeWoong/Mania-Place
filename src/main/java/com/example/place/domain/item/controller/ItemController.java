@@ -6,7 +6,6 @@ import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.item.dto.request.ItemRequest;
 import com.example.place.domain.item.dto.response.ItemResponse;
 import com.example.place.domain.item.service.ItemService;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -47,8 +46,8 @@ public class ItemController {
      * @return
      */
     @GetMapping("/{itemId}")
-    public ResponseEntity<ApiResponseDto<ItemResponse>> readItem(@PathVariable Long itemId) {
-        ItemResponse item = itemService.readItem(itemId);
+    public ResponseEntity<ApiResponseDto<ItemResponse>> getItme(@PathVariable Long itemId) {
+        ItemResponse item = itemService.getItem(itemId);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("상품 조회가 완료되었습니다.", item));
     }
 
@@ -68,7 +67,7 @@ public class ItemController {
             @PageableDefault(size = 5)Pageable pageable
 
             ) {
-        PageResponseDto<ItemResponse> result = itemService.searchItem(keyword, tags, userId, pageable);
+        PageResponseDto<ItemResponse> result = itemService.searchItems(keyword, tags, userId, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("상품 조회가 완료되었습니다", result));
     }
 
