@@ -213,4 +213,12 @@ public class OrderService {
 		);
 	}
 
+	@Transactional
+	public void clearItemFromOrders(Long itemId) {
+		List<Order> orders = orderRepository.findByItemId(itemId);
+		for (Order order : orders) {
+			order.clearItem();
+		}
+	}
+
 }
