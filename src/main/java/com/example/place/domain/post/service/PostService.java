@@ -7,13 +7,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
+import com.example.place.domain.post.dto.response.PostWithUserResponseDto;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.service.UserService;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.item.service.ItemService;
 import com.example.place.domain.post.dto.request.PostCreateRequestDto;
 import com.example.place.domain.post.dto.request.PostUpdateRequestDto;
-import com.example.place.domain.post.dto.response.PostResponseDto;
 import com.example.place.domain.post.entity.Post;
 import com.example.place.domain.post.repository.PostRepository;
 
@@ -28,39 +28,42 @@ public class PostService {
 	private final ItemService itemService;
 
 	//살까말까 생성
-	public PostResponseDto createPost(Long userId, PostCreateRequestDto request) {
+	public PostWithUserResponseDto createPost(Long userId, PostCreateRequestDto request) {
 		User user = userService.findUserById(userId);
 		Item item = itemService.findByIdOrElseThrow(request.getItemId());
 
 		Post post = Post.of(user, item, request.getContent(), request.getImage());
 		Post saved = postRepository.save(post);
 
-		return new PostResponseDto(saved);
+		return new PostWithUserResponseDto(saved,user.getNickname());
 	}
 
 	//살까말까 단건 조회
-	public PostResponseDto readPost(Long postId) {
+	public PostWithUserResponseDto readPost(Long postId,Long userId) {
+		User user = userService.findUserById(userId);
 		Post post = findByIdOrElseThrow(postId);
-		return new PostResponseDto(post);
+		return new PostWithUserResponseDto(post,user.getNickname());
 	}
 
 	//살까말까 전체 조회
-	public Page<PostResponseDto> getAllPosts(Pageable pageable) {
+	public Page<PostWithUserResponseDto> getAllPosts(Pageable pageable,Long userId) {
+		User user = userService.findUserById(userId);
 		return postRepository.findAll(pageable)
-			.map(PostResponseDto::new);
+			.map(post -> new PostWithUserResponseDto(post,user.getNickname()));
 	}
 
 	//살까말까 내 글 조회
-	public Page<PostResponseDto> findMyPosts(Long userId, Pageable pageable) {
+	public Page<PostWithUserResponseDto> findMyPosts(Long userId, Pageable pageable) {
 		User user = userService.findUserById(userId);
 
 		return postRepository.findAllByUser(user, pageable)
-			.map(PostResponseDto::new);
+			.map(post -> new PostWithUserResponseDto(post,user.getNickname()));
 	}
 
 	//살까말까 수정
 	@Transactional
-	public PostResponseDto updatePost(Long postId, PostUpdateRequestDto request, Long userId) {
+	public PostWithUserResponseDto updatePost(Long postId, PostUpdateRequestDto request, Long userId) {
+		User user = userService.findUserById(userId);
 		Post post = findByIdOrElseThrow(postId);
 
 		if (!post.getUser().getId().equals(userId)) {
@@ -68,7 +71,7 @@ public class PostService {
 		}
 
 		post.update(request.getContent(), request.getImage());
-		return new PostResponseDto(post);
+		return new PostWithUserResponseDto(post,user.getNickname());
 	}
 
 	//살까말까 삭제
