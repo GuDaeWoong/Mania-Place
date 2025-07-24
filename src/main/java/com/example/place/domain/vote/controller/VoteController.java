@@ -34,9 +34,9 @@ public class VoteController {
 		
 		Long userId = principal.getId();
 		VoteResponseDto response = voteService.vote(postId, request, userId);
-		// ApiResponseDto<VoteResponseDto> success = ApiResponseDto.of("투표가 반영되었습니다.", response);
-		// return ResponseEntity.status(HttpStatus.OK).body(success);
-		return ResponseEntity.status(HttpStatus.OK)
-			.body(new ApiResponseDto<>("투표가 반영되었습니다.", response));
+		ApiResponseDto<VoteResponseDto> success = ApiResponseDto.of("투표가 반영되었습니다.", response);
+		return ResponseEntity.status(HttpStatus.OK).body(success);
+		// return ResponseEntity.status(HttpStatus.OK)
+		// 	.body(new ApiResponseDto<>("투표가 반영되었습니다.", response));
 	}
 }

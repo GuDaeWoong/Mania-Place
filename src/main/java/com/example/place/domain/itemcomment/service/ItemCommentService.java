@@ -49,7 +49,7 @@ public class ItemCommentService {
 
 	// 상품 댓글 조회
 	@Transactional(readOnly = true)
-	public PageResponseDto<ItemCommentResponse> readItemComment(Long itemId, Pageable pageable) {
+	public PageResponseDto<ItemCommentResponse> getAllItemComments(Long itemId, Pageable pageable) {
 		// 해당 상품이 존재하는지 여부 확인
 		itemService.findByIdOrElseThrow(itemId);
 
