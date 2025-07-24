@@ -30,7 +30,10 @@ public class ImageService {
 		for (int i = 0; i < imageUrls.size(); i++) {
 			boolean isMain = (validatedMainIndex == i);
 			Image image = Image.of(item, imageUrls.get(i), isMain);
+
 			imageRepository.save(image);
+
+			item.addImage(image); // 연관관계 양방향 설정
 		}
 	}
 
