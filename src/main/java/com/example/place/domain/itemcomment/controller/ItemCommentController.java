@@ -104,6 +104,6 @@ public class ItemCommentController {
 
 		itemCommentService.deleteItemComment(itemId, itemCommentId, principal);
 
-		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto<>("댓글을 삭제하였습니다.", null));
+		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("댓글을 삭제하였습니다.", null));
 	}
 }
