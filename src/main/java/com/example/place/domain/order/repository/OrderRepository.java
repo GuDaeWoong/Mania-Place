@@ -23,4 +23,5 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 	""")
 	Page<Order> findAllByUserIdWithItemAndUser(Long userId, Pageable pageable);
 
+	List<Order> findByItemId(Long itemId);
 }
