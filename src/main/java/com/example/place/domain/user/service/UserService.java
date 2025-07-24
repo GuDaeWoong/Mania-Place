@@ -1,5 +1,7 @@
 package com.example.place.domain.user.service;
 
+import java.util.Optional;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,8 @@ import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.entity.UserRole;
 import com.example.place.domain.user.repository.UserRepository;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -24,7 +28,7 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 
-	public UserRegisterResponse register(UserRegisterRequest userRegisterRequest) {
+	public UserRegisterResponse register(UserRegisterRequest userRegisterRequest, UserRole userRole) {
 		// 이메일 중복 검증
 		if (userRepository.existsByEmail(userRegisterRequest.getEmail())) {
 			throw new CustomException(ExceptionCode.EXISTS_EMAIL);
@@ -42,7 +46,7 @@ public class UserService {
 			userRegisterRequest.getEmail(),
 			encodedPassword,
 			userRegisterRequest.getImageUrl(),
-			UserRole.USER
+			userRole
 		);
 
 		User savedUser = userRepository.save(user);
@@ -131,5 +135,10 @@ public class UserService {
 		}
 
 		return user;
+	}
+
+	public Optional<Object> findByEmail(String email) {
+		return Optional.ofNullable(userRepository.findByEmail(email)
+			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER)));
 	}
 }

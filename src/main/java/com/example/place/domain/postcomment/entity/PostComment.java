@@ -1,7 +1,8 @@
-package com.example.place.domain.itemcomment.entity;
+package com.example.place.domain.postcomment.entity;
+
 
 import com.example.place.common.entity.BaseEntity;
-import com.example.place.domain.item.entity.Item;
+import com.example.place.domain.post.entity.Post;
 import com.example.place.domain.user.entity.User;
 
 import jakarta.persistence.Entity;
@@ -18,9 +19,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "itemcomments")
-public class ItemComment extends BaseEntity {
-
+@Table(name = "postcomments")
+public class PostComment extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -30,22 +30,22 @@ public class ItemComment extends BaseEntity {
 	private User user;
 
 	@ManyToOne
-	@JoinColumn(name = "item_id")
-	private Item item;
+	@JoinColumn(name = "post_id")
+	private Post post;
 
 	private String content;
 
-	private ItemComment(User user, Item item, String content) {
+	private PostComment(User user, Post post, String content) {
 		this.user = user;
-		this.item = item;
+		this.post = post;
 		this.content = content;
 	}
 
-	public static ItemComment of(User user, Item item, String content) {
-		return new ItemComment(user, item, content);
+	public static PostComment of(User user, Post post, String content) {
+		return new PostComment(user, post, content);
 	}
 
-	public void updateItemComment(String content) {
+	public void updateContent(String content) {
 		this.content = content;
 	}
 }

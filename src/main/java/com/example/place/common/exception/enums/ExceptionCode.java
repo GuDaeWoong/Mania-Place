@@ -20,6 +20,8 @@ public enum ExceptionCode {
 	NOT_SALE_PERIOD(HttpStatus.BAD_REQUEST, "판매 기간이 아닙니다."),
 	INVALID_ORDER_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "허용되지 않은 주문 상태 변환입니다."),
 	INVALID_IMAGE_UPDATE_REQUEST(HttpStatus.BAD_REQUEST, "이미지 수정을 위해서는 이미지 URL 목록과 대표 이미지 인덱스를 함께 보내주세요"),
+	INVALID_PATH(HttpStatus.BAD_REQUEST, "유효하지 않는 주소입니다."),
+
 
 	// 401 Unauthorized
 	LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."),
@@ -27,6 +29,8 @@ public enum ExceptionCode {
 	INVALID_OR_MISSING_TOKEN(HttpStatus.UNAUTHORIZED, "인증에 실패했습니다."),
 	INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "잘못된 토큰 정보입니다."),
 	EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 만료됐습니다."),
+	INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED,"리프레시 토큰이 유효하지 않습니다."),
+	EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "리프레시 토큰이 만료되었습니다."),
 	INVALID_EMAIL_OR_PASSWORD(HttpStatus.UNAUTHORIZED, "잘못된 이메일 또는 비밀번호입니다."),
 
 	// 403 Forbidden
@@ -38,7 +42,9 @@ public enum ExceptionCode {
 	ACCESS_DENIED(HttpStatus.FORBIDDEN, "관리자가 아니므로 수정할 수 없습니다."),
 	FORBIDDEN_ORDER_ACCESS(HttpStatus.FORBIDDEN, "해당 주문은 본인의 주문이 아닙니다."),
 	ORDER_CANCEL_ACCESS_DENIED(HttpStatus.FORBIDDEN, "주문을 취소할 권한이 없습니다."),
+	FORBIDDEN_COMMENT_ACCESS(HttpStatus.FORBIDDEN, "본인 외에 댓글은 수정할 수 없습니다."),
 	DELETED_USER(HttpStatus.FORBIDDEN, "탈퇴한 사용자 입니다."),
+
 
 	// 404 Not Found
 	NOT_FOUND_USER(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."),
