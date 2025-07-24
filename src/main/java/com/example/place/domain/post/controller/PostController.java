@@ -40,7 +40,7 @@ public class PostController {
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
 		PostWithUserResponseDto post = postService.createPost(principal.getId(), request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponseDto<>("게시글 등록이 완료되었습니다.", post));
+		return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponseDto.of("게시글 등록이 완료되었습니다.", post));
 	}
 
 	//살까말까 단건 조회
@@ -50,7 +50,7 @@ public class PostController {
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
 		PostWithUserResponseDto post = postService.readPost(postId,principal.getId());
-		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto<>("게시글 조회가 완료되었습니다.", post));
+		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 조회가 완료되었습니다.", post));
 	}
 
 	//살까말까 전체 조회
@@ -60,7 +60,7 @@ public class PostController {
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
 		Page<PostWithUserResponseDto> posts = postService.getAllPosts(pageable,principal.getId());
-		return ResponseEntity.ok(new ApiResponseDto<>("성공", posts));
+		return ResponseEntity.ok(ApiResponseDto.of("성공", posts));
 
 	}
 
@@ -71,7 +71,7 @@ public class PostController {
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
 		Page<PostWithUserResponseDto> response = postService.findMyPosts(principal.getId(), pageable);
-		return ResponseEntity.ok(new ApiResponseDto<>("성공", response));
+		return ResponseEntity.ok(ApiResponseDto.of("성공", response));
 	}
 
 	//살까말까 수정
@@ -82,7 +82,7 @@ public class PostController {
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
 		PostWithUserResponseDto updatePost = postService.updatePost(postId, request, principal.getId());
-		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto<>("게시글 수정이 완료되었습니다.", updatePost));
+		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 수정이 완료되었습니다.", updatePost));
 	}
 
 	//살까말까 삭제
@@ -92,7 +92,7 @@ public class PostController {
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
 		postService.deletePost(postId, principal.getId());
-		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto<>("게시글 삭제가 완료되었습니다.", null));
+		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 삭제가 완료되었습니다.", null));
 	}
 
 }

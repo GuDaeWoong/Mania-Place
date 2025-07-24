@@ -18,9 +18,13 @@ public class ApiResponseDto<T> {
 
 	private LocalDateTime timestamp;
 
-	public ApiResponseDto(String message, T data) {
+	private ApiResponseDto(String message, T data) {
 		this.message = message;
 		this.data = data;
 		this.timestamp = LocalDateTime.now();
+	}
+
+	public static <T> ApiResponseDto<T> of(String message, T data) {
+		return new ApiResponseDto<>(message, data);
 	}
 }
