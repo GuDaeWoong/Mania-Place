@@ -9,6 +9,7 @@ import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.item.dto.request.ItemRequest;
+import com.example.place.domain.itemcomment.entity.ItemComment;
 import com.example.place.domain.itemtag.entity.ItemTag;
 import com.example.place.domain.user.entity.User;
 
@@ -45,6 +46,9 @@ public class Item extends BaseEntity {
 
 	@OneToMany(mappedBy = "item", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
 	private List<ItemTag> itemTags = new ArrayList<>();
+
+	@OneToMany(mappedBy = "item", cascade = CascadeType.REMOVE, orphanRemoval = true)
+	private List<ItemComment> comments = new ArrayList<>();
 
 	// 재고 감소
 	public void decreaseStock(Long quantity){
