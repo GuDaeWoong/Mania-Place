@@ -35,7 +35,7 @@ public class Order extends BaseEntity {
 	private User user;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "item_id")
+	@JoinColumn(name = "item_id", nullable = true)
 	private Item item;
 	//상품 개수
 	private Long quantity;
@@ -61,5 +61,9 @@ public class Order extends BaseEntity {
 
 	public void updateStatus(OrderStatus toStatus) {
 		this.status = toStatus;
+	}
+
+	public void clearItem() {
+		this.item = null;
 	}
 }

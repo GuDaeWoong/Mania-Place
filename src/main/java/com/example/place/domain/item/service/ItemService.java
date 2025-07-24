@@ -12,7 +12,6 @@ import com.example.place.domain.tag.entity.Tag;
 import com.example.place.domain.tag.repository.TagRepository;
 
 import com.example.place.domain.user.entity.User;
-import com.example.place.domain.user.repository.UserRepository;
 import com.example.place.domain.user.service.UserService;
 import org.springframework.stereotype.Service;
 
