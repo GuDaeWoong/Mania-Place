@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.common.security.jwt.CustomPrincipal;
@@ -48,12 +49,14 @@ public class ItemCommentService {
 
 	// 상품 댓글 조회
 	@Transactional(readOnly = true)
-	public Page<ItemCommentResponse> readItemComment(Long itemId, Pageable pageable) {
+	public PageResponseDto<ItemCommentResponse> readItemComment(Long itemId, Pageable pageable) {
 		// 댓글 조회
 		Page<ItemComment> comments = itemCommentRepository.findByItemId(itemId, pageable);
 
+		Page<ItemCommentResponse> ItemCommentPage = comments.map(ItemCommentResponse::of);
+
 		// 응답 DTO로 반환
-		return comments.map(ItemCommentResponse::from);
+		return new PageResponseDto<>(ItemCommentPage);
 	}
 
 	// 상품 댓글 수정

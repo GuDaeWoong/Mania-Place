@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.place.common.dto.ApiResponseDto;
+import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.itemcomment.dto.request.ItemCommentRequest;
 import com.example.place.domain.itemcomment.dto.response.ItemCommentResponse;
@@ -58,11 +59,11 @@ public class ItemCommentController {
 	 * @return 조회된 상품 댓글들
 	 */
 	@GetMapping
-	public ResponseEntity<ApiResponseDto<Page<ItemCommentResponse>>> readItemComment(
+	public ResponseEntity<ApiResponseDto<PageResponseDto<ItemCommentResponse>>> readItemComment(
 		@PathVariable Long itemId,
 		@PageableDefault Pageable pageable) {
 
-		Page<ItemCommentResponse> response = itemCommentService.readItemComment(itemId, pageable);
+		PageResponseDto<ItemCommentResponse> response = itemCommentService.readItemComment(itemId, pageable);
 
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("댓글이 조회되었습니다.", response));
 	}
