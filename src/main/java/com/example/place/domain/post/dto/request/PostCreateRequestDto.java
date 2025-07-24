@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 public class PostCreateRequestDto {
 
-	private Long userId;
+	@NotNull(message = "아이템 ID는 필수입니다.")
 	private Long itemId;
 
 	@NotBlank(message = "내용을 입력해주세요.")
