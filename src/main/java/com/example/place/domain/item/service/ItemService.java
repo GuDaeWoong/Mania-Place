@@ -1,5 +1,6 @@
 package com.example.place.domain.item.service;
 
+import com.example.place.common.dto.PageResponseDto;
 import com.example.place.domain.Image.service.ImageService;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.item.dto.request.ItemRequest;
@@ -14,6 +15,8 @@ import com.example.place.domain.tag.repository.TagRepository;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.repository.UserRepository;
 import com.example.place.domain.user.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.place.common.exception.enums.ExceptionCode;
@@ -142,11 +145,11 @@ public class ItemService {
 	}
 
 
-	public List<ItemResponse> searchItem(String keyword, List<String> tags, Long userId) {
-		return itemRepository.searchItems(keyword, tags, userId)
-				.stream()
-				.map(ItemResponse::from)
-				.toList();
+	public PageResponseDto<ItemResponse> searchItem(String keyword, List<String> tags, Long userId, Pageable pageable) {
+		Page<Item> items = itemRepository.searchItems(keyword, tags, userId, pageable);
+		Page<ItemResponse> itemResponsePage = items.map(ItemResponse::from);
+
+		return new PageResponseDto<>(itemResponsePage);
 	}
 
 	public String getMainImageUrl(Long itemId) {

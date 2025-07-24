@@ -1,6 +1,8 @@
 package com.example.place.domain.item.repository;
 
 import com.example.place.domain.item.entity.Item;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,9 +19,10 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "WHERE (:keyword IS NULL OR i.itemName LIKE %:keyword%)" +
             "AND (:userId IS NULL OR i.user.id = :userId)" +
             "AND (:tags IS NULL OR t.tagName IN :tags)")
-    List<Item> searchItems(
+    Page<Item> searchItems(
             @Param("keyword") String keyword,
             @Param("tags") List<String> tags,
-            @Param("userId") Long userId
+            @Param("userId") Long userId,
+            Pageable pageable
     );
 }
