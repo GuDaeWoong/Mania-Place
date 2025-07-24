@@ -1,6 +1,5 @@
 package com.example.place.domain.order.controller;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.place.common.dto.ApiResponseDto;
+import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.order.dto.CreateOrderRequestDto;
 import com.example.place.domain.order.dto.CreateOrderResponseDto;
@@ -33,6 +33,7 @@ public class OrderController {
 		this.orderService = orderService;
 	}
 
+	// 주문 완료 (생성)
 	@PostMapping("/orders")
 	public ResponseEntity<ApiResponseDto> createOrder(
 		@Valid @RequestBody CreateOrderRequestDto requestDto,
@@ -45,6 +46,7 @@ public class OrderController {
 	return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
 
+	// 주문 나의것 단건 조회
 	@GetMapping("/orders/my/{orderId}")
 	public ResponseEntity<ApiResponseDto> getMyOrder(
 		@PathVariable Long orderId,
@@ -53,23 +55,20 @@ public class OrderController {
 		Long userId =  userDetails.getId();
 		SearchOrderResponseDto searchOrder = orderService.getMyOrder(orderId, userId);
 		ApiResponseDto<SearchOrderResponseDto> success = ApiResponseDto.of("단건 조회가 완료되었습니다.", searchOrder);
-		return ResponseEntity.ok(success);
-	}
+		return ResponseEntity.status(HttpStatus.OK).body(success);	}
 
-
+	// 주문 나의것 다건 조회
 	@GetMapping("/orders/my")
-	public ResponseEntity<ApiResponseDto> getAllMyOrders(
+	public ResponseEntity<ApiResponseDto<PageResponseDto<SearchOrderResponseDto>>> getAllMyOrders(
 		@AuthenticationPrincipal CustomPrincipal userDetails,
 		@PageableDefault Pageable pageable
-	){
-		Long userId = userDetails.getId();
-
-		Page<SearchOrderResponseDto> orders = orderService.getAllMyOrders(userId, pageable);
-
-		ApiResponseDto<Page<SearchOrderResponseDto>> success = ApiResponseDto.of("전체 주문 조회가 완료되었습니다.", orders);
-		return ResponseEntity.ok(success);
+	) {
+		PageResponseDto<SearchOrderResponseDto> orders = orderService.getAllMyOrders(userDetails.getId(), pageable);
+		ApiResponseDto success = ApiResponseDto.of("전체 주문 조회가 완료되었습니다.", orders);
+		return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
 
+	// 주문 완료 -> 배송중
 	@PostMapping("/user/orders/{orderId}/status/ready")
 	public ResponseEntity<ApiResponseDto> updateOrderStatusToReady(
 		@PathVariable Long orderId,
@@ -77,9 +76,11 @@ public class OrderController {
 	) {
 		Long userId = userDetails.getId();
 		UpdateOrderStatusResponseDto updatedOrder = orderService.updateOrderStatusToReady(orderId, userId);
-		return ResponseEntity.ok(ApiResponseDto.of("주문 상태 변경 완료", updatedOrder));
+		ApiResponseDto success = ApiResponseDto.of("전체 주문 조회가 완료되었습니다.", updatedOrder);
+		return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
 
+	// 배송중 -> 거래 완료
 	@PostMapping("/user/orders/{orderId}/status/completed")
 	public ResponseEntity<ApiResponseDto> updateOrderStatusToCompleted(
 		@PathVariable Long orderId,
@@ -87,9 +88,11 @@ public class OrderController {
 	) {
 		Long userId = userDetails.getId();
 		UpdateOrderStatusResponseDto updatedOrder = orderService.updateOrderStatusToCompleted(orderId, userId);
-		return ResponseEntity.ok(ApiResponseDto.of("주문 상태 변경 완료", updatedOrder));
+		ApiResponseDto success = ApiResponseDto.of("주문 상태 변경 완료되었습니다.", updatedOrder);
+		return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
 
+	// 주문 완료 -> 주문 취소
 	@PostMapping("/user/orders/{orderId}/status/canceled")
 	public ResponseEntity<ApiResponseDto> cancelOrder(
 		@PathVariable Long orderId,
@@ -97,8 +100,7 @@ public class OrderController {
 	) {
 		Long userId = userDetails.getId();
 		UpdateOrderStatusResponseDto canceledOrder = orderService.updateOrderStatusToCanceled(orderId, userId);
-		return ResponseEntity.ok(ApiResponseDto.of("주문 취소 완료", canceledOrder));
+		ApiResponseDto success = ApiResponseDto.of("주문 취소 완료되었습니다.", canceledOrder);
+		return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
-
-
 }
