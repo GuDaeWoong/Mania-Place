@@ -41,13 +41,14 @@ public class PostCommentController {
 		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDto<>("댓글이 등록되었습니다.", response));
 	}
 
-	@PutMapping("/comments/{commentId}")
+	@PutMapping("{postId}/comments/{commentId}")
 	public ResponseEntity<ApiResponseDto<PostCommentResponse>> updatePostComment(
+		@PathVariable Long postId,
 		@PathVariable Long commentId,
 		@Valid @RequestBody PostCommentRequest request,
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
-		PostCommentResponse response = postCommnetService.updatePostComment(commentId, request, principal);
+		PostCommentResponse response = postCommnetService.updatePostComment(postId, commentId, request, principal);
 
 		return ResponseEntity.ok(new ApiResponseDto<>("게시글이 수정이 완료되었습니다.", response));
 	}
@@ -61,6 +62,5 @@ public class PostCommentController {
 		Page<PostCommentResponse> responses = postCommnetService.getCommentsByPost(postId, pageable);
 		return ResponseEntity.ok(new ApiResponseDto<>("댓글 목록 조회 완료", responses));
 	}
-
 
 }
