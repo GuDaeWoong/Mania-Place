@@ -20,7 +20,7 @@ public class ItemCommentResponse {
 		this.createAt = createAt;
 	}
 
-	public static ItemCommentResponse of(ItemComment itemComment) {
+	public static ItemCommentResponse from(ItemComment itemComment) {
 		return new ItemCommentResponse(
 			itemComment.getUser().getNickname(),
 			itemComment.getUser().getImageUrl(),

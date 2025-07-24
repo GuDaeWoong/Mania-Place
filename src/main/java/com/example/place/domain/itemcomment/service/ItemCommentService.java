@@ -18,7 +18,6 @@ import com.example.place.domain.user.service.UserService;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -29,6 +28,7 @@ public class ItemCommentService {
 	private final ItemService itemService;
 	private final UserService userService;
 
+	// 상품 댓글 저장
 	@Transactional
 	public ItemCommentResponse saveItemComment(Long itemId, ItemCommentRequest request,
 		CustomPrincipal principal) {
@@ -39,22 +39,24 @@ public class ItemCommentService {
 		Item item = itemService.findByIdOrElseThrow(itemId);
 
 		// 댓글 저장
-		ItemComment itemComment = ItemComment.of(user, item, request.getContent());
-		ItemComment saveItemComment = itemCommentRepository.save(itemComment);
+		ItemComment comment = ItemComment.of(user, item, request.getContent());
+		ItemComment saveComment = itemCommentRepository.save(comment);
 
 		// 응답 DTO로 반환
-		return ItemCommentResponse.of(saveItemComment);
+		return ItemCommentResponse.from(saveComment);
 	}
 
+	// 상품 댓글 조회
 	@Transactional(readOnly = true)
 	public Page<ItemCommentResponse> readItemComment(Long itemId, Pageable pageable) {
 		// 댓글 조회
 		Page<ItemComment> comments = itemCommentRepository.findByItemId(itemId, pageable);
 
 		// 응답 DTO로 반환
-		return comments.map(ItemCommentResponse::of);
+		return comments.map(ItemCommentResponse::from);
 	}
 
+	// 상품 댓글 수정
 	@Transactional
 	public ItemCommentResponse updateItemComment(Long itemId, Long itemCommentId, ItemCommentRequest request,
 		CustomPrincipal principal) {
@@ -75,6 +77,27 @@ public class ItemCommentService {
 		// 댓글 수정
 		comment.updateItemComment(request.getContent());
 
-		return ItemCommentResponse.of(comment);
+		return ItemCommentResponse.from(comment);
+	}
+
+	// 상품 댓글 삭제
+	@Transactional
+	public void deleteItemComment(Long itemId, Long itemCommentId, CustomPrincipal principal) {
+		// 삭제할 댓글 조회
+		ItemComment comment = itemCommentRepository.findById(itemCommentId).
+			orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_COMMENT));
+
+		// 유효한 경로인지 확인(해당 itemCommentId의 대상 itemId가 일치하는지 확인)
+		if (comment.getItem().getId() != itemId) {
+			throw new CustomException(ExceptionCode.INVALID_PATH);
+		}
+
+		// 본인이 쓴 댓글인지 확인
+		if (comment.getUser().getId() != principal.getId()) {
+			throw new CustomException(ExceptionCode.FORBIDDEN_COMMENT_DELETE);
+		}
+
+		// 댓글 삭제
+		itemCommentRepository.deleteById(itemCommentId);
 	}
 }
