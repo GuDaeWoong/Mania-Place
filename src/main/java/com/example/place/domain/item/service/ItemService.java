@@ -12,7 +12,6 @@ import com.example.place.domain.tag.entity.Tag;
 import com.example.place.domain.tag.repository.TagRepository;
 
 import com.example.place.domain.user.entity.User;
-import com.example.place.domain.user.repository.UserRepository;
 import com.example.place.domain.user.service.UserService;
 import org.springframework.stereotype.Service;
 
@@ -80,7 +79,7 @@ public class ItemService {
         itemRepository.save(item);
 
 		// 연관 이미지 저장
-		imageService.saveImages(item, request.getImages(), request.getMainIndex());
+		imageService.saveImages(item, request.getImageUrls(), request.getMainIndex());
 
 		//	태그 저장 로직
         for (String tagName: request.getItemTagNames()) {
@@ -110,13 +109,13 @@ public class ItemService {
 		item.updateItem(request);
 
 		// 연관 이미지 수정
-		if ((request.getImages() == null && request.getMainIndex() != null)
-			|| (request.getImages() != null && request.getMainIndex() == null)) {
+		if ((request.getImageUrls() == null && request.getMainIndex() != null)
+			|| (request.getImageUrls() != null && request.getMainIndex() == null)) {
 			throw new CustomException(ExceptionCode.INVALID_IMAGE_UPDATE_REQUEST);
 		}
 
-		if (request.getImages() != null && request.getMainIndex() != null) {
-			imageService.updateImages(item, request.getImages(), request.getMainIndex());
+		if (request.getImageUrls() != null && request.getMainIndex() != null) {
+			imageService.updateImages(item, request.getImageUrls(), request.getMainIndex());
 		}
 
 		return ItemResponse.from(item);
