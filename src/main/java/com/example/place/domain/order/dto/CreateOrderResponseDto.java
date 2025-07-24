@@ -18,7 +18,7 @@ public class CreateOrderResponseDto {
 	private String deliveryAddress;
 	private LocalDateTime createdAt;
 
-	public CreateOrderResponseDto(String mainImageUrl, String userNickname, String itemName, Long quantity, double price,
+	private CreateOrderResponseDto(String mainImageUrl, String userNickname, String itemName, Long quantity, double price,
 		String status, String deliveryAddress, LocalDateTime createdAt) {
 		this.mainImageUrl = mainImageUrl;
 		this.userNickname = userNickname;
