@@ -1,5 +1,6 @@
 package com.example.place.domain.item.service;
 
+import com.example.place.common.dto.PageResponseDto;
 import com.example.place.domain.Image.service.ImageService;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.item.dto.request.ItemRequest;
@@ -13,6 +14,9 @@ import com.example.place.domain.tag.repository.TagRepository;
 
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.place.common.exception.enums.ExceptionCode;
@@ -95,7 +99,7 @@ public class ItemService {
     }
 
 	@Transactional(readOnly = true)
-	public ItemResponse readItem(Long itemId) {
+	public ItemResponse getItem(Long itemId) {
 		Item item = findByIdOrElseThrow(itemId);
 		return ItemResponse.from(item);
 	}
@@ -132,6 +136,23 @@ public class ItemService {
 		itemRepository.deleteById(itemId);
 	}
 
+	@Transactional
+	public PageResponseDto<ItemResponse> searchItems(String keyword, List<String> tags, Long userId, Pageable pageable) {
+		List<Item> items = itemRepository.searchitems(keyword, userId, tags);
+
+		int total = items.size();
+		int start = (int) pageable.getOffset();
+		int end = Math.min(start + pageable.getPageSize(), total);
+
+		List<Item> pagedItems = items.subList(start, end);
+
+		List<ItemResponse> itemResponses = pagedItems.stream()
+				.map(ItemResponse::from)
+				.toList();
+		Page<ItemResponse> page = new PageImpl<>(itemResponses, pageable, total);
+
+		return new PageResponseDto<>(page);
+	}
 
 	public Item findByIdOrElseThrow(Long id) {
 		return itemRepository.findById(id)
@@ -139,12 +160,6 @@ public class ItemService {
 	}
 
 
-	public List<ItemResponse> searchItem(String keyword, List<String> tags, Long userId) {
-		return itemRepository.searchItems(keyword, tags, userId)
-				.stream()
-				.map(ItemResponse::from)
-				.toList();
-	}
 
 	public String getMainImageUrl(Long itemId) {
 		Item item =  itemRepository.findById(itemId)

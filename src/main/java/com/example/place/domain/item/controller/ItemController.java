@@ -1,11 +1,14 @@
 package com.example.place.domain.item.controller;
 
 import com.example.place.common.dto.ApiResponseDto;
+import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.item.dto.request.ItemRequest;
 import com.example.place.domain.item.dto.response.ItemResponse;
 import com.example.place.domain.item.service.ItemDeleteService;
 import com.example.place.domain.item.service.ItemService;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -45,8 +48,8 @@ public class ItemController {
      * @return
      */
     @GetMapping("/{itemId}")
-    public ResponseEntity<ApiResponseDto<ItemResponse>> readItem(@PathVariable Long itemId) {
-        ItemResponse item = itemService.readItem(itemId);
+    public ResponseEntity<ApiResponseDto<ItemResponse>> getItme(@PathVariable Long itemId) {
+        ItemResponse item = itemService.getItem(itemId);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("상품 조회가 완료되었습니다.", item));
     }
 
@@ -55,15 +58,18 @@ public class ItemController {
      * @param keyword
      * @param tags
      * @param userId
+     * @param pageable
      * @return
      */
     @GetMapping("/search")
-    public ResponseEntity<ApiResponseDto<List<ItemResponse>>> searchItem(
+    public ResponseEntity<ApiResponseDto<PageResponseDto<ItemResponse>>> searchItem(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) List<String> tags,
-            @RequestParam(required = false) Long userId
-    ) {
-        List<ItemResponse> result = itemService.searchItem(keyword, tags, userId);
+            @RequestParam(required = false) Long userId,
+            @PageableDefault(size = 5)Pageable pageable
+
+            ) {
+        PageResponseDto<ItemResponse> result = itemService.searchItems(keyword, tags, userId, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("상품 조회가 완료되었습니다", result));
     }
 
