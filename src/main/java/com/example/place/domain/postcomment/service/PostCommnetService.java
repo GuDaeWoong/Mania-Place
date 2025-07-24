@@ -35,13 +35,7 @@ public class PostCommnetService {
 		PostComment postComment = PostComment.of(user, post, request.getContent());
 		postCommentRepository.save(postComment);
 
-		return new PostCommentResponse(
-			user.getNickname(),
-			user.getImageUrl(),
-			postComment.getContent(),
-			postComment.getUser().getCreatedAt()
-		);
-
+		return PostCommentResponse.from(user, postComment);
 	}
 
 	@Transactional
@@ -61,12 +55,7 @@ public class PostCommnetService {
 
 		postComment.updateContent(request.getContent());
 
-		return new PostCommentResponse(
-			user.getNickname(),
-			user.getImageUrl(),
-			postComment.getContent(),
-			postComment.getUser().getCreatedAt()
-		);
+		return PostCommentResponse.from(user, postComment);
 	}
 
 	public PageResponseDto<PostCommentResponse> getCommentsByPost(Long postId, Pageable pageable
@@ -75,12 +64,8 @@ public class PostCommnetService {
 
 		Page<PostComment> commentPage = postCommentRepository.findAllByPost(post, pageable);
 
-		Page<PostCommentResponse> responsePage = commentPage.map(comment -> new PostCommentResponse(
-			comment.getUser().getNickname(),
-			comment.getUser().getImageUrl(),
-			comment.getContent(),
-			comment.getCreatedAt()
-		));
+		Page<PostCommentResponse> responsePage = commentPage.map(
+			comment -> PostCommentResponse.from(comment.getUser(), comment));
 		return new PageResponseDto<>(responsePage);
 	}
 }
