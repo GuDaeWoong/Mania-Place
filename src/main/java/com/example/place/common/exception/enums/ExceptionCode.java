@@ -45,7 +45,8 @@ public enum ExceptionCode {
 	FORBIDDEN_COMMENT_ACCESS(HttpStatus.FORBIDDEN, "본인 외에 댓글은 수정할 수 없습니다."),
 	FORBIDDEN_COMMENT_DELETE(HttpStatus.FORBIDDEN, "본인 외에 댓글은 삭제할 수 없습니다."),
 	DELETED_USER(HttpStatus.FORBIDDEN, "탈퇴한 사용자 입니다."),
-
+	UNAUTHORIZED_STATUS_CHANGE(HttpStatus.FORBIDDEN, "본인 이외에는 상태값을 변경할 수 없습니다."),
+	NOT_SELLER(HttpStatus.FORBIDDEN, "판매자가 아닙니다."),
 
 	// 404 Not Found
 	NOT_FOUND_USER(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."),

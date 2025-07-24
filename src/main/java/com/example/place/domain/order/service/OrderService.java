@@ -102,7 +102,7 @@ public class OrderService {
 	}
 
 
-		@Transactional
+	@Transactional
 	public UpdateOrderStatusResponseDto updateOrderStatusToReady(Long orderId, Long userId) {
 		Order order = orderRepository.findById(orderId)
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ORDER));
@@ -110,7 +110,7 @@ public class OrderService {
 		// 상품 등록한 유저와 동일한지 검증
 		Item item = order.getItem();
 		if (!item.getUser().getId().equals(userId)) {
-			throw new CustomException(ExceptionCode.FORBIDDEN_ITEM_ACCESS);
+			throw new CustomException(ExceptionCode.UNAUTHORIZED_STATUS_CHANGE);
 		}
 		OrderStatus.statusIsReady(order.getStatus());
 
@@ -121,13 +121,14 @@ public class OrderService {
 		return UpdateOrderStatusResponseDto.from(order,mainImageUrl);
 	}
 
+	@Transactional
 	public UpdateOrderStatusResponseDto updateOrderStatusToCompleted(Long orderId, Long userId) {
 		Order order = orderRepository.findById(orderId)
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ORDER));
 
 		// 주문자 인지 아닌지 검증
 		if (!order.getUser().getId().equals(userId)) {
-			throw new CustomException(ExceptionCode.FORBIDDEN_ORDER_ACCESS);
+			throw new CustomException(ExceptionCode.NOT_SELLER);
 		}
 
 		OrderStatus.statusIsCompleted(order.getStatus());
