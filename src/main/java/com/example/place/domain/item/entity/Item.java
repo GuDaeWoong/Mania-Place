@@ -110,4 +110,8 @@ public class Item extends BaseEntity {
 		this.itemTags.add(itemTag);
 		itemTag.setItem(this);
 	}
+
+	public void addImage(Image image) {
+		this.images.add(image);
+	}
 }
