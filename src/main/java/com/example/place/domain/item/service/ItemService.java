@@ -129,9 +129,6 @@ public class ItemService {
 			throw new CustomException(ExceptionCode.FORBIDDEN_ITEM_DELETE);
 		}
 
-		// 연관 이미지 삭제
-		imageService.deleteImageByItemId(itemId);
-
 		itemRepository.deleteById(itemId);
 	}
 

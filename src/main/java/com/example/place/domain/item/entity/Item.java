@@ -40,7 +40,7 @@ public class Item extends BaseEntity {
 	private LocalDateTime salesStartAt;
 	private LocalDateTime salesEndAt;
 
-	@OneToMany(mappedBy = "item")
+	@OneToMany(mappedBy = "item", cascade = CascadeType.REMOVE, orphanRemoval = true)
 	private List<Image> images = new ArrayList<>();
 
 	@OneToMany(mappedBy = "item", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
