@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.place.common.dto.ApiResponseDto;
+import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.postcomment.dto.PostCommentRequest;
 import com.example.place.domain.postcomment.dto.PostCommentResponse;
@@ -54,13 +55,14 @@ public class PostCommentController {
 	}
 
 	@GetMapping("/{postId}/comments")
-	public ResponseEntity<ApiResponseDto<Page<PostCommentResponse>>> getCommentsByPost(
+	public ResponseEntity<ApiResponseDto<PageResponseDto<PostCommentResponse>>> getCommentsByPost(
 		@PathVariable Long postId,
 		@PageableDefault Pageable pageable
 
 	) {
-		Page<PostCommentResponse> responses = postCommnetService.getCommentsByPost(postId, pageable);
-		return ResponseEntity.ok(ApiResponseDto.of("댓글 목록 조회 완료", responses));
+		PageResponseDto<PostCommentResponse> responses = postCommnetService.getCommentsByPost(postId, pageable);
+
+		return ResponseEntity.ok(new ApiResponseDto<>("댓글 목록 조회 완료", responses));
 	}
 
 }
