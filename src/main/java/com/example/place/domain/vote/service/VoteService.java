@@ -17,6 +17,7 @@ import com.example.place.domain.vote.entity.Vote;
 import com.example.place.domain.vote.entity.VoteType;
 import com.example.place.domain.vote.repository.VoteRepository;
 
+import aj.org.objectweb.asm.commons.GeneratorAdapter;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -43,7 +44,7 @@ public class VoteService {
 		}
 
 		// 투표 저장
-		Vote vote = new Vote(user, post, newVoteType);
+		Vote vote = Vote.of(user, post, newVoteType);
 		voteRepository.save(vote);
 
 		// like 개수
@@ -51,6 +52,6 @@ public class VoteService {
 		// dislike 개수
 		Long dislikeCount = voteRepository.countByPostAndVoteType(post, VoteType.DISLIKE);
 
-		return new VoteResponseDto(likeCount, dislikeCount);
+		return VoteResponseDto.of(likeCount, dislikeCount);
 	}
 }
