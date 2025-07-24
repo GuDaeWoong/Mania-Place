@@ -79,7 +79,7 @@ public class ItemService {
         itemRepository.save(item);
 
 		// 연관 이미지 저장
-		imageService.saveImages(item, request.getImageUrls(), request.getMainIndex());
+		imageService.createImages(item, request.getImageUrls(), request.getMainIndex());
 
 		//	태그 저장 로직
         for (String tagName: request.getItemTagNames()) {
@@ -90,6 +90,7 @@ public class ItemService {
 
 			item.addItemTag(itemTag);
         }
+
         return ItemResponse.from(item);
     }
 

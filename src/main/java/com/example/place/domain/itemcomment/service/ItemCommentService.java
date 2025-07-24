@@ -31,7 +31,7 @@ public class ItemCommentService {
 
 	// 상품 댓글 저장
 	@Transactional
-	public ItemCommentResponse saveItemComment(Long itemId, ItemCommentRequest request,
+	public ItemCommentResponse createItemComment(Long itemId, ItemCommentRequest request,
 		CustomPrincipal principal) {
 		// 로그인 유저 조회
 		User user = userService.findUserById(principal.getId());
