@@ -27,6 +27,7 @@ public class PostCommnetService {
 	private final PostService postService;
 	private final UserService userService;
 
+	@Transactional
 	public PostCommentResponse savePostComment(Long postId, PostCommentRequest request, CustomPrincipal principal) {
 		User user = userService.findUserById(principal.getId());
 
@@ -35,13 +36,7 @@ public class PostCommnetService {
 		PostComment postComment = PostComment.of(user, post, request.getContent());
 		postCommentRepository.save(postComment);
 
-		return new PostCommentResponse(
-			user.getNickname(),
-			user.getImageUrl(),
-			postComment.getContent(),
-			postComment.getUser().getCreatedAt()
-		);
-
+		return PostCommentResponse.from(user, postComment);
 	}
 
 	@Transactional
@@ -61,12 +56,7 @@ public class PostCommnetService {
 
 		postComment.updateContent(request.getContent());
 
-		return new PostCommentResponse(
-			user.getNickname(),
-			user.getImageUrl(),
-			postComment.getContent(),
-			postComment.getUser().getCreatedAt()
-		);
+		return PostCommentResponse.from(user, postComment);
 	}
 
 	public PageResponseDto<PostCommentResponse> getCommentsByPost(Long postId, Pageable pageable
@@ -75,12 +65,23 @@ public class PostCommnetService {
 
 		Page<PostComment> commentPage = postCommentRepository.findAllByPost(post, pageable);
 
-		Page<PostCommentResponse> responsePage = commentPage.map(comment -> new PostCommentResponse(
-			comment.getUser().getNickname(),
-			comment.getUser().getImageUrl(),
-			comment.getContent(),
-			comment.getCreatedAt()
-		));
+		Page<PostCommentResponse> responsePage = commentPage.map(
+			comment -> PostCommentResponse.from(comment.getUser(), comment));
 		return new PageResponseDto<>(responsePage);
 	}
+
+	@Transactional
+	public void deletePostComment(Long postId, Long commentId, Long userId) {
+
+		postService.findByIdOrElseThrow(postId);
+
+		PostComment comment = postCommentRepository.findById(commentId)
+			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_COMMENT));
+
+		if (!comment.getUser().getId().equals(userId)) {
+			throw new CustomException(ExceptionCode.FORBIDDEN_COMMENT_ACCESS);
+		}
+		postCommentRepository.delete(comment);
+	}
+
 }
