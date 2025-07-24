@@ -90,6 +90,7 @@ public class ItemService {
 
 			item.addItemTag(itemTag);
         }
+
         return ItemResponse.from(item);
     }
 

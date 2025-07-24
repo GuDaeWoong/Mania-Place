@@ -4,13 +4,13 @@ import com.example.place.domain.tag.entity.Tag;
 import com.example.place.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "user_tags")
+@Getter
 public class UserTag {
 
     @Id
@@ -25,4 +25,18 @@ public class UserTag {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
+    private UserTag(Tag tag, User user) {
+        this.tag = tag;
+        this.user = user;
+    }
+
+    public static UserTag of(Tag tag, User user) {
+        return new UserTag(tag,user);
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
 }
+
