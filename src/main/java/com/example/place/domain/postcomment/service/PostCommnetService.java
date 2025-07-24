@@ -44,7 +44,10 @@ public class PostCommnetService {
 	}
 
 	@Transactional
-	public PostCommentResponse updatePostComment(Long commentId, PostCommentRequest request, CustomPrincipal principal) {
+	public PostCommentResponse updatePostComment(Long postId ,Long commentId, PostCommentRequest request, CustomPrincipal principal) {
+
+		postService.findByIdOrElseThrow(postId);
+
 		User user = userService.findUserById(principal.getId());
 
 		PostComment postComment = postCommentRepository.findById(commentId)
