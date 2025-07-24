@@ -1,6 +1,5 @@
 package com.example.place.domain.vote.entity;
 
-import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.post.entity.Post;
 import com.example.place.domain.user.entity.User;
 
@@ -33,6 +32,6 @@ public class Vote {
 
 
 	@Enumerated(EnumType.STRING)
-	private ReactionType type;
+	private VoteType voteType;
 
 }

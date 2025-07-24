@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/posts")
 public class VoteController {
 
 	private final VoteService voteService;
@@ -30,6 +31,7 @@ public class VoteController {
 		@RequestBody @Valid VoteRequestDto request,
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
+		
 		Long userId = principal.getId();
 		VoteResponseDto response = voteService.vote(postId, request, userId);
 		// ApiResponseDto<VoteResponseDto> success = ApiResponseDto.of("투표가 반영되었습니다.", response);

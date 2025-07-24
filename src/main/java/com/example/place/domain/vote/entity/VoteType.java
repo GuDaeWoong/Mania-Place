@@ -1,5 +1,5 @@
 package com.example.place.domain.vote.entity;
 
-public enum ReactionType {
+public enum VoteType {
 	LIKE, DISLIKE
 }
