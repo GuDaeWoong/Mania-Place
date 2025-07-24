@@ -53,7 +53,7 @@ public class ItemCommentService {
 		// 댓글 조회
 		Page<ItemComment> comments = itemCommentRepository.findByItemId(itemId, pageable);
 
-		Page<ItemCommentResponse> ItemCommentPage = comments.map(ItemCommentResponse::of);
+		Page<ItemCommentResponse> ItemCommentPage = comments.map(ItemCommentResponse::from);
 
 		// 응답 DTO로 반환
 		return new PageResponseDto<>(ItemCommentPage);
