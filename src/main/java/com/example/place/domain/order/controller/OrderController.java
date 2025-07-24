@@ -33,6 +33,7 @@ public class OrderController {
 		this.orderService = orderService;
 	}
 
+	// 주문 완료 (생성)
 	@PostMapping("/orders")
 	public ResponseEntity<ApiResponseDto> createOrder(
 		@Valid @RequestBody CreateOrderRequestDto requestDto,
@@ -45,6 +46,7 @@ public class OrderController {
 	return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
 
+	// 주문 나의것 단건 조회
 	@GetMapping("/orders/my/{orderId}")
 	public ResponseEntity<ApiResponseDto> getMyOrder(
 		@PathVariable Long orderId,
@@ -55,6 +57,7 @@ public class OrderController {
 		ApiResponseDto<SearchOrderResponseDto> success = ApiResponseDto.of("단건 조회가 완료되었습니다.", searchOrder);
 		return ResponseEntity.status(HttpStatus.OK).body(success);	}
 
+	// 주문 나의것 다건 조회
 	@GetMapping("/orders/my")
 	public ResponseEntity<ApiResponseDto<PageResponseDto<SearchOrderResponseDto>>> getAllMyOrders(
 		@AuthenticationPrincipal CustomPrincipal userDetails,
@@ -65,6 +68,7 @@ public class OrderController {
 		return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
 
+	// 주문 완료 -> 배송중
 	@PostMapping("/user/orders/{orderId}/status/ready")
 	public ResponseEntity<ApiResponseDto> updateOrderStatusToReady(
 		@PathVariable Long orderId,
@@ -76,6 +80,7 @@ public class OrderController {
 		return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
 
+	// 배송중 -> 거래 완료
 	@PostMapping("/user/orders/{orderId}/status/completed")
 	public ResponseEntity<ApiResponseDto> updateOrderStatusToCompleted(
 		@PathVariable Long orderId,
@@ -87,6 +92,7 @@ public class OrderController {
 		return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
 
+	// 주문 완료 -> 주문 취소
 	@PostMapping("/user/orders/{orderId}/status/canceled")
 	public ResponseEntity<ApiResponseDto> cancelOrder(
 		@PathVariable Long orderId,
@@ -97,6 +103,4 @@ public class OrderController {
 		ApiResponseDto success = ApiResponseDto.of("주문 취소 완료되었습니다.", canceledOrder);
 		return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
-
-
 }

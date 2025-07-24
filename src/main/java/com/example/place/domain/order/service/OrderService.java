@@ -82,17 +82,7 @@ public class OrderService {
 		Item item = itemService.findByIdOrElseThrow(order.getItem().getId());
 		String mainImageUrl = itemService.getMainImageUrl(item.getId());
 
-		return new SearchOrderResponseDto(
-			mainImageUrl,
-			order.getUser().getNickname(),
-			order.getItem().getItemName(),
-			order.getQuantity(),
-			order.getPrice(),
-			order.getDeliveryAddress(),
-			order.getStatus().name(),
-			order.getCreatedAt()
-		);
-
+		return SearchOrderResponseDto.from(order,mainImageUrl);
 	}
 
 	public PageResponseDto<SearchOrderResponseDto> getAllMyOrders(Long userId, Pageable pageable
@@ -103,18 +93,9 @@ public class OrderService {
 			Item item = order.getItem();
 			String mainImageUrl = itemService.getMainImageUrl(item.getId());
 
-			return new SearchOrderResponseDto(
-				mainImageUrl,
-				order.getUser().getNickname(),
-				order.getItem().getItemName(),
-				order.getQuantity(),
-				order.getPrice(),
-				order.getDeliveryAddress(),
-				order.getStatus().name(),
-				order.getCreatedAt()
+			return SearchOrderResponseDto.from(order,mainImageUrl
 			);
 		});
-
 		return new PageResponseDto<>(dtoPage);
 	}
 
@@ -135,16 +116,7 @@ public class OrderService {
 
 		String mainImageUrl = itemService.getMainImageUrl(item.getId());
 
-		return new UpdateOrderStatusResponseDto(
-			mainImageUrl,
-			order.getUser().getNickname(),
-			order.getItem().getItemName(),
-			order.getQuantity(),
-			order.getPrice(),
-			order.getDeliveryAddress(),
-			order.getStatus().name(),
-			order.getCreatedAt()
-		);
+		return UpdateOrderStatusResponseDto.from(order,mainImageUrl);
 	}
 
 	public UpdateOrderStatusResponseDto updateOrderStatusToCompleted(Long orderId, Long userId) {
@@ -163,16 +135,7 @@ public class OrderService {
 		Item item = order.getItem();
 		String mainImageUrl = itemService.getMainImageUrl(item.getId());
 
-		return new UpdateOrderStatusResponseDto(
-			mainImageUrl,
-			order.getUser().getNickname(),
-			order.getItem().getItemName(),
-			order.getQuantity(),
-			order.getPrice(),
-			order.getDeliveryAddress(),
-			order.getStatus().name(),
-			order.getCreatedAt()
-		);
+		return UpdateOrderStatusResponseDto.from(order,mainImageUrl);
 	}
 
 	@Transactional
@@ -196,16 +159,7 @@ public class OrderService {
 
 		String mainImageUrl = itemService.getMainImageUrl(item.getId());
 
-		return new UpdateOrderStatusResponseDto(
-			mainImageUrl,
-			order.getUser().getNickname(),
-			order.getItem().getItemName(),
-			order.getQuantity(),
-			order.getPrice(),
-			order.getDeliveryAddress(),
-			order.getStatus().name(),
-			order.getCreatedAt()
-		);
+		return UpdateOrderStatusResponseDto.from(order,mainImageUrl);
 	}
 
 }
