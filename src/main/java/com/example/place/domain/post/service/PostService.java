@@ -32,7 +32,7 @@ public class PostService {
 		User user = userService.findUserById(userId);
 		Item item = itemService.findByIdOrElseThrow(request.getItemId());
 
-		Post post = new Post(user, item, request.getContent(), request.getImage());
+		Post post = Post.of(user, item, request.getContent(), request.getImage());
 		Post saved = postRepository.save(post);
 
 		return new PostResponseDto(saved);
