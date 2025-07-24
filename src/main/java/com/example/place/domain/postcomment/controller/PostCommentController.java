@@ -6,6 +6,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -56,11 +57,21 @@ public class PostCommentController {
 	public ResponseEntity<ApiResponseDto<Page<PostCommentResponse>>> getCommentsByPost(
 		@PathVariable Long postId,
 		@PageableDefault Pageable pageable
-
 	) {
 		Page<PostCommentResponse> responses = postCommnetService.getCommentsByPost(postId, pageable);
 		return ResponseEntity.ok(new ApiResponseDto<>("댓글 목록 조회 완료", responses));
 	}
 
+
+	@DeleteMapping("/{postId}/comments/{commentId}")
+	public ResponseEntity<ApiResponseDto<Void>> deletePostComment(
+		@PathVariable Long postId,
+		@PathVariable Long commentId,
+		@AuthenticationPrincipal CustomPrincipal principal
+	) {
+		Long userId = principal.getId();
+		postCommnetService.deletePostComment(postId, commentId, userId);
+		return ResponseEntity.ok(new ApiResponseDto<>("댓글 삭제가 완료되었습니다.", null));
+	}
 
 }
