@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.post.dto.response.PostWithUserResponseDto;
@@ -46,18 +47,30 @@ public class PostService {
 	}
 
 	//살까말까 전체 조회
-	public Page<PostWithUserResponseDto> getAllPosts(Pageable pageable,Long userId) {
+	public PageResponseDto<PostWithUserResponseDto> getAllPosts(Pageable pageable, Long userId) {
 		User user = userService.findUserById(userId);
-		return postRepository.findAll(pageable)
-			.map(post -> new PostWithUserResponseDto(post,user.getNickname()));
+
+		Page<Post> postsPage = postRepository.findAll(pageable);
+
+		Page<PostWithUserResponseDto> dtoPage = postsPage.map(post ->
+			new PostWithUserResponseDto(post, user.getNickname())
+		);
+
+		return new PageResponseDto<>(dtoPage);
 	}
 
+
 	//살까말까 내 글 조회
-	public Page<PostWithUserResponseDto> findMyPosts(Long userId, Pageable pageable) {
+	public PageResponseDto<PostWithUserResponseDto> findMyPosts(Long userId, Pageable pageable) {
 		User user = userService.findUserById(userId);
 
-		return postRepository.findAllByUser(user, pageable)
-			.map(post -> new PostWithUserResponseDto(post,user.getNickname()));
+		Page<Post> postsPage = postRepository.findAllByUser(user,pageable);
+
+		Page<PostWithUserResponseDto> dtoPage = postsPage.map(post ->
+			new PostWithUserResponseDto(post,user.getNickname())
+		);
+
+		return new PageResponseDto<>(dtoPage);
 	}
 
 	//살까말까 수정
