@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.common.security.jwt.CustomPrincipal;
@@ -18,7 +19,6 @@ import com.example.place.domain.user.service.UserService;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -47,12 +47,14 @@ public class ItemCommentService {
 	}
 
 	@Transactional(readOnly = true)
-	public Page<ItemCommentResponse> readItemComment(Long itemId, Pageable pageable) {
+	public PageResponseDto<ItemCommentResponse> readItemComment(Long itemId, Pageable pageable) {
 		// 댓글 조회
 		Page<ItemComment> comments = itemCommentRepository.findByItemId(itemId, pageable);
 
+		Page<ItemCommentResponse> ItemCommentPage = comments.map(ItemCommentResponse::of);
+
 		// 응답 DTO로 반환
-		return comments.map(ItemCommentResponse::of);
+		return new PageResponseDto<>(ItemCommentPage);
 	}
 
 	@Transactional
