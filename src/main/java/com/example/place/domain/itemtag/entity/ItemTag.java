@@ -2,13 +2,11 @@ package com.example.place.domain.itemtag.entity;
 
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.tag.entity.Tag;
-import com.example.place.domain.user.entity.User;
 import jakarta.persistence.*;
 
 import lombok.*;
 
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "item_tags")
@@ -18,7 +16,8 @@ public class ItemTag {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn(name = "item_id")
+    @Setter
+	@JoinColumn(name = "item_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private Item item;
 
@@ -26,8 +25,12 @@ public class ItemTag {
     @ManyToOne(fetch = FetchType.LAZY)
     private Tag tag;
 
-    public void setItem(Item item) {
+    private ItemTag(Tag tag, Item item) {
+        this.tag = tag;
         this.item = item;
     }
 
+    public static ItemTag of(Tag tag, Item item) {
+        return new ItemTag(tag,item);
+    }
 }

@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -21,7 +22,8 @@ public class UserTag {
     @ManyToOne(fetch = FetchType.LAZY)
     private Tag tag;
 
-    @JoinColumn(name = "user_id")
+    @Setter
+	@JoinColumn(name = "user_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
@@ -32,10 +34,6 @@ public class UserTag {
 
     public static UserTag of(Tag tag, User user) {
         return new UserTag(tag,user);
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
 }
