@@ -53,7 +53,7 @@ public class UserController {
 	public ResponseEntity<ApiResponseDto<UserResponse>> getUser(
 		@PathVariable Long id
 	) {
-		return ResponseEntity.ok(ApiResponseDto.of("회원 조회 성공", userService.findUser(id)));
+		return ResponseEntity.ok(ApiResponseDto.of("회원 정보를 불러왔습니다.", userService.findUser(id)));
 	}
 
 	//마이페이지 조회
@@ -62,7 +62,7 @@ public class UserController {
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
 		Long userId = principal.getId();
-		return ResponseEntity.ok(ApiResponseDto.of("마이페이지 조회 성공", userService.findMyInfo(userId)));
+			return ResponseEntity.ok(ApiResponseDto.of("마이페이지 정보를 불러왔습니다.", userService.findMyInfo(userId)));
 	}
 
 	//내 정보 수정
