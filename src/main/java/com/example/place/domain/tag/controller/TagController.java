@@ -25,5 +25,12 @@ public class TagController {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("태그 생성이 완료되었습니다.", tag));
     }
 
+    @GetMapping("{tagId}")
+    public ResponseEntity<ApiResponseDto<TagResponse>> getTag(@PathVariable Long tagId) {
+        TagResponse tag = tagService.getTag(tagId);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("태그가 조회되었습니다.",tag));
+    }
+
+
 
 }

@@ -29,4 +29,14 @@ public class TagService {
         return TagResponse.from(tag);
     }
 
+    @Transactional(readOnly = true)
+    public TagResponse getTag(Long tagId) {
+        Tag tag = findByIdOrElseThrow(tagId);
+        return TagResponse.from(tag);
+    }
+
+    public Tag findByIdOrElseThrow(Long tagId) {
+        return tagRepository.findById(tagId)
+                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_TAG));
+    }
 }

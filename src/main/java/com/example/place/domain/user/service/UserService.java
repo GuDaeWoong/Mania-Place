@@ -144,7 +144,7 @@ public class UserService {
 	private void saveTags(User user, Set<String> tagNames) {
 		for (String tagName: tagNames) {
 			Tag tag = tagRepository.findByTagName(tagName)
-				.orElseGet(() -> tagRepository.save(new Tag(tagName)));
+				.orElseGet(() -> tagRepository.save(Tag.of(tagName)));
 
 			UserTag userTag = UserTag.of(tag, user);
 
