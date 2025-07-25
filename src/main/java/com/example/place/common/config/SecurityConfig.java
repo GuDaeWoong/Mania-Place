@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true)
-public class SecurityConfig {
+public class    SecurityConfig {
 
 	private final JwtUtil jwtUtil;
 	private final ObjectMapper objectMapper;
@@ -44,7 +44,7 @@ public class SecurityConfig {
 
 	@Bean
 	public JwtFilter jwtFilter() {
-		return new JwtFilter(jwtUtil, userRepository);
+		return new JwtFilter(jwtUtil,userRepository);
 	}
 
 	@Bean
@@ -58,7 +58,10 @@ public class SecurityConfig {
 			.addFilterBefore(jwtFilter(), JwtBlacklistFilter.class)
 
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/api/**").permitAll()
+				.requestMatchers("/api/login", "/api/accounts").permitAll()
+				.requestMatchers("/error", "/refresh").permitAll()
+				.requestMatchers("/api/admin/**").hasRole("ADMIN")
+				.requestMatchers("/api/**").hasAnyRole("USER", "ADMIN")
 				.anyRequest().authenticated()
 			)
 

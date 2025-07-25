@@ -95,4 +95,9 @@ public class ImageService {
 			|| mainIndex >= listSize)
 			? 0 : mainIndex;
 	}
+
+	@Transactional
+	public List<Image> findByItemIds(List<Long> itemIds) {
+		return imageRepository.findByItemIds(itemIds);
+	}
 }

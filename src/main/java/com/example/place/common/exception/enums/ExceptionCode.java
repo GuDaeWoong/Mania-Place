@@ -56,13 +56,15 @@ public enum ExceptionCode {
 	NOT_FOUND_POST(HttpStatus.NOT_FOUND, "게시물이 존재하지 않습니다."),
 	NOT_FOUND_ORDER(HttpStatus.NOT_FOUND, "존재하지 않는 오더id 입니다."),
 	NOT_FOUND_VOTE(HttpStatus.NOT_FOUND, "존재하지 않는 투표입니다."),
+	NOT_FOUND_TAG(HttpStatus.NOT_FOUND,"존재하지 않는 태그입니다."),
 
 	// 409 Conflict
 	OUT_OF_STOCK(HttpStatus.CONFLICT, "상품의 개수가 부족합니다."),
 	ALREADY_VOTED(HttpStatus.CONFLICT, "이미 투표한 게시글입니다."),
 	EXISTS_EMAIL(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다."),
 	EXISTS_NICKNAME(HttpStatus.CONFLICT, "이미 존재하는 닉네임입니다."),
-	BLACKLISTED_TOKEN(HttpStatus.CONFLICT, "다시 로그인 해주세요.");
+	BLACKLISTED_TOKEN(HttpStatus.CONFLICT, "다시 로그인 해주세요."),
+	DUPLICATED_TAG_NAME(HttpStatus.CONFLICT,"이미 존재하는 태그명입니다.");
 
 	private final HttpStatus httpStatus;
 	private final String message;

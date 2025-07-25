@@ -11,10 +11,10 @@ import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.item.service.ItemService;
-import com.example.place.domain.order.dto.CreateOrderRequestDto;
-import com.example.place.domain.order.dto.CreateOrderResponseDto;
-import com.example.place.domain.order.dto.SearchOrderResponseDto;
-import com.example.place.domain.order.dto.UpdateOrderStatusResponseDto;
+import com.example.place.domain.order.dto.request.CreateOrderRequestDto;
+import com.example.place.domain.order.dto.response.CreateOrderResponseDto;
+import com.example.place.domain.order.dto.response.SearchOrderResponseDto;
+import com.example.place.domain.order.dto.response.UpdateOrderStatusResponseDto;
 import com.example.place.domain.order.entity.Order;
 import com.example.place.domain.order.entity.OrderStatus;
 import com.example.place.domain.order.repository.OrderRepository;
@@ -40,7 +40,7 @@ public class OrderService {
 	@Transactional
 	public CreateOrderResponseDto createOrder(CreateOrderRequestDto requestDto,Long userId
 	) {
-		User user = userService.findUserById(userId);
+		User user = userService.findByIdOrElseThrow(userId);
 
 		Item item = itemService.findByIdOrElseThrow(requestDto.getItemId());
 

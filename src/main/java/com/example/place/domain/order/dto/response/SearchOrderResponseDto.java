@@ -1,4 +1,4 @@
-package com.example.place.domain.order.dto;
+package com.example.place.domain.order.dto.response;
 
 import java.time.LocalDateTime;
 
@@ -7,7 +7,8 @@ import com.example.place.domain.order.entity.Order;
 import lombok.Getter;
 
 @Getter
-public class UpdateOrderStatusResponseDto {
+public class SearchOrderResponseDto {
+
 	private String mainImageUrl;
 	private String userNickname;
 	private String itemName;
@@ -17,8 +18,7 @@ public class UpdateOrderStatusResponseDto {
 	private String deliveryAddress;
 	private LocalDateTime createdAt;
 
-	private UpdateOrderStatusResponseDto(String mainImageUrl, String nickname, String itemName, Long quantity,
-		double price, String deliveryAddress, String status, LocalDateTime createdAt) {
+	private SearchOrderResponseDto(String mainImageUrl, String nickname, String itemName, Long quantity, double price, String deliveryAddress, String status, LocalDateTime createdAt) {
 		this.mainImageUrl = mainImageUrl;
 		this.userNickname = nickname;
 		this.itemName = itemName;
@@ -29,8 +29,8 @@ public class UpdateOrderStatusResponseDto {
 		this.createdAt = createdAt;
 	}
 
-	public static UpdateOrderStatusResponseDto from(Order order, String mainImageUrl){
-		return new UpdateOrderStatusResponseDto(
+	public static SearchOrderResponseDto from(Order order, String mainImageUrl) {
+		return new SearchOrderResponseDto(
 			mainImageUrl,
 			order.getUser().getNickname(),
 			order.getItem().getItemName(),
@@ -40,7 +40,6 @@ public class UpdateOrderStatusResponseDto {
 			order.getStatus().name(),
 			order.getCreatedAt()
 		);
+
 	}
-
-
 }

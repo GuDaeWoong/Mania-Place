@@ -16,8 +16,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.item.service.ItemService;
-import com.example.place.domain.order.dto.CreateOrderRequestDto;
-import com.example.place.domain.order.dto.CreateOrderResponseDto;
+import com.example.place.domain.order.dto.request.CreateOrderRequestDto;
+import com.example.place.domain.order.dto.response.CreateOrderResponseDto;
 import com.example.place.domain.order.entity.Order;
 import com.example.place.domain.order.repository.OrderRepository;
 import com.example.place.domain.user.entity.User;
@@ -74,7 +74,7 @@ public class OrderServiceTest {
 		CreateOrderRequestDto requestDto = new CreateOrderRequestDto(itemId, quantity, "부산");
 
 		// 유저 아이템 조회
-		given(userService.findUserById(userId)).willReturn(TEST_USER);
+		given(userService.findByIdOrElseThrow(userId)).willReturn(TEST_USER);
 		given(itemService.findByIdOrElseThrow(itemId)).willReturn(TEST_ITEM);
 		given(itemService.getMainImageUrl(itemId)).willReturn("image1url");
 
@@ -101,7 +101,7 @@ public class OrderServiceTest {
 		Long quantity = 3L;
 		CreateOrderRequestDto requestDto = new CreateOrderRequestDto(itemId, quantity, "부산");
 
-		given(userService.findUserById(userId)).willReturn(TEST_USER);
+		given(userService.findByIdOrElseThrow(userId)).willReturn(TEST_USER);
 		given(itemService.findByIdOrElseThrow(itemId)).willReturn(TEST_ITEM);
 
 		CustomException exception = assertThrows(CustomException.class, () ->

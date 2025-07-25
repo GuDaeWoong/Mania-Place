@@ -1,7 +1,6 @@
 package com.example.place.domain.user.service;
 
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -9,8 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
-import com.example.place.domain.tag.entity.Tag;
-import com.example.place.domain.tag.repository.TagRepository;
+import com.example.place.domain.tag.service.TagService;
 import com.example.place.domain.user.dto.UserDeleteRequest;
 import com.example.place.domain.user.dto.UserPasswordRequest;
 import com.example.place.domain.user.dto.UserRegisterRequest;
@@ -20,7 +18,6 @@ import com.example.place.domain.user.dto.UserUpdateRequest;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.entity.UserRole;
 import com.example.place.domain.user.repository.UserRepository;
-import com.example.place.domain.usertag.entity.UserTag;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
-	private final TagRepository tagRepository;
+	private final TagService tagService;
 
 	@Transactional
 	public UserRegisterResponse register(UserRegisterRequest userRegisterRequest, UserRole userRole) {
@@ -55,26 +52,26 @@ public class UserService {
 
 		User savedUser = userRepository.save(user);
 
-		saveTags(savedUser, userRegisterRequest.getTags());
+		tagService.saveTags(savedUser, userRegisterRequest.getTags());
 
 		return new UserRegisterResponse(savedUser.getEmail());
 	}
 
 	// 어드민 검색용
 	public UserResponse findUser(Long userId) {
-		User foundUser = findUserById(userId);
+		User foundUser = findByIdOrElseThrow(userId);
 		return UserResponse.from(foundUser);
 	}
 
 	// 마이페이지 조회용
 	public UserResponse findMyInfo(Long userId) {
-		User myInfo = findUserById(userId);
+		User myInfo = findByIdOrElseThrow(userId);
 		return UserResponse.from(myInfo);
 	}
 
 	@Transactional
 	public UserResponse modifyUser(Long userId, UserUpdateRequest userUpdateRequest) {
-		User foundUser = findUserById(userId);
+		User foundUser = findByIdOrElseThrow(userId);
 
 		// 닉네임이 변경되었을 때만 중복 검증
 		if (!foundUser.getNickname().equals(userUpdateRequest.getNickname()) &&
@@ -87,14 +84,16 @@ public class UserService {
 			userUpdateRequest.getNickname(),
 			userUpdateRequest.getImageUrl());
 
-		updateUserTags(foundUser, userUpdateRequest.getTags());
+		// 현재 유저태그 테이블을 전부 비운뒤에 태그를 새로 저장함
+		foundUser.getUserTags().clear();
+		tagService.saveTags(foundUser, userUpdateRequest.getTags());
 
 		return UserResponse.from(foundUser);
 	}
 
 	@Transactional
 	public Void modifyPassword(Long userId, UserPasswordRequest userPasswordRequest) {
-		User foundUser = findUserById(userId);
+		User foundUser = findByIdOrElseThrow(userId);
 
 		// 이전 비밀번호가 맞는지 확인
 		if (!passwordEncoder.matches(userPasswordRequest.getOldPassword(), foundUser.getPassword())) {
@@ -120,7 +119,7 @@ public class UserService {
 
 	@Transactional
 	public Void deleteUser(Long userId, UserDeleteRequest userDeleteRequest) {
-		User foundUser = findUserById(userId);
+		User foundUser = findByIdOrElseThrow(userId);
 
 		// 비밀번호가 일치하는지 확인
 		if (!passwordEncoder.matches(userDeleteRequest.getPassword(), foundUser.getPassword())) {
@@ -133,26 +132,7 @@ public class UserService {
 		return null;
 	}
 
-	// 태그 업데이트 메서드
-	private void updateUserTags(User user, Set<String> newTagNames) {
-		// 기존 태그 모두 제거 (orphanRemoval = true 설정되어 있다면 자동 삭제)
-		user.getUserTags().clear();
-		saveTags(user, newTagNames);
-	}
-
-	// 태그 저장 메서드
-	private void saveTags(User user, Set<String> tagNames) {
-		for (String tagName: tagNames) {
-			Tag tag = tagRepository.findByTagName(tagName)
-				.orElseGet(() -> tagRepository.save(new Tag(tagName)));
-
-			UserTag userTag = UserTag.of(tag, user);
-
-			user.addUserTag(userTag);
-		}
-	}
-
-	public User findUserById(Long userId) {
+	public User findByIdOrElseThrow(Long userId) {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
 
@@ -164,7 +144,7 @@ public class UserService {
 		return user;
 	}
 
-	public Optional<Object> findByEmail(String email) {
+	public Optional<Object> findByEmailOrElseThrow(String email) {
 		return Optional.ofNullable(userRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER)));
 	}

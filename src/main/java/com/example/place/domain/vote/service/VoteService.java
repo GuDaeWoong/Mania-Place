@@ -17,6 +17,7 @@ import com.example.place.domain.vote.entity.Vote;
 import com.example.place.domain.vote.entity.VoteType;
 import com.example.place.domain.vote.repository.VoteRepository;
 
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -30,7 +31,7 @@ public class VoteService {
 
 	@Transactional
 	public VoteResponseDto createVote(Long postId, VoteRequestDto request, Long userId) {
-		User user = userService.findUserById(userId);
+		User user = userService.findByIdOrElseThrow(userId);
 		Post post = postService.findByIdOrElseThrow(postId);
 
 		VoteType newVoteType = VoteType.valueOf(request.getVoteType());
