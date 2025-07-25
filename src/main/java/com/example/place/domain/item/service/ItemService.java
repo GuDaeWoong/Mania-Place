@@ -12,6 +12,7 @@ import com.example.place.domain.itemtag.repository.ItemTagRepository;
 import com.example.place.domain.tag.entity.Tag;
 import com.example.place.domain.tag.repository.TagRepository;
 
+import com.example.place.domain.tag.service.TagService;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.service.UserService;
 import org.springframework.data.domain.Page;
@@ -36,8 +37,7 @@ import java.util.List;
 public class ItemService {
 
     private final ItemRepository itemRepository;
-    private final ItemTagRepository itemTagRepository;
-    private final TagRepository tagRepository;
+    private final TagService tagService;
     private final UserService userService;
 	private final ImageService imageService;
 
@@ -87,8 +87,7 @@ public class ItemService {
 
 		//	태그 저장 로직
         for (String tagName: request.getItemTagNames()) {
-            Tag tag = tagRepository.findByTagName(tagName)
-                    .orElseGet(() -> tagRepository.save(Tag.of(tagName)));
+			Tag tag = tagService.findOrCreateTagByName(tagName);
 
             ItemTag itemTag = ItemTag.of(tag, item);
 
