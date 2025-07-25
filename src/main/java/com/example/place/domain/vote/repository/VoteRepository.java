@@ -1,8 +1,11 @@
 package com.example.place.domain.vote.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.example.place.domain.post.entity.Post;
 import com.example.place.domain.user.entity.User;
@@ -12,5 +15,14 @@ import com.example.place.domain.vote.entity.VoteType;
 public interface VoteRepository extends JpaRepository<Vote, Long> {
 	Optional<Vote> findByUserAndPostAndVoteType(User user, Post post, VoteType attr0);
 
-	Long countByPostAndVoteType(Post post, VoteType voteType);
+	@Query("""
+		SELECT
+		    COUNT(CASE WHEN v.voteType = 'LIKE' THEN 1 END),
+		    COUNT(CASE WHEN v.voteType = 'DISLIKE' THEN 1 END),
+		    MAX(CASE WHEN v.voteType = 'LIKE' AND v.user.id = :userId THEN 1 ELSE 0 END),
+		    MAX(CASE WHEN v.voteType = 'DISLIKE' AND v.user.id = :userId THEN 1 ELSE 0 END)
+		FROM Vote v
+		JOIN v.post p
+		WHERE p.id = :postId""")
+	List<Object[]> findVoteStatsByPostIds(@Param("postId") Long postId, @Param("userId") Long userId);
 }
