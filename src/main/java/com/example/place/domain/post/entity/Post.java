@@ -1,5 +1,6 @@
 package com.example.place.domain.post.entity;
 
+import com.example.place.common.entity.BaseEntity;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.user.entity.User;
 
@@ -19,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "posts")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Post {
+public class Post extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,21 +37,17 @@ public class Post {
 	@Lob
 	private String content;
 
-	private String image;
-
-	private Post(User user, Item item, String content, String image) {
+	private Post(User user, Item item, String content) {
 		this.user = user;
 		this.item = item;
 		this.content = content;
-		this.image = image;
 	}
 
-	public static Post of(User user, Item item, String content, String image){
-		return new Post(user, item, content, image);
+	public static Post of(User user, Item item, String content) {
+		return new Post(user, item, content);
 	}
 
-	public void update(String content, String image) {
+	public void update(String content) {
 		this.content = content;
-		this.image = image;
 	}
 }
