@@ -3,6 +3,7 @@ package com.example.place.common.filter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
@@ -30,7 +31,7 @@ import lombok.RequiredArgsConstructor;
 public class JwtFilter extends OncePerRequestFilter implements Ordered {
 
 	private final JwtUtil jwtUtil;
-	private final UserService userService;
+	private final UserRepository userRepository;
 
 	private static final String BEARER_PREFIX = "Bearer ";
 
@@ -63,7 +64,8 @@ public class JwtFilter extends OncePerRequestFilter implements Ordered {
 		String subject = jwtUtil.extractUserId(jwt);
 		Long userId = Long.parseLong(subject);
 
-		User user = userService.findByIdOrElseThrow(userId);
+		Optional<User> userOptional = userRepository.findById(userId);
+		User user = userOptional.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
 
 		List<GrantedAuthority> authorities = List.of(
 			new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
@@ -76,6 +78,7 @@ public class JwtFilter extends OncePerRequestFilter implements Ordered {
 			user.getEmail(),
 			authorities
 		);
+
 
 
 		if (SecurityContextHolder.getContext().getAuthentication() == null) {
