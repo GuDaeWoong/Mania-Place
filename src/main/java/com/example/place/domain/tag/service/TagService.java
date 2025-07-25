@@ -28,6 +28,11 @@ public class TagService {
 
         return TagResponse.from(tag);
     }
+    @Transactional
+    public Tag findOrCreateTagByName(String tagName) {
+        return tagRepository.findByTagName(tagName)
+                .orElseGet(() -> tagRepository.save(Tag.of(tagName)));
+    }
 
     @Transactional(readOnly = true)
     public TagResponse getTag(Long tagId) {
@@ -53,9 +58,13 @@ public class TagService {
         tagRepository.delete(tag);
     }
 
+    public Tag findByTagNameOrElseThrow(String tagName) {
+        return tagRepository.findByTagName(tagName)
+                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_TAG));
+    }
+
     public Tag findByIdOrElseThrow(Long tagId) {
         return tagRepository.findById(tagId)
                 .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_TAG));
     }
-
 }
