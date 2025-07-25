@@ -26,14 +26,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/accounts")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class UserController {
 
 	private final UserService userService;
 
 	//유저 회원가입
-	@PostMapping
+	@PostMapping("/accounts")
 	public ResponseEntity<ApiResponseDto<UserRegisterResponse>> register(
 		@Valid @RequestBody UserRegisterRequest userRegisterRequest
 	) {
@@ -41,7 +41,7 @@ public class UserController {
 	}
 
 	//어드민 회원가입
-	@PostMapping("/admin")
+	@PostMapping("/admin/accounts")
 	public ResponseEntity<ApiResponseDto<UserRegisterResponse>> registerAdmin(
 		@Valid @RequestBody UserRegisterRequest userRegisterRequest
 	) {
@@ -49,7 +49,7 @@ public class UserController {
 	}
 
 	//유저 조회 일단은 어드민용?
-	@GetMapping("/{id}")
+	@GetMapping("/accounts/{id}")
 	public ResponseEntity<ApiResponseDto<UserResponse>> getUser(
 		@PathVariable Long id
 	) {
@@ -57,7 +57,7 @@ public class UserController {
 	}
 
 	//마이페이지 조회
-	@GetMapping("/me")
+	@GetMapping("/accounts/me")
 	public ResponseEntity<ApiResponseDto<UserResponse>> getMyAccount(
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
@@ -66,7 +66,7 @@ public class UserController {
 	}
 
 	//내 정보 수정
-	@PatchMapping("/me")
+	@PatchMapping("/accounts/me")
 	public ResponseEntity<ApiResponseDto<UserResponse>> updateUser(
 		@AuthenticationPrincipal CustomPrincipal principal,
 		@Valid @RequestBody UserUpdateRequest userUpdateRequest
@@ -76,7 +76,7 @@ public class UserController {
 	}
 
 	//내 비밀번호 수정
-	@PatchMapping("/me/password")
+	@PatchMapping("/accounts/me/password")
 	public ResponseEntity<ApiResponseDto<Void>> changePassword(
 		@AuthenticationPrincipal CustomPrincipal principal,
 		@Valid @RequestBody UserPasswordRequest userPasswordRequest
@@ -86,7 +86,7 @@ public class UserController {
 	}
 
 	//회원 삭제
-	@DeleteMapping("/me")
+	@DeleteMapping("/accounts/me")
 	public ResponseEntity<ApiResponseDto<Void>> deleteUser(
 		@AuthenticationPrincipal CustomPrincipal principal,
 		@Valid @RequestBody UserDeleteRequest userDeleteRequest
