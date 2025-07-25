@@ -29,7 +29,7 @@ public class PostCommnetService {
 
 	@Transactional
 	public PostCommentResponse createPostComment(Long postId, PostCommentRequest request, CustomPrincipal principal) {
-		User user = userService.findUserById(principal.getId());
+		User user = userService.findByIdOrElseThrow(principal.getId());
 
 		Post post = postService.findByIdOrElseThrow(postId);
 
@@ -44,7 +44,7 @@ public class PostCommnetService {
 
 		postService.findByIdOrElseThrow(postId);
 
-		User user = userService.findUserById(principal.getId());
+		User user = userService.findByIdOrElseThrow(principal.getId());
 
 		PostComment postComment = postCommentRepository.findById(commentId)
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_COMMENT));
