@@ -31,7 +31,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 		ErrorResponseDto errorResponseDto = new ErrorResponseDto(
 			status.value(),
 			status.getReasonPhrase(),
-			"인증되지 않은 URL 요청입니다.",
+			"인증에 실패 했습니다.",
 			request.getRequestURI()
 		);
 		String responseBody = objectMapper.writeValueAsString(errorResponseDto);
