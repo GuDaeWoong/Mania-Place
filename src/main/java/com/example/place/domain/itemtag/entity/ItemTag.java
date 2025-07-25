@@ -16,7 +16,6 @@ public class ItemTag {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Setter
 	@JoinColumn(name = "item_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private Item item;
@@ -32,5 +31,9 @@ public class ItemTag {
 
     public static ItemTag of(Tag tag, Item item) {
         return new ItemTag(tag,item);
+    }
+
+    public void setItem(Item item) {
+        this.item = item;
     }
 }
