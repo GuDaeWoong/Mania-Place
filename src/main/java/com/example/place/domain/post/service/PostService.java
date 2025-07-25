@@ -71,10 +71,10 @@ public class PostService {
 
 	//살까말까 내 글 조회
 	@Transactional(readOnly = true)
-	public PageResponseDto<PostResponseDto> findMyPosts(Long userId, Pageable pageable) {
+	public PageResponseDto<PostResponseDto> getMyPosts(Long userId, Pageable pageable) {
 		User user = userService.findByIdOrElseThrow(userId);
 
-		Page<Post> postsPage = postRepository.findAllByUser(user,pageable);
+		Page<Post> postsPage = postRepository.findAllByUser(user, pageable);
 
 		// 현제 페이지의 게시글과 맵핑된 상품별로 이미지 리스트 생성
 		Map<Long, List<Image>> itemIdToImagesMap = mapItemIdsToImagesFromPosts(postsPage);

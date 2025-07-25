@@ -10,7 +10,6 @@ import lombok.Getter;
 
 @Getter
 public class PostResponseDto {
-	private final Long id;
 	private final String content;
 	private final String nickname;
 	private final Long itemId;
@@ -19,7 +18,6 @@ public class PostResponseDto {
 
 	private PostResponseDto(Long id, String content, String nickname, Long itemId, List<String> imageUrls,
 		int mainIndex) {
-		this.id = id;
 		this.content = content;
 		this.nickname = nickname;
 		this.itemId = itemId;

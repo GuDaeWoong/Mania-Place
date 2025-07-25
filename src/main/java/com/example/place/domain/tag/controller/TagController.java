@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/tags")
+@RequestMapping("/api/admin/tags")
 public class TagController {
 
     private final TagService tagService;
@@ -44,8 +44,4 @@ public class TagController {
         tagService.deleteTag(tagId);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("태그가 삭제되었습니다.",null));
     }
-
-
-
-
 }
