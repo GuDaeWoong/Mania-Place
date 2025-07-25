@@ -11,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.place.common.exception.enums.ExceptionCode;
@@ -19,6 +20,7 @@ import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.common.security.jwt.JwtUtil;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.repository.UserRepository;
+import com.example.place.domain.user.service.CustomUserDetailsService;
 import com.example.place.domain.user.service.UserService;
 
 import jakarta.servlet.FilterChain;
@@ -31,7 +33,7 @@ import lombok.RequiredArgsConstructor;
 public class JwtFilter extends OncePerRequestFilter implements Ordered {
 
 	private final JwtUtil jwtUtil;
-	private final UserRepository userRepository;
+	private final CustomUserDetailsService customUserDetailsService;
 
 	private static final String BEARER_PREFIX = "Bearer ";
 
@@ -64,26 +66,11 @@ public class JwtFilter extends OncePerRequestFilter implements Ordered {
 		String subject = jwtUtil.extractUserId(jwt);
 		Long userId = Long.parseLong(subject);
 
-		Optional<User> userOptional = userRepository.findById(userId);
-		User user = userOptional.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
-
-		List<GrantedAuthority> authorities = List.of(
-			new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
-		);
-
-		CustomPrincipal principal = new CustomPrincipal(
-			user.getId(),
-			user.getName(),
-			user.getNickname(),
-			user.getEmail(),
-			authorities
-		);
-
-
+		UserDetails userDetails = customUserDetailsService.loadUserByUserId(userId);
 
 		if (SecurityContextHolder.getContext().getAuthentication() == null) {
 			UsernamePasswordAuthenticationToken authentication =
-				new UsernamePasswordAuthenticationToken(principal, null, authorities);
+				new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
 

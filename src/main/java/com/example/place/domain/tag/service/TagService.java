@@ -4,6 +4,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
+import com.example.place.domain.item.entity.Item;
+import com.example.place.domain.itemtag.entity.ItemTag;
 import com.example.place.domain.tag.dto.request.TagRequest;
 import com.example.place.domain.tag.dto.response.TagResponse;
 import com.example.place.domain.tag.entity.Tag;
@@ -11,11 +13,11 @@ import com.example.place.domain.tag.repository.TagRepository;
 import com.example.place.domain.tag.util.TagUtil;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.usertag.entity.UserTag;
-import com.example.place.domain.item.entity.Item;
-import com.example.place.domain.itemtag.entity.ItemTag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +36,11 @@ public class TagService {
         tagRepository.save(tag);
 
         return TagResponse.from(tag);
+    }
+    @Transactional
+    public Tag findOrCreateTagByName(String tagName) {
+        return tagRepository.findByTagName(tagName)
+                .orElseGet(() -> tagRepository.save(Tag.of(tagName)));
     }
 
     @Transactional(readOnly = true)
@@ -95,7 +102,6 @@ public class TagService {
 
     public Tag findOrCreateTag(String tagName) {
         return tagRepository.findByTagName(tagName)
-            .orElseGet(() -> tagRepository.save(Tag.of(tagName)));
+                .orElseGet(() -> tagRepository.save(Tag.of(tagName)));
     }
-
 }

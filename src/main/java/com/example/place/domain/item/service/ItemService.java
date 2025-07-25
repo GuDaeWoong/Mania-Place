@@ -7,11 +7,8 @@ import com.example.place.domain.item.dto.request.ItemRequest;
 import com.example.place.domain.item.dto.response.ItemResponse;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.item.repository.ItemRepository;
-import com.example.place.domain.itemtag.entity.ItemTag;
-import com.example.place.domain.itemtag.repository.ItemTagRepository;
-import com.example.place.domain.tag.entity.Tag;
-import com.example.place.domain.tag.repository.TagRepository;
 
+import com.example.place.domain.tag.service.TagService;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.service.UserService;
 import org.springframework.data.domain.Page;
@@ -36,8 +33,7 @@ import java.util.List;
 public class ItemService {
 
     private final ItemRepository itemRepository;
-    private final ItemTagRepository itemTagRepository;
-    private final TagRepository tagRepository;
+    private final TagService tagService;
     private final UserService userService;
 	private final ImageService imageService;
 
@@ -58,44 +54,26 @@ public class ItemService {
 		item.increaseStock(quantity);
 	}
 
-	//기본적인 태그 관리 흐름입니다
     @Transactional
     public ItemResponse createItem(Long userId, ItemRequest request) {
         User user = userService.findByIdOrElseThrow(userId);
+		List<LocalDateTime> sales_start0_end1 = setSalesTime(request);
 
-		LocalDateTime salesStartAt = request.getSalesStartAt() != null
-				? request.getSalesStartAt()
-				: LocalDateTime.now();
-
-		LocalDateTime salesEndAt = request.getSalesEndAt() != null
-				? request.getSalesEndAt()
-				: LocalDateTime.of(3000, 1, 1, 0, 0);
-//		:LocalDateTime.Max;
         Item item = Item.of(
                 user,
 				request.getItemName(),
 				request.getItemDescription(),
 				request.getPrice(),
 				request.getCount(),
-				salesStartAt,
-				salesEndAt
+				sales_start0_end1.get(0),
+				sales_start0_end1.get(1)
 				);
         itemRepository.save(item);
-
 		// 연관 이미지 저장
 		imageService.createImages(item, request.getImageUrls(), request.getMainIndex());
+		tagService.saveTags(item, request.getItemTagNames());
 
-		//	태그 저장 로직
-        for (String tagName: request.getItemTagNames()) {
-            Tag tag = tagRepository.findByTagName(tagName)
-                    .orElseGet(() -> tagRepository.save(Tag.of(tagName)));
-
-            ItemTag itemTag = ItemTag.of(tag, item);
-
-			item.addItemTag(itemTag);
-        }
-
-        return ItemResponse.from(item);
+		return ItemResponse.from(item);
     }
 
 	@Transactional(readOnly = true)
@@ -114,12 +92,11 @@ public class ItemService {
 		item.updateItem(request);
 
 		// 연관 이미지 수정
-		if ((request.getImageUrls() == null && request.getMainIndex() != null)
+		if (((request.getImageUrls() == null || request.getImageUrls().isEmpty()) && request.getMainIndex() != null)
 			|| (request.getImageUrls() != null && request.getMainIndex() == null)) {
 			throw new CustomException(ExceptionCode.INVALID_IMAGE_UPDATE_REQUEST);
 		}
-
-		if (request.getImageUrls() != null && request.getMainIndex() != null) {
+		if (request.getImageUrls() != null) {
 			imageService.updateImages(item, request.getImageUrls(), request.getMainIndex());
 		}
 
@@ -170,5 +147,16 @@ public class ItemService {
 			.findFirst()
 			.map(Image::getImageUrl)
 			.orElse(null);
+	}
+	private List<LocalDateTime> setSalesTime(ItemRequest request) {
+
+		LocalDateTime salesStartAt = request.getSalesStartAt() != null
+				? request.getSalesStartAt()
+				: LocalDateTime.now();
+
+		LocalDateTime salesEndAt = request.getSalesEndAt() != null
+				? request.getSalesEndAt()
+				: LocalDateTime.of(3000, 1, 1, 0, 0);
+		return List.of(salesStartAt, salesEndAt);
 	}
 }
