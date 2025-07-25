@@ -6,13 +6,18 @@ import lombok.Getter;
 public class VoteResponseDto {
 	private Long likeCount;
 	private Long disLikeCount;
+	private boolean isLike;
+	private boolean isDislike;
 
-	private VoteResponseDto(Long likeCount, Long dislikeCount) {
+	private VoteResponseDto(Long likeCount, Long dislikeCount, boolean isLike, boolean isDislike) {
 		this.likeCount = likeCount;
 		this.disLikeCount = dislikeCount;
+		this.isLike = isLike;
+		this.isDislike = isDislike;
+
 	}
 
-	public static VoteResponseDto of(Long likeCount, Long disLikeCount) {
-		return new VoteResponseDto(likeCount, disLikeCount);
+	public static VoteResponseDto of(Long likeCount, Long disLikeCount, boolean isLike, boolean isDislike) {
+		return new VoteResponseDto(likeCount, disLikeCount, isLike, isDislike);
 	}
 }
