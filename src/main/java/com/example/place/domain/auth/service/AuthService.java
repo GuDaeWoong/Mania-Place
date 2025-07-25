@@ -10,7 +10,6 @@ import com.example.place.common.security.jwt.JwtUtil;
 import com.example.place.domain.auth.controller.dto.LoginRequestDto;
 import com.example.place.domain.auth.controller.dto.LoginResponseDto;
 import com.example.place.domain.user.entity.User;
-import com.example.place.domain.user.repository.UserRepository;
 import com.example.place.domain.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,7 @@ public class AuthService {
 	private final JwtUtil jwtUtil;
 
 	public LoginResponseDto login(LoginRequestDto requestDto) {
-		User user = (User)userService.findByEmail(requestDto.getEmail())
+		User user = (User)userService.findByEmailOrElseThrow(requestDto.getEmail())
 			.orElseThrow(() -> new CustomException(ExceptionCode.INVALID_EMAIL_OR_PASSWORD));
 
 		if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
@@ -63,7 +62,7 @@ public class AuthService {
 
 		Long userId = Long.parseLong(userIdStr);
 
-		User user = userService.findUserById(userId);
+		User user = userService.findByIdOrElseThrow(userId);
 
 		String newAccessToken = jwtUtil.createAccessToken(user.getId());
 
