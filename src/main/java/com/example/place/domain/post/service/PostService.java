@@ -29,6 +29,7 @@ public class PostService {
 	private final ItemService itemService;
 
 	//살까말까 생성
+	@Transactional
 	public PostWithUserResponseDto createPost(Long userId, PostCreateRequestDto request) {
 		User user = userService.findByIdOrElseThrow(userId);
 		Item item = itemService.findByIdOrElseThrow(request.getItemId());
@@ -40,12 +41,14 @@ public class PostService {
 	}
 
 	//살까말까 단건 조회
+	@Transactional(readOnly = true)
 	public PostWithUserResponseDto getPost(Long postId) {
 		Post post = findByIdOrElseThrow(postId);
 		return PostWithUserResponseDto.from(post);
 	}
 
 	//살까말까 전체 조회
+	@Transactional(readOnly = true)
 	public PageResponseDto<PostWithUserResponseDto> getAllPosts(Pageable pageable) {
 
 		Page<Post> postsPage = postRepository.findAll(pageable);
@@ -57,6 +60,7 @@ public class PostService {
 
 
 	//살까말까 내 글 조회
+	@Transactional(readOnly = true)
 	public PageResponseDto<PostWithUserResponseDto> findMyPosts(Long userId, Pageable pageable) {
 		User user = userService.findByIdOrElseThrow(userId);
 

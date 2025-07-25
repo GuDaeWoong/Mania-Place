@@ -55,7 +55,7 @@ public class PostController {
 	//살까말까 전체 조회
 	@GetMapping
 	public ResponseEntity<ApiResponseDto<PageResponseDto<PostWithUserResponseDto>>> getAllPosts(
-		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+		@PageableDefault Pageable pageable
 	) {
 		PageResponseDto<PostWithUserResponseDto> posts = postService.getAllPosts(pageable);
 		return ResponseEntity.ok(ApiResponseDto.of("성공", posts));
@@ -64,7 +64,7 @@ public class PostController {
 	//살까말까 내 글 조회
 	@GetMapping("/me")
 	public ResponseEntity<ApiResponseDto<PageResponseDto<PostWithUserResponseDto>>> getMyPosts(
-		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+		@PageableDefault Pageable pageable,
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
 		PageResponseDto<PostWithUserResponseDto> posts = postService.findMyPosts(principal.getId(), pageable);
