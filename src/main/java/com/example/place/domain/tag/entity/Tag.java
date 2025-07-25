@@ -19,6 +19,7 @@ public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(length = 70, nullable = false, unique = true)
     private String tagName;
 
     @OneToMany(mappedBy = "tag")
@@ -30,4 +31,8 @@ public class Tag {
     public Tag(String tagName) {
         this.tagName = tagName;
     }
+    public static Tag of(String tagName) {
+        return new Tag(tagName);
+    }
+
 }
