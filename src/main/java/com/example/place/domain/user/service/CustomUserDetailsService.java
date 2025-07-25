@@ -23,6 +23,24 @@ public class CustomUserDetailsService implements UserDetailsService {
 
 	private final UserRepository userRepository;
 
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+		User user = userRepository.findByEmail(username)
+			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
+
+		List<GrantedAuthority> authorities = List.of(
+			new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
+		);
+
+		return new CustomPrincipal(
+			user.getId(),
+			user.getName(),
+			user.getNickname(),
+			user.getEmail(),
+			authorities
+		);
+	}
 
 	public UserDetails loadUserByUserId(Long userId) {
 		User user = userRepository.findById(userId)
@@ -39,10 +57,5 @@ public class CustomUserDetailsService implements UserDetailsService {
 			user.getEmail(),
 			authorities
 		);
-	}
-
-	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		throw new UnsupportedOperationException("사용하지 않음");
 	}
 }
