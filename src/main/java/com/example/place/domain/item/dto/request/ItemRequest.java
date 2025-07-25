@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @NoArgsConstructor
@@ -27,7 +28,7 @@ public class ItemRequest {
     private Integer mainIndex;
     @NotNull(message = "태그 리스트는 null일 수 없습니다.")
     @Size(min = 1, message = "최소 하나 이상의 태그가 필요합니다.")
-    private List<String> itemTagNames;
+    private Set<String> itemTagNames;
 
 
 }
