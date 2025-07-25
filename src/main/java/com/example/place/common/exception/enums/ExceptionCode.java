@@ -55,6 +55,7 @@ public enum ExceptionCode {
 	NOT_FOUND_COMMENT(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다."),
 	NOT_FOUND_POST(HttpStatus.NOT_FOUND, "게시물이 존재하지 않습니다."),
 	NOT_FOUND_ORDER(HttpStatus.NOT_FOUND, "존재하지 않는 오더id 입니다."),
+	NOT_FOUND_VOTE(HttpStatus.NOT_FOUND, "존재하지 않는 투표입니다."),
 	NOT_FOUND_TAG(HttpStatus.NOT_FOUND,"존재하지 않는 태그입니다."),
 
 	// 409 Conflict
