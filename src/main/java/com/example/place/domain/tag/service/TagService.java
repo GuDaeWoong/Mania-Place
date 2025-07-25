@@ -1,9 +1,7 @@
 package com.example.place.domain.tag.service;
 
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.tag.dto.request.TagRequest;
@@ -78,7 +76,7 @@ public class TagService {
 
     // 아이템 태그 저장 메서드
     public void saveTags(Item item, Set<String> tagNames) {
-        Set<String> normalizedTags = new HashSet<>();
+        Set<String> normalizedTags = new LinkedHashSet<>();
 
         for (String tagName : tagNames) {
             normalizedTags.add(TagUtil.normalizeTag(tagName));
