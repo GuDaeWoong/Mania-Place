@@ -56,7 +56,7 @@ public class VoteService {
 	}
 
 	public VoteResponseDto deleteVote(Long postId, @Valid VoteRequestDto request, Long userId) {
-		User user = userService.findUserById(userId);
+		User user = userService.findByIdOrElseThrow(userId);
 		Post post = postService.findByIdOrElseThrow(postId);
 
 		VoteType newVoteType = VoteType.valueOf(request.getVoteType());
