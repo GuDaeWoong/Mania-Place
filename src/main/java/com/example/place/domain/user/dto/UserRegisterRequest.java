@@ -1,6 +1,6 @@
 package com.example.place.domain.user.dto;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import jakarta.validation.constraints.Email;
@@ -30,7 +30,7 @@ public class UserRegisterRequest {
 	private final String imageUrl;
 
 	@Size(max = 5, message = "태그는 최대 5개까지 등록할 수 있습니다.")
-	private final Set<@Size(max = 70, message = "태그명은 70자를 초과할 수 없습니다.")String> tags = new HashSet<>();
+	private final Set<@Size(max = 70, message = "태그명은 70자를 초과할 수 없습니다.")String> tags = new LinkedHashSet<>();
 
 	public UserRegisterRequest(String name, String nickname, String email, String password, String imageUrl) {
 		this.name = name;
