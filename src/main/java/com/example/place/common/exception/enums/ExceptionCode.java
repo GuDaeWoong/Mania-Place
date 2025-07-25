@@ -1,5 +1,6 @@
 package com.example.place.common.exception.enums;
 
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 
 import lombok.Getter;
@@ -55,6 +56,7 @@ public enum ExceptionCode {
 	NOT_FOUND_COMMENT(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다."),
 	NOT_FOUND_POST(HttpStatus.NOT_FOUND, "게시물이 존재하지 않습니다."),
 	NOT_FOUND_ORDER(HttpStatus.NOT_FOUND, "존재하지 않는 오더id 입니다."),
+	NOT_FOUND_VOTE(HttpStatus.NOT_FOUND, "존재하지 않는 투표입니다."),
 
 	// 409 Conflict
 	OUT_OF_STOCK(HttpStatus.CONFLICT, "상품의 개수가 부족합니다."),

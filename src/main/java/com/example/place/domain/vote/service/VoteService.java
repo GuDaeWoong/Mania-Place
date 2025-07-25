@@ -17,7 +17,7 @@ import com.example.place.domain.vote.entity.Vote;
 import com.example.place.domain.vote.entity.VoteType;
 import com.example.place.domain.vote.repository.VoteRepository;
 
-import aj.org.objectweb.asm.commons.GeneratorAdapter;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -29,7 +29,7 @@ public class VoteService {
 	private final UserService userService;
 
 	@Transactional
-	public VoteResponseDto vote(Long postId, VoteRequestDto request, Long userId) {
+	public VoteResponseDto createVote(Long postId, VoteRequestDto request, Long userId) {
 		User user = userService.findUserById(userId);
 		Post post = postService.findByIdOrElseThrow(postId);
 
@@ -46,6 +46,27 @@ public class VoteService {
 		// 투표 저장
 		Vote vote = Vote.of(user, post, newVoteType);
 		voteRepository.save(vote);
+
+		// like 개수
+		Long likeCount = voteRepository.countByPostAndVoteType(post, VoteType.LIKE);
+		// dislike 개수
+		Long dislikeCount = voteRepository.countByPostAndVoteType(post, VoteType.DISLIKE);
+
+		return VoteResponseDto.of(likeCount, dislikeCount);
+	}
+
+	public VoteResponseDto deleteVote(Long postId, @Valid VoteRequestDto request, Long userId) {
+		User user = userService.findUserById(userId);
+		Post post = postService.findByIdOrElseThrow(postId);
+
+		VoteType newVoteType = VoteType.valueOf(request.getVoteType());
+
+		// 취소할 투표가 존재하는지 확인 (취소할 투표가 없다면 에러 반환)
+		Vote existingVote = voteRepository.findByUserAndPostAndVoteType(user, post, newVoteType)
+			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_VOTE));
+
+		// 투표 삭제
+		voteRepository.delete(existingVote);
 
 		// like 개수
 		Long likeCount = voteRepository.countByPostAndVoteType(post, VoteType.LIKE);
