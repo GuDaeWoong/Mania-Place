@@ -36,21 +36,17 @@ public class Post {
 	@Lob
 	private String content;
 
-	private String image;
-
-	private Post(User user, Item item, String content, String image) {
+	private Post(User user, Item item, String content) {
 		this.user = user;
 		this.item = item;
 		this.content = content;
-		this.image = image;
 	}
 
-	public static Post of(User user, Item item, String content, String image){
-		return new Post(user, item, content, image);
+	public static Post of(User user, Item item, String content) {
+		return new Post(user, item, content);
 	}
 
-	public void update(String content, String image) {
+	public void update(String content) {
 		this.content = content;
-		this.image = image;
 	}
 }

@@ -33,7 +33,7 @@ public class PostService {
 		User user = userService.findByIdOrElseThrow(userId);
 		Item item = itemService.findByIdOrElseThrow(request.getItemId());
 
-		Post post = Post.of(user, item, request.getContent(), request.getImage());
+		Post post = Post.of(user, item, request.getContent());
 		Post saved = postRepository.save(post);
 
 		return new PostWithUserResponseDto(saved,user.getNickname());
@@ -83,7 +83,7 @@ public class PostService {
 			throw new CustomException(ExceptionCode.FORBIDDEN_POST_ACCESS);
 		}
 
-		post.update(request.getContent(), request.getImage());
+		post.update(request.getContent());
 		return new PostWithUserResponseDto(post,user.getNickname());
 	}
 
