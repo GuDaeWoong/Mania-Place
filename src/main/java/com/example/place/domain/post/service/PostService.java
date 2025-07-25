@@ -36,25 +36,21 @@ public class PostService {
 		Post post = Post.of(user, item, request.getContent());
 		Post saved = postRepository.save(post);
 
-		return new PostWithUserResponseDto(saved,user.getNickname());
+		return PostWithUserResponseDto.from(saved);
 	}
 
 	//살까말까 단건 조회
-	public PostWithUserResponseDto readPost(Long postId,Long userId) {
-		User user = userService.findByIdOrElseThrow(userId);
+	public PostWithUserResponseDto getPost(Long postId) {
 		Post post = findByIdOrElseThrow(postId);
-		return new PostWithUserResponseDto(post,user.getNickname());
+		return PostWithUserResponseDto.from(post);
 	}
 
 	//살까말까 전체 조회
-	public PageResponseDto<PostWithUserResponseDto> getAllPosts(Pageable pageable, Long userId) {
-		User user = userService.findByIdOrElseThrow(userId);
+	public PageResponseDto<PostWithUserResponseDto> getAllPosts(Pageable pageable) {
 
 		Page<Post> postsPage = postRepository.findAll(pageable);
 
-		Page<PostWithUserResponseDto> dtoPage = postsPage.map(post ->
-			new PostWithUserResponseDto(post, user.getNickname())
-		);
+		Page<PostWithUserResponseDto> dtoPage = postsPage.map(PostWithUserResponseDto::from);
 
 		return new PageResponseDto<>(dtoPage);
 	}
@@ -66,9 +62,7 @@ public class PostService {
 
 		Page<Post> postsPage = postRepository.findAllByUser(user,pageable);
 
-		Page<PostWithUserResponseDto> dtoPage = postsPage.map(post ->
-			new PostWithUserResponseDto(post,user.getNickname())
-		);
+		Page<PostWithUserResponseDto> dtoPage = postsPage.map(PostWithUserResponseDto::from);
 
 		return new PageResponseDto<>(dtoPage);
 	}
@@ -76,7 +70,6 @@ public class PostService {
 	//살까말까 수정
 	@Transactional
 	public PostWithUserResponseDto updatePost(Long postId, PostUpdateRequestDto request, Long userId) {
-		User user = userService.findByIdOrElseThrow(userId);
 		Post post = findByIdOrElseThrow(postId);
 
 		if (!post.getUser().getId().equals(userId)) {
@@ -84,7 +77,7 @@ public class PostService {
 		}
 
 		post.update(request.getContent());
-		return new PostWithUserResponseDto(post,user.getNickname());
+		return PostWithUserResponseDto.from(post);
 	}
 
 	//살까말까 삭제

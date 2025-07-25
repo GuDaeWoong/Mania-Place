@@ -1,6 +1,5 @@
 package com.example.place.domain.post.controller;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -46,21 +45,19 @@ public class PostController {
 
 	//살까말까 단건 조회
 	@GetMapping("/{postId}")
-	public ResponseEntity<ApiResponseDto<PostWithUserResponseDto>> readPost(
-		@PathVariable Long postId,
-		@AuthenticationPrincipal CustomPrincipal principal
+	public ResponseEntity<ApiResponseDto<PostWithUserResponseDto>> getPost(
+		@PathVariable Long postId
 	) {
-		PostWithUserResponseDto post = postService.readPost(postId,principal.getId());
+		PostWithUserResponseDto post = postService.getPost(postId);
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 조회가 완료되었습니다.", post));
 	}
 
 	//살까말까 전체 조회
 	@GetMapping
 	public ResponseEntity<ApiResponseDto<PageResponseDto<PostWithUserResponseDto>>> getAllPosts(
-		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-		@AuthenticationPrincipal CustomPrincipal principal
+		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
 	) {
-		PageResponseDto<PostWithUserResponseDto> posts = postService.getAllPosts(pageable, principal.getId());
+		PageResponseDto<PostWithUserResponseDto> posts = postService.getAllPosts(pageable);
 		return ResponseEntity.ok(ApiResponseDto.of("성공", posts));
 	}
 

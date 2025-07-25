@@ -17,7 +17,17 @@ public class PostWithUserResponseDto {
 	private List<String> imageUrls;
 	private int mainIndex;
 
-	public PostWithUserResponseDto(Post post,String nickname) {
+	private PostWithUserResponseDto(Long id, String content, String nickname, Long itemId, List<String> imageUrls,
+		int mainIndex) {
+		this.id = id;
+		this.content = content;
+		this.nickname = nickname;
+		this.itemId = itemId;
+		this.imageUrls = imageUrls;
+		this.mainIndex = mainIndex;
+	}
+
+	public static PostWithUserResponseDto from(Post post) {
 		List<Image> images = post.getItem().getImages();
 		List<String> imageUrls = new ArrayList<>();
 		int mainIndex = 0;
@@ -28,11 +38,12 @@ public class PostWithUserResponseDto {
 			}
 		}
 
-		this.id = post.getId();
-		this.content = post.getContent();
-		this.nickname = nickname;
-		this.itemId = post.getItem().getId();
-		this.imageUrls = imageUrls;
-		this.mainIndex = mainIndex;
+		return new PostWithUserResponseDto(post.getId(),
+			post.getContent(),
+			post.getUser().getNickname(),
+			post.getItem().getId(),
+			imageUrls,
+			mainIndex);
 	}
+
 }
