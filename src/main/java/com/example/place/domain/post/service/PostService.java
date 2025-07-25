@@ -30,7 +30,7 @@ public class PostService {
 
 	//살까말까 생성
 	public PostWithUserResponseDto createPost(Long userId, PostCreateRequestDto request) {
-		User user = userService.findUserById(userId);
+		User user = userService.findByIdOrElseThrow(userId);
 		Item item = itemService.findByIdOrElseThrow(request.getItemId());
 
 		Post post = Post.of(user, item, request.getContent(), request.getImage());
@@ -41,14 +41,14 @@ public class PostService {
 
 	//살까말까 단건 조회
 	public PostWithUserResponseDto readPost(Long postId,Long userId) {
-		User user = userService.findUserById(userId);
+		User user = userService.findByIdOrElseThrow(userId);
 		Post post = findByIdOrElseThrow(postId);
 		return new PostWithUserResponseDto(post,user.getNickname());
 	}
 
 	//살까말까 전체 조회
 	public PageResponseDto<PostWithUserResponseDto> getAllPosts(Pageable pageable, Long userId) {
-		User user = userService.findUserById(userId);
+		User user = userService.findByIdOrElseThrow(userId);
 
 		Page<Post> postsPage = postRepository.findAll(pageable);
 
@@ -62,7 +62,7 @@ public class PostService {
 
 	//살까말까 내 글 조회
 	public PageResponseDto<PostWithUserResponseDto> findMyPosts(Long userId, Pageable pageable) {
-		User user = userService.findUserById(userId);
+		User user = userService.findByIdOrElseThrow(userId);
 
 		Page<Post> postsPage = postRepository.findAllByUser(user,pageable);
 
@@ -76,7 +76,7 @@ public class PostService {
 	//살까말까 수정
 	@Transactional
 	public PostWithUserResponseDto updatePost(Long postId, PostUpdateRequestDto request, Long userId) {
-		User user = userService.findUserById(userId);
+		User user = userService.findByIdOrElseThrow(userId);
 		Post post = findByIdOrElseThrow(postId);
 
 		if (!post.getUser().getId().equals(userId)) {

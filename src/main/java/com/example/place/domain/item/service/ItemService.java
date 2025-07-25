@@ -61,7 +61,7 @@ public class ItemService {
 	//기본적인 태그 관리 흐름입니다
     @Transactional
     public ItemResponse createItem(Long userId, ItemRequest request) {
-        User user = userService.findUserById(userId);
+        User user = userService.findByIdOrElseThrow(userId);
 
 		LocalDateTime salesStartAt = request.getSalesStartAt() != null
 				? request.getSalesStartAt()

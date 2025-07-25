@@ -17,7 +17,6 @@ import com.example.place.domain.vote.entity.Vote;
 import com.example.place.domain.vote.entity.VoteType;
 import com.example.place.domain.vote.repository.VoteRepository;
 
-import aj.org.objectweb.asm.commons.GeneratorAdapter;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -30,7 +29,7 @@ public class VoteService {
 
 	@Transactional
 	public VoteResponseDto vote(Long postId, VoteRequestDto request, Long userId) {
-		User user = userService.findUserById(userId);
+		User user = userService.findByIdOrElseThrow(userId);
 		Post post = postService.findByIdOrElseThrow(postId);
 
 		VoteType newVoteType = VoteType.valueOf(request.getVoteType());
