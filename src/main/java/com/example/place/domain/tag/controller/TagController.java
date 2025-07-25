@@ -25,5 +25,30 @@ public class TagController {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("태그 생성이 완료되었습니다.", tag));
     }
 
+    @GetMapping("{tagId}")
+    public ResponseEntity<ApiResponseDto<TagResponse>> getTag(@PathVariable Long tagId) {
+        TagResponse tag = tagService.getTag(tagId);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("태그가 조회되었습니다.",tag));
+    }
+
+    @PatchMapping("{tagId}")
+    public ResponseEntity<ApiResponseDto<TagResponse>> updateTag(
+            @PathVariable Long tagId,
+            @Valid @RequestBody TagRequest tagRequest) {
+        TagResponse tag = tagService.updateTag(tagId, tagRequest);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("태그이름이 수정되었습니다.",tag));
+    }
+
+    @DeleteMapping("/{tagId}")
+    public ResponseEntity<ApiResponseDto<Void>> deleteTag(
+            @PathVariable Long tagId,
+            @AuthenticationPrincipal CustomPrincipal principal
+    ) {
+        tagService.deleteTag(tagId);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("태그가 삭제되었습니다.",null));
+    }
+
+
+
 
 }

@@ -88,7 +88,7 @@ public class ItemService {
 		//	태그 저장 로직
         for (String tagName: request.getItemTagNames()) {
             Tag tag = tagRepository.findByTagName(tagName)
-                    .orElseGet(() -> tagRepository.save(new Tag(tagName)));
+                    .orElseGet(() -> tagRepository.save(Tag.of(tagName)));
 
             ItemTag itemTag = new ItemTag(null, item, tag);
 

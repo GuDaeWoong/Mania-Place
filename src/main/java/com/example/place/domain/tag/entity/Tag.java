@@ -28,11 +28,17 @@ public class Tag {
     @OneToMany(mappedBy = "tag")
     private List<UserTag> userTags = new ArrayList<>();
 
-    public Tag(String tagName) {
+    private Tag(String tagName) {
         this.tagName = tagName;
     }
     public static Tag of(String tagName) {
         return new Tag(tagName);
     }
+
+
+    public void updateTag(String tagName) {
+        this.tagName = tagName;
+    }
+
 
 }
