@@ -1,6 +1,5 @@
 package com.example.place.common.exception.enums;
 
-import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 
 import lombok.Getter;

@@ -14,7 +14,6 @@ import com.example.place.common.dto.ApiResponseDto;
 import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.vote.dto.request.VoteRequestDto;
 import com.example.place.domain.vote.dto.response.VoteResponseDto;
-import com.example.place.domain.vote.entity.Vote;
 import com.example.place.domain.vote.service.VoteService;
 
 import jakarta.validation.Valid;
