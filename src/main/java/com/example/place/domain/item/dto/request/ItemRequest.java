@@ -1,9 +1,6 @@
 package com.example.place.domain.item.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -14,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 public class ItemRequest {
 
-    @NotBlank(message = "사용자 이름은 필수입니다")
+    @NotBlank(message = "상품 이름은 필수입니다")
     private String itemName;
     @NotBlank(message = "상품 설명은 필수입니다.")
     private String itemDescription;
@@ -28,6 +25,8 @@ public class ItemRequest {
     @NotEmpty(message = "최소 1개의 이미지가 있어야합니다.")
     private List<String> imageUrls;
     private Integer mainIndex;
+    @NotNull(message = "태그 리스트는 null일 수 없습니다.")
+    @Size(min = 1, message = "최소 하나 이상의 태그가 필요합니다.")
     private List<String> itemTagNames;
 
 
