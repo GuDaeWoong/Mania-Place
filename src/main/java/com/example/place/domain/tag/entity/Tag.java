@@ -35,4 +35,10 @@ public class Tag {
         return new Tag(tagName);
     }
 
+
+    public void updateTag(String tagName) {
+        this.tagName = tagName;
+    }
+
+
 }
