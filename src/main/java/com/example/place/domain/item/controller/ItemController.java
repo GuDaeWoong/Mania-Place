@@ -29,21 +29,23 @@ public class ItemController {
 
     /**
      * 상품 생성 기존 Tag가 있다면 사용 없다면 생성해서 상품등록
+     *
      * @param request
      * @param
      * @return
      */
     @PostMapping
     public ResponseEntity<ApiResponseDto<ItemResponse>> createItem(
-        @Valid @RequestBody ItemRequest request,
+            @Valid @RequestBody ItemRequest request,
             @AuthenticationPrincipal CustomPrincipal principal
     ) {
         ItemResponse item = itemService.createItem(principal.getId(), request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponseDto.of("상품 등록이 완료되었습니다.", item)) ;
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponseDto.of("상품 등록이 완료되었습니다.", item));
     }
 
     /**
      * 상품 단건 조회
+     *
      * @param itemId
      * @return
      */
@@ -55,6 +57,7 @@ public class ItemController {
 
     /**
      * 원하는 값으로 조회
+     *
      * @param keyword
      * @param tags
      * @param userId
@@ -75,6 +78,7 @@ public class ItemController {
 
     /**
      * 상품 단건 수정
+     *
      * @param request
      * @return
      */
@@ -90,6 +94,7 @@ public class ItemController {
 
     /**
      * 상품 삭제
+     *
      * @param itemId
      * @param principal
      * @return
