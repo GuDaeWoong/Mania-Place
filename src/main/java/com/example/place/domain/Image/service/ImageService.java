@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.example.place.common.exception.enums.ExceptionCode;
+import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.Image.repository.ImageRepository;
 import com.example.place.domain.item.entity.Item;
@@ -88,12 +90,9 @@ public class ImageService {
 	}
 
 	// 대표 이미지 인덱스 검증
-	private int validMainIndex(int listSize, Integer mainIndex) {
+	private int validMainIndex(int listSize, int mainIndex) {
 
-		return (mainIndex == null
-			|| mainIndex < 0
-			|| mainIndex >= listSize)
-			? 0 : mainIndex;
+		return (mainIndex < 0 || mainIndex >= listSize) ? 0 : mainIndex;
 	}
 
 	@Transactional
