@@ -2,13 +2,19 @@ package com.example.place.domain.tag.service;
 
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
+import com.example.place.domain.item.entity.Item;
+import com.example.place.domain.itemtag.entity.ItemTag;
 import com.example.place.domain.tag.dto.request.TagRequest;
 import com.example.place.domain.tag.dto.response.TagResponse;
 import com.example.place.domain.tag.entity.Tag;
 import com.example.place.domain.tag.repository.TagRepository;
+import com.example.place.domain.user.entity.User;
+import com.example.place.domain.usertag.entity.UserTag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -58,13 +64,29 @@ public class TagService {
         tagRepository.delete(tag);
     }
 
-    public Tag findByTagNameOrElseThrow(String tagName) {
-        return tagRepository.findByTagName(tagName)
-                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_TAG));
+    // 유저 태그 저장 메서드
+    public void saveTags(User user, Set<String> tagNames) {
+        for (String tagName: tagNames) {
+            Tag tag = findOrCreateTag(tagName);
+            user.addUserTag(UserTag.of(tag, user));
+        }
+    }
+
+    // 아이템 태그 저장 메서드
+    public void saveTags(Item item, Set<String> tagNames) {
+        for (String tagName: tagNames) {
+            Tag tag = findOrCreateTag(tagName);
+            item.addItemTag(ItemTag.of(tag, item));
+        }
     }
 
     public Tag findByIdOrElseThrow(Long tagId) {
         return tagRepository.findById(tagId)
                 .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_TAG));
+    }
+
+    public Tag findOrCreateTag(String tagName) {
+        return tagRepository.findByTagName(tagName)
+                .orElseGet(() -> tagRepository.save(Tag.of(tagName)));
     }
 }

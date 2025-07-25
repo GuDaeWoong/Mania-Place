@@ -21,7 +21,7 @@ public class UserTag {
     @ManyToOne(fetch = FetchType.LAZY)
     private Tag tag;
 
-    @JoinColumn(name = "user_id")
+	@JoinColumn(name = "user_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
@@ -37,6 +37,5 @@ public class UserTag {
     public void setUser(User user) {
         this.user = user;
     }
-
 }
 

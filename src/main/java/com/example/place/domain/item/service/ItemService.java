@@ -8,7 +8,9 @@ import com.example.place.domain.item.dto.response.ItemResponse;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.item.repository.ItemRepository;
 import com.example.place.domain.itemtag.entity.ItemTag;
+import com.example.place.domain.itemtag.repository.ItemTagRepository;
 import com.example.place.domain.tag.entity.Tag;
+import com.example.place.domain.tag.repository.TagRepository;
 
 import com.example.place.domain.tag.service.TagService;
 import com.example.place.domain.user.entity.User;
@@ -87,7 +89,8 @@ public class ItemService {
         for (String tagName: request.getItemTagNames()) {
 			Tag tag = tagService.findOrCreateTagByName(tagName);
 
-            ItemTag itemTag = new ItemTag(null, item, tag);
+            ItemTag itemTag = ItemTag.of(tag, item);
+
 			item.addItemTag(itemTag);
         }
 
@@ -154,6 +157,8 @@ public class ItemService {
 		return itemRepository.findById(id)
 				.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
 	}
+
+
 
 	public String getMainImageUrl(Long itemId) {
 		Item item =  itemRepository.findById(itemId)
