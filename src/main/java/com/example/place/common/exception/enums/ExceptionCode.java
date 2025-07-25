@@ -8,15 +8,9 @@ import lombok.Getter;
 public enum ExceptionCode {
 
 	// 400 Bad Request
-	INVALID_PASSWORD_FORMAT(HttpStatus.BAD_REQUEST, "비밀번호는 8자 이상이어야 하고, 대소문자 포함 영문 + 숫자 + 특수문자를 최소 1글자씩 포함해야 합니다."),
-	INVALID_EMAIL_OR_PASSWORD_FORMAT(HttpStatus.BAD_REQUEST, "이메일 또는 비밀번호 형식이 올바르지 않습니다."),
 	INCORRECT_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 올바르지 않습니다."),
 	DUPLICATE_NEW_PASSWORD(HttpStatus.BAD_REQUEST, "새 비밀번호는 기존 비밀번호와 달라야 합니다."),
 	PASSWORD_CONFIRM_MISMATCH(HttpStatus.BAD_REQUEST, "비밀번호 확인이 일치하지 않습니다."),
-	REQUIRED_FIELD_MISSING(HttpStatus.BAD_REQUEST, "필수 항목에 값을 입력해주세요."),
-	PASSWORD_TOO_SHORT(HttpStatus.BAD_REQUEST, "비밀번호는 최소 4자 이상이어야 합니다."),
-	CONTENT_REQUIRED(HttpStatus.BAD_REQUEST, "내용을 입력해주세요."),
-	ADDRESS_REQUIRED(HttpStatus.BAD_REQUEST, "주소지가 입력되지 않았습니다."),
 	NOT_SALE_PERIOD(HttpStatus.BAD_REQUEST, "판매 기간이 아닙니다."),
 	INVALID_ORDER_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "허용되지 않은 주문 상태 변환입니다."),
 	INVALID_IMAGE_UPDATE_REQUEST(HttpStatus.BAD_REQUEST, "이미지 수정을 위해서는 이미지 URL 목록과 대표 이미지 인덱스를 함께 보내주세요"),
@@ -39,7 +33,6 @@ public enum ExceptionCode {
 	FORBIDDEN_ITEM_DELETE(HttpStatus.FORBIDDEN, "본인 외에 상품은 삭제할 수 없습니다."),
 	FORBIDDEN_POST_ACCESS(HttpStatus.FORBIDDEN, "본인 외의 게시글은 수정할 수 없습니다."),
 	FORBIDDEN_POST_DELETE(HttpStatus.FORBIDDEN, "본인 외의 게시글은 삭제할 수 없습니다."),
-	ACCESS_DENIED(HttpStatus.FORBIDDEN, "관리자가 아니므로 수정할 수 없습니다."),
 	FORBIDDEN_ORDER_ACCESS(HttpStatus.FORBIDDEN, "해당 주문은 본인의 주문이 아닙니다."),
 	ORDER_CANCEL_ACCESS_DENIED(HttpStatus.FORBIDDEN, "주문을 취소할 권한이 없습니다."),
 	FORBIDDEN_COMMENT_ACCESS(HttpStatus.FORBIDDEN, "본인 외에 댓글은 수정할 수 없습니다."),
