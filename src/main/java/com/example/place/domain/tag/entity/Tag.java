@@ -22,17 +22,23 @@ public class Tag {
     @Column(length = 70, nullable = false, unique = true)
     private String tagName;
 
-    @OneToMany(mappedBy = "tag")
+    @OneToMany(mappedBy = "tag", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ItemTag> itemTags = new ArrayList<>();
 
     @OneToMany(mappedBy = "tag")
     private List<UserTag> userTags = new ArrayList<>();
 
-    public Tag(String tagName) {
+    private Tag(String tagName) {
         this.tagName = tagName;
     }
     public static Tag of(String tagName) {
         return new Tag(tagName);
     }
+
+
+    public void updateTag(String tagName) {
+        this.tagName = tagName;
+    }
+
 
 }

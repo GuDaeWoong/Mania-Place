@@ -61,7 +61,7 @@ public class ItemService {
 	//기본적인 태그 관리 흐름입니다
     @Transactional
     public ItemResponse createItem(Long userId, ItemRequest request) {
-        User user = userService.findUserById(userId);
+        User user = userService.findByIdOrElseThrow(userId);
 
 		LocalDateTime salesStartAt = request.getSalesStartAt() != null
 				? request.getSalesStartAt()
@@ -88,7 +88,7 @@ public class ItemService {
 		//	태그 저장 로직
         for (String tagName: request.getItemTagNames()) {
             Tag tag = tagRepository.findByTagName(tagName)
-                    .orElseGet(() -> tagRepository.save(new Tag(tagName)));
+                    .orElseGet(() -> tagRepository.save(Tag.of(tagName)));
 
             ItemTag itemTag = new ItemTag(null, item, tag);
 

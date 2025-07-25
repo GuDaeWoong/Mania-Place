@@ -62,19 +62,19 @@ public class UserService {
 
 	// 어드민 검색용
 	public UserResponse findUser(Long userId) {
-		User foundUser = findUserById(userId);
+		User foundUser = findByIdOrElseThrow(userId);
 		return UserResponse.from(foundUser);
 	}
 
 	// 마이페이지 조회용
 	public UserResponse findMyInfo(Long userId) {
-		User myInfo = findUserById(userId);
+		User myInfo = findByIdOrElseThrow(userId);
 		return UserResponse.from(myInfo);
 	}
 
 	@Transactional
 	public UserResponse modifyUser(Long userId, UserUpdateRequest userUpdateRequest) {
-		User foundUser = findUserById(userId);
+		User foundUser = findByIdOrElseThrow(userId);
 
 		// 닉네임이 변경되었을 때만 중복 검증
 		if (!foundUser.getNickname().equals(userUpdateRequest.getNickname()) &&
@@ -94,7 +94,7 @@ public class UserService {
 
 	@Transactional
 	public Void modifyPassword(Long userId, UserPasswordRequest userPasswordRequest) {
-		User foundUser = findUserById(userId);
+		User foundUser = findByIdOrElseThrow(userId);
 
 		// 이전 비밀번호가 맞는지 확인
 		if (!passwordEncoder.matches(userPasswordRequest.getOldPassword(), foundUser.getPassword())) {
@@ -120,7 +120,7 @@ public class UserService {
 
 	@Transactional
 	public Void deleteUser(Long userId, UserDeleteRequest userDeleteRequest) {
-		User foundUser = findUserById(userId);
+		User foundUser = findByIdOrElseThrow(userId);
 
 		// 비밀번호가 일치하는지 확인
 		if (!passwordEncoder.matches(userDeleteRequest.getPassword(), foundUser.getPassword())) {
@@ -144,7 +144,7 @@ public class UserService {
 	private void saveTags(User user, Set<String> tagNames) {
 		for (String tagName: tagNames) {
 			Tag tag = tagRepository.findByTagName(tagName)
-				.orElseGet(() -> tagRepository.save(new Tag(tagName)));
+				.orElseGet(() -> tagRepository.save(Tag.of(tagName)));
 
 			UserTag userTag = UserTag.of(tag, user);
 
@@ -152,7 +152,7 @@ public class UserService {
 		}
 	}
 
-	public User findUserById(Long userId) {
+	public User findByIdOrElseThrow(Long userId) {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
 
@@ -164,7 +164,7 @@ public class UserService {
 		return user;
 	}
 
-	public Optional<Object> findByEmail(String email) {
+	public Optional<Object> findByEmailOrElseThrow(String email) {
 		return Optional.ofNullable(userRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER)));
 	}

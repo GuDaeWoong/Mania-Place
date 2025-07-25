@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.place.common.dto.ApiResponseDto;
 import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.security.jwt.CustomPrincipal;
-import com.example.place.domain.postcomment.dto.PostCommentRequest;
-import com.example.place.domain.postcomment.dto.PostCommentResponse;
+import com.example.place.domain.postcomment.dto.request.PostCommentRequestDto;
+import com.example.place.domain.postcomment.dto.response.PostCommentResponseDto;
 import com.example.place.domain.postcomment.service.PostCommnetService;
 
 import jakarta.validation.Valid;
@@ -32,25 +32,25 @@ public class PostCommentController {
 	private final PostCommnetService postCommnetService;
 
 	@PostMapping("/{postId}/comments")
-	public ResponseEntity<ApiResponseDto<PostCommentResponse>> createPostComment(
+	public ResponseEntity<ApiResponseDto<PostCommentResponseDto>> createPostComment(
 		@PathVariable Long postId,
-		@Valid @RequestBody PostCommentRequest request,
+		@Valid @RequestBody PostCommentRequestDto request,
 		@AuthenticationPrincipal CustomPrincipal principal) {
 
-		PostCommentResponse response = postCommnetService.createPostComment(postId, request, principal);
-		ApiResponseDto<PostCommentResponse> success = ApiResponseDto.of("댓글이 등록되었습니다.", response);
+		PostCommentResponseDto response = postCommnetService.createPostComment(postId, request, principal);
+		ApiResponseDto<PostCommentResponseDto> success = ApiResponseDto.of("댓글이 등록되었습니다.", response);
 		return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
 
 	@PutMapping("{postId}/comments/{commentId}")
-	public ResponseEntity<ApiResponseDto<PostCommentResponse>> updatePostComment(
+	public ResponseEntity<ApiResponseDto<PostCommentResponseDto>> updatePostComment(
 		@PathVariable Long postId,
 		@PathVariable Long commentId,
-		@Valid @RequestBody PostCommentRequest request,
+		@Valid @RequestBody PostCommentRequestDto request,
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
-		PostCommentResponse response = postCommnetService.updatePostComment(postId, commentId, request, principal);
-		ApiResponseDto<PostCommentResponse> success = ApiResponseDto.of("게시글이 수정이 완료되었습니다.", response);
+		PostCommentResponseDto response = postCommnetService.updatePostComment(postId, commentId, request, principal);
+		ApiResponseDto<PostCommentResponseDto> success = ApiResponseDto.of("게시글이 수정이 완료되었습니다.", response);
 		return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
 
@@ -59,7 +59,7 @@ public class PostCommentController {
 		@PathVariable Long postId,
 		@PageableDefault Pageable pageable
 	) {
-		PageResponseDto<PostCommentResponse> response = postCommnetService.getAllCommentsByPosts(postId, pageable);
+		PageResponseDto<PostCommentResponseDto> response = postCommnetService.getAllCommentsByPosts(postId, pageable);
 		ApiResponseDto<PageResponseDto> success = ApiResponseDto.of("댓글 목록 조회가 완료되었습니다.", response);
 		return ResponseEntity.status(HttpStatus.OK).body(success);
 	}

@@ -1,4 +1,4 @@
-package com.example.place.domain.order.dto;
+package com.example.place.domain.order.dto.response;
 
 import java.time.LocalDateTime;
 
@@ -7,7 +7,7 @@ import com.example.place.domain.order.entity.Order;
 import lombok.Getter;
 
 @Getter
-public class SearchOrderResponseDto {
+public class CreateOrderResponseDto {
 
 	private String mainImageUrl;
 	private String userNickname;
@@ -18,9 +18,10 @@ public class SearchOrderResponseDto {
 	private String deliveryAddress;
 	private LocalDateTime createdAt;
 
-	private SearchOrderResponseDto(String mainImageUrl, String nickname, String itemName, Long quantity, double price, String deliveryAddress, String status, LocalDateTime createdAt) {
+	private CreateOrderResponseDto(String mainImageUrl, String userNickname, String itemName, Long quantity, double price,
+		String status, String deliveryAddress, LocalDateTime createdAt) {
 		this.mainImageUrl = mainImageUrl;
-		this.userNickname = nickname;
+		this.userNickname = userNickname;
 		this.itemName = itemName;
 		this.quantity = quantity;
 		this.price = price;
@@ -29,17 +30,17 @@ public class SearchOrderResponseDto {
 		this.createdAt = createdAt;
 	}
 
-	public static SearchOrderResponseDto from(Order order, String mainImageUrl) {
-		return new SearchOrderResponseDto(
+	public static CreateOrderResponseDto from(Order order, String mainImageUrl) {
+		return new CreateOrderResponseDto(
 			mainImageUrl,
 			order.getUser().getNickname(),
 			order.getItem().getItemName(),
 			order.getQuantity(),
 			order.getPrice(),
-			order.getDeliveryAddress(),
 			order.getStatus().name(),
+			order.getDeliveryAddress(),
 			order.getCreatedAt()
 		);
-
 	}
+
 }

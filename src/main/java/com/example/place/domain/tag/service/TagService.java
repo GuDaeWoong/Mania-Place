@@ -29,4 +29,33 @@ public class TagService {
         return TagResponse.from(tag);
     }
 
+    @Transactional(readOnly = true)
+    public TagResponse getTag(Long tagId) {
+        Tag tag = findByIdOrElseThrow(tagId);
+        return TagResponse.from(tag);
+    }
+
+    @Transactional
+    public TagResponse updateTag(Long tagId, TagRequest tagRequest) {
+        Tag tag = findByIdOrElseThrow(tagId);
+
+        if (!tagRequest.getTagName().equals(tag.getTagName()) && tagRepository.existsByTagName(tagRequest.getTagName())) {
+            throw new CustomException(ExceptionCode.DUPLICATED_TAG_NAME);
+        }
+
+        tag.updateTag(tagRequest.getTagName());
+        return TagResponse.from(tag);
+    }
+
+    @Transactional
+    public void deleteTag(Long tagId) {
+        Tag tag = findByIdOrElseThrow(tagId);
+        tagRepository.delete(tag);
+    }
+
+    public Tag findByIdOrElseThrow(Long tagId) {
+        return tagRepository.findById(tagId)
+                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_TAG));
+    }
+
 }
