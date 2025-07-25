@@ -1,7 +1,6 @@
 package com.example.place.domain.post.controller;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +19,7 @@ import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.post.dto.request.PostCreateRequestDto;
 import com.example.place.domain.post.dto.request.PostUpdateRequestDto;
-import com.example.place.domain.post.dto.response.PostWithUserResponseDto;
+import com.example.place.domain.post.dto.response.PostResponseDto;
 import com.example.place.domain.post.service.PostService;
 
 import jakarta.validation.Valid;
@@ -35,50 +34,50 @@ public class PostController {
 
 	//살까말까 생성
 	@PostMapping
-	public ResponseEntity<ApiResponseDto<PostWithUserResponseDto>> createPost(
+	public ResponseEntity<ApiResponseDto<PostResponseDto>> createPost(
 		@Valid @RequestBody PostCreateRequestDto request,
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
-		PostWithUserResponseDto post = postService.createPost(principal.getId(), request);
+		PostResponseDto post = postService.createPost(principal.getId(), request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponseDto.of("게시글 등록이 완료되었습니다.", post));
 	}
 
 	//살까말까 단건 조회
 	@GetMapping("/{postId}")
-	public ResponseEntity<ApiResponseDto<PostWithUserResponseDto>> getPost(
+	public ResponseEntity<ApiResponseDto<PostResponseDto>> getPost(
 		@PathVariable Long postId
 	) {
-		PostWithUserResponseDto post = postService.getPost(postId);
+		PostResponseDto post = postService.getPost(postId);
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 조회가 완료되었습니다.", post));
 	}
 
 	//살까말까 전체 조회
 	@GetMapping
-	public ResponseEntity<ApiResponseDto<PageResponseDto<PostWithUserResponseDto>>> getAllPosts(
+	public ResponseEntity<ApiResponseDto<PageResponseDto<PostResponseDto>>> getAllPosts(
 		@PageableDefault Pageable pageable
 	) {
-		PageResponseDto<PostWithUserResponseDto> posts = postService.getAllPosts(pageable);
+		PageResponseDto<PostResponseDto> posts = postService.getAllPosts(pageable);
 		return ResponseEntity.ok(ApiResponseDto.of("성공", posts));
 	}
 
 	//살까말까 내 글 조회
 	@GetMapping("/me")
-	public ResponseEntity<ApiResponseDto<PageResponseDto<PostWithUserResponseDto>>> getMyPosts(
+	public ResponseEntity<ApiResponseDto<PageResponseDto<PostResponseDto>>> getMyPosts(
 		@PageableDefault Pageable pageable,
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
-		PageResponseDto<PostWithUserResponseDto> posts = postService.findMyPosts(principal.getId(), pageable);
+		PageResponseDto<PostResponseDto> posts = postService.findMyPosts(principal.getId(), pageable);
 		return ResponseEntity.ok(ApiResponseDto.of("성공", posts));
 	}
 
 	//살까말까 수정
 	@PatchMapping("/{postId}")
-	public ResponseEntity<ApiResponseDto<PostWithUserResponseDto>> updatePost(
+	public ResponseEntity<ApiResponseDto<PostResponseDto>> updatePost(
 		@PathVariable Long postId,
 		@Valid @RequestBody PostUpdateRequestDto request,
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
-		PostWithUserResponseDto updatePost = postService.updatePost(postId, request, principal.getId());
+		PostResponseDto updatePost = postService.updatePost(postId, request, principal.getId());
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 수정이 완료되었습니다.", updatePost));
 	}
 
