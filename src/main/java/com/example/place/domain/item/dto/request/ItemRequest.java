@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @NoArgsConstructor
@@ -24,10 +25,11 @@ public class ItemRequest {
     private LocalDateTime salesEndAt;
     @NotEmpty(message = "최소 1개의 이미지가 있어야합니다.")
     private List<String> imageUrls;
+    @NotNull(message = "대표 이미지 인덱스를 입력해주세요.")
     private Integer mainIndex;
     @NotNull(message = "태그 리스트는 null일 수 없습니다.")
     @Size(min = 1, message = "최소 하나 이상의 태그가 필요합니다.")
-    private List<String> itemTagNames;
+    private Set<String> itemTagNames;
 
 
 }

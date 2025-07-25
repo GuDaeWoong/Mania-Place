@@ -1,5 +1,7 @@
 package com.example.place.domain.tag.service;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.item.entity.Item;
@@ -8,6 +10,7 @@ import com.example.place.domain.tag.dto.request.TagRequest;
 import com.example.place.domain.tag.dto.response.TagResponse;
 import com.example.place.domain.tag.entity.Tag;
 import com.example.place.domain.tag.repository.TagRepository;
+import com.example.place.domain.tag.util.TagUtil;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.usertag.entity.UserTag;
 import lombok.RequiredArgsConstructor;
@@ -66,7 +69,13 @@ public class TagService {
 
     // 유저 태그 저장 메서드
     public void saveTags(User user, Set<String> tagNames) {
-        for (String tagName: tagNames) {
+        Set<String> normalizedTags = new LinkedHashSet<>();
+
+        for (String tagName : tagNames) {
+            normalizedTags.add(TagUtil.normalizeTag(tagName));
+        }
+
+        for (String tagName : normalizedTags) {
             Tag tag = findOrCreateTag(tagName);
             user.addUserTag(UserTag.of(tag, user));
         }
@@ -74,7 +83,13 @@ public class TagService {
 
     // 아이템 태그 저장 메서드
     public void saveTags(Item item, Set<String> tagNames) {
-        for (String tagName: tagNames) {
+        Set<String> normalizedTags = new LinkedHashSet<>();
+
+        for (String tagName : tagNames) {
+            normalizedTags.add(TagUtil.normalizeTag(tagName));
+        }
+
+        for (String tagName : normalizedTags) {
             Tag tag = findOrCreateTag(tagName);
             item.addItemTag(ItemTag.of(tag, item));
         }

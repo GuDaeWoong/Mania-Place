@@ -1,5 +1,6 @@
 package com.example.place.domain.vote.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -48,12 +49,19 @@ public class VoteService {
 		Vote vote = Vote.of(user, post, newVoteType);
 		voteRepository.save(vote);
 
-		// like 개수
-		Long likeCount = voteRepository.countByPostAndVoteType(post, VoteType.LIKE);
-		// dislike 개수
-		Long dislikeCount = voteRepository.countByPostAndVoteType(post, VoteType.DISLIKE);
+		// 응답값 조회
+		Object[] result = voteRepository.findVoteStatsByPostIds(postId, userId).get(0);
 
-		return VoteResponseDto.of(likeCount, dislikeCount);
+		// like 개수
+		Long likeCount = ((Number)result[0]).longValue();
+		// dislike 개수
+		Long dislikeCount = ((Number)result[1]).longValue();
+		// 로그인한 유저의 like 투표 여부
+		boolean isLike = ((Number)result[2]).intValue() == 1;
+		// 로그인한 유저의 dislike 투표 여부
+		boolean isDislike = ((Number)result[3]).intValue() == 1;
+
+		return VoteResponseDto.of(likeCount, dislikeCount, isLike, isDislike);
 	}
 
 	public VoteResponseDto deleteVote(Long postId, @Valid VoteRequestDto request, Long userId) {
@@ -69,11 +77,18 @@ public class VoteService {
 		// 투표 삭제
 		voteRepository.delete(existingVote);
 
-		// like 개수
-		Long likeCount = voteRepository.countByPostAndVoteType(post, VoteType.LIKE);
-		// dislike 개수
-		Long dislikeCount = voteRepository.countByPostAndVoteType(post, VoteType.DISLIKE);
+		// 응답값 조회
+		Object[] result = voteRepository.findVoteStatsByPostIds(postId, userId).get(0);
 
-		return VoteResponseDto.of(likeCount, dislikeCount);
+		// like 개수
+		Long likeCount = ((Number)result[0]).longValue();
+		// dislike 개수
+		Long dislikeCount = ((Number)result[1]).longValue();
+		// 로그인한 유저의 like 투표 여부
+		boolean isLike = ((Number)result[2]).intValue() == 1;
+		// 로그인한 유저의 dislike 투표 여부
+		boolean isDislike = ((Number)result[3]).intValue() == 1;
+
+		return VoteResponseDto.of(likeCount, dislikeCount, isLike, isDislike);
 	}
 }

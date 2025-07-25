@@ -66,7 +66,7 @@ public class PostController {
 		@PageableDefault Pageable pageable,
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
-		PageResponseDto<PostResponseDto> posts = postService.findMyPosts(principal.getId(), pageable);
+		PageResponseDto<PostResponseDto> posts = postService.getMyPosts(principal.getId(), pageable);
 		return ResponseEntity.ok(ApiResponseDto.of("성공", posts));
 	}
 

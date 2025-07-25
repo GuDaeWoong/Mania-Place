@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import com.example.place.domain.order.entity.Order;
+import com.example.place.domain.order.entity.OrderStatus;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
@@ -24,4 +25,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 	Page<Order> findAllByUserIdWithItemAndUser(Long userId, Pageable pageable);
 
 	List<Order> findByItemId(Long itemId);
+
+	boolean existsByItemIdAndStatusIn(Long itemId, List<OrderStatus> ordered);
 }
