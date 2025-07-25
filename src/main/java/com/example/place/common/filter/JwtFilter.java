@@ -63,7 +63,7 @@ public class JwtFilter extends OncePerRequestFilter implements Ordered {
 		String subject = jwtUtil.extractUserId(jwt);
 		Long userId = Long.parseLong(subject);
 
-		User user = userService.findUserById(userId);
+		User user = userService.findByIdOrElseThrow(userId);
 
 		List<GrantedAuthority> authorities = List.of(
 			new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
