@@ -10,8 +10,8 @@ import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.post.entity.Post;
 import com.example.place.domain.post.service.PostService;
-import com.example.place.domain.postcomment.dto.PostCommentRequest;
-import com.example.place.domain.postcomment.dto.PostCommentResponse;
+import com.example.place.domain.postcomment.dto.request.PostCommentRequestDto;
+import com.example.place.domain.postcomment.dto.response.PostCommentResponseDto;
 import com.example.place.domain.postcomment.entity.PostComment;
 import com.example.place.domain.postcomment.repository.PostCommentRepository;
 import com.example.place.domain.user.entity.User;
@@ -28,7 +28,7 @@ public class PostCommnetService {
 	private final UserService userService;
 
 	@Transactional
-	public PostCommentResponse createPostComment(Long postId, PostCommentRequest request, CustomPrincipal principal) {
+	public PostCommentResponseDto createPostComment(Long postId, PostCommentRequestDto request, CustomPrincipal principal) {
 		User user = userService.findUserById(principal.getId());
 
 		Post post = postService.findByIdOrElseThrow(postId);
@@ -36,11 +36,11 @@ public class PostCommnetService {
 		PostComment postComment = PostComment.of(user, post, request.getContent());
 		postCommentRepository.save(postComment);
 
-		return PostCommentResponse.from(user, postComment);
+		return PostCommentResponseDto.from(user, postComment);
 	}
 
 	@Transactional
-	public PostCommentResponse updatePostComment(Long postId ,Long commentId, PostCommentRequest request, CustomPrincipal principal) {
+	public PostCommentResponseDto updatePostComment(Long postId ,Long commentId, PostCommentRequestDto request, CustomPrincipal principal) {
 
 		postService.findByIdOrElseThrow(postId);
 
@@ -56,17 +56,17 @@ public class PostCommnetService {
 
 		postComment.updateContent(request.getContent());
 
-		return PostCommentResponse.from(user, postComment);
+		return PostCommentResponseDto.from(user, postComment);
 	}
 
-	public PageResponseDto<PostCommentResponse> getAllCommentsByPosts(Long postId, Pageable pageable
+	public PageResponseDto<PostCommentResponseDto> getAllCommentsByPosts(Long postId, Pageable pageable
 	){
 		Post post = postService.findByIdOrElseThrow(postId);
 
 		Page<PostComment> commentPage = postCommentRepository.findAllByPost(post, pageable);
 
-		Page<PostCommentResponse> responsePage = commentPage.map(
-			comment -> PostCommentResponse.from(comment.getUser(), comment));
+		Page<PostCommentResponseDto> responsePage = commentPage.map(
+			comment -> PostCommentResponseDto.from(comment.getUser(), comment));
 		return new PageResponseDto<>(responsePage);
 	}
 

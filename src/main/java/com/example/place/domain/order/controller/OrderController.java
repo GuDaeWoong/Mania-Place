@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.place.common.dto.ApiResponseDto;
 import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.security.jwt.CustomPrincipal;
-import com.example.place.domain.order.dto.CreateOrderRequestDto;
-import com.example.place.domain.order.dto.CreateOrderResponseDto;
-import com.example.place.domain.order.dto.SearchOrderResponseDto;
-import com.example.place.domain.order.dto.UpdateOrderStatusResponseDto;
+import com.example.place.domain.order.dto.request.CreateOrderRequestDto;
+import com.example.place.domain.order.dto.response.CreateOrderResponseDto;
+import com.example.place.domain.order.dto.response.SearchOrderResponseDto;
+import com.example.place.domain.order.dto.response.UpdateOrderStatusResponseDto;
 import com.example.place.domain.order.service.OrderService;
 
 import jakarta.validation.Valid;
