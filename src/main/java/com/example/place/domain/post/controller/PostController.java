@@ -39,7 +39,7 @@ public class PostController {
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
 		PostResponseDto post = postService.createPost(principal.getId(), request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponseDto.of("게시글 등록이 완료되었습니다.", post));
+		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 등록이 완료되었습니다.", post));
 	}
 
 	//살까말까 단건 조회

@@ -40,7 +40,7 @@ public class ItemController {
             @AuthenticationPrincipal CustomPrincipal principal
     ) {
         ItemResponse item = itemService.createItem(principal.getId(), request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponseDto.of("상품 등록이 완료되었습니다.", item));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("상품 등록이 완료되었습니다.", item));
     }
 
     /**
