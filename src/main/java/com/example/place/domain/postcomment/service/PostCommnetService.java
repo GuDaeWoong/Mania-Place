@@ -29,14 +29,14 @@ public class PostCommnetService {
 
 	@Transactional
 	public PostCommentResponseDto createPostComment(Long postId, PostCommentRequestDto request, CustomPrincipal principal) {
-		User user = userService.findUserById(principal.getId());
+		User user = userService.findByIdOrElseThrow(principal.getId());
 
 		Post post = postService.findByIdOrElseThrow(postId);
 
 		PostComment postComment = PostComment.of(user, post, request.getContent());
 		postCommentRepository.save(postComment);
 
-		return PostCommentResponse.from(user, postComment);
+		return PostCommentResponseDto.from(user, postComment);
 	}
 
 	@Transactional
@@ -44,7 +44,7 @@ public class PostCommnetService {
 
 		postService.findByIdOrElseThrow(postId);
 
-		User user = userService.findUserById(principal.getId());
+		User user = userService.findByIdOrElseThrow(principal.getId());
 
 		PostComment postComment = postCommentRepository.findById(commentId)
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_COMMENT));
