@@ -36,7 +36,7 @@ public class PostCommnetService {
 		PostComment postComment = PostComment.of(user, post, request.getContent());
 		postCommentRepository.save(postComment);
 
-		return PostCommentResponseDto.from(user, postComment);
+		return PostCommentResponse.from(user, postComment);
 	}
 
 	@Transactional

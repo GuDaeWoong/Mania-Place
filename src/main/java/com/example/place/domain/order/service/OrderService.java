@@ -40,7 +40,7 @@ public class OrderService {
 	@Transactional
 	public CreateOrderResponseDto createOrder(CreateOrderRequestDto requestDto,Long userId
 	) {
-		User user = userService.findUserById(userId);
+		User user = userService.findByIdOrElseThrow(userId);
 
 		Item item = itemService.findByIdOrElseThrow(requestDto.getItemId());
 

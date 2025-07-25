@@ -22,7 +22,7 @@ public class Tag {
     @Column(length = 70, nullable = false, unique = true)
     private String tagName;
 
-    @OneToMany(mappedBy = "tag")
+    @OneToMany(mappedBy = "tag", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ItemTag> itemTags = new ArrayList<>();
 
     @OneToMany(mappedBy = "tag")

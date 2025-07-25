@@ -34,7 +34,7 @@ public class ItemCommentService {
 	public ItemCommentResponse createItemComment(Long itemId, ItemCommentRequest request,
 		CustomPrincipal principal) {
 		// 로그인 유저 조회
-		User user = userService.findUserById(principal.getId());
+		User user = userService.findByIdOrElseThrow(principal.getId());
 
 		// 대상 상품 조회
 		Item item = itemService.findByIdOrElseThrow(itemId);
