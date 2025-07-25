@@ -90,7 +90,7 @@ public class ItemService {
             Tag tag = tagRepository.findByTagName(tagName)
                     .orElseGet(() -> tagRepository.save(Tag.of(tagName)));
 
-            ItemTag itemTag = new ItemTag(null, item, tag);
+            ItemTag itemTag = ItemTag.of(tag, item);
 
 			item.addItemTag(itemTag);
         }
