@@ -2,10 +2,13 @@ package com.example.place.common.filter;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -15,6 +18,7 @@ import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.common.security.jwt.JwtUtil;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.repository.UserRepository;
+import com.example.place.domain.user.service.UserService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -26,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 public class JwtFilter extends OncePerRequestFilter implements Ordered {
 
 	private final JwtUtil jwtUtil;
-	private final UserRepository userRepository;
+	private final UserService userService;
 
 	private static final String BEARER_PREFIX = "Bearer ";
 
@@ -59,14 +63,24 @@ public class JwtFilter extends OncePerRequestFilter implements Ordered {
 		String subject = jwtUtil.extractUserId(jwt);
 		Long userId = Long.parseLong(subject);
 
-		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
+		User user = userService.findByIdOrElseThrow(userId);
 
-		CustomPrincipal principal = new CustomPrincipal(user.getId(), user.getName(), user.getNickname(), user.getEmail());
+		List<GrantedAuthority> authorities = List.of(
+			new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
+		);
+
+		CustomPrincipal principal = new CustomPrincipal(
+			user.getId(),
+			user.getName(),
+			user.getNickname(),
+			user.getEmail(),
+			authorities
+		);
+
 
 		if (SecurityContextHolder.getContext().getAuthentication() == null) {
 			UsernamePasswordAuthenticationToken authentication =
-				new UsernamePasswordAuthenticationToken(principal, null, Collections.emptyList());
+				new UsernamePasswordAuthenticationToken(principal, null, authorities);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
 
