@@ -27,6 +27,7 @@ public class ItemRequest {
     private LocalDateTime salesEndAt;
     @NotEmpty(message = "최소 1개의 이미지가 있어야합니다.")
     private List<String> imageUrls;
+    @NotNull(message = "대표 이미지 인덱스를 입력해주세요.")
     private Integer mainIndex;
     private List<String> itemTagNames;
 

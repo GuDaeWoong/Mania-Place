@@ -114,12 +114,11 @@ public class ItemService {
 		item.updateItem(request);
 
 		// 연관 이미지 수정
-		if ((request.getImageUrls() == null && request.getMainIndex() != null)
+		if (((request.getImageUrls() == null || request.getImageUrls().isEmpty()) && request.getMainIndex() != null)
 			|| (request.getImageUrls() != null && request.getMainIndex() == null)) {
 			throw new CustomException(ExceptionCode.INVALID_IMAGE_UPDATE_REQUEST);
 		}
-
-		if (request.getImageUrls() != null && request.getMainIndex() != null) {
+		if (request.getImageUrls() != null) {
 			imageService.updateImages(item, request.getImageUrls(), request.getMainIndex());
 		}
 
