@@ -64,6 +64,7 @@ public class VoteService {
 		return VoteResponseDto.of(likeCount, dislikeCount, isLike, isDislike);
 	}
 
+	@Transactional
 	public VoteResponseDto deleteVote(Long postId, @Valid VoteRequestDto request, Long userId) {
 		User user = userService.findByIdOrElseThrow(userId);
 		Post post = postService.findByIdOrElseThrow(postId);
