@@ -69,8 +69,7 @@ public class ItemController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) List<String> tags,
             @RequestParam(required = false) Long userId,
-            @PageableDefault(size = 5)Pageable pageable
-
+            @PageableDefault Pageable pageable
             ) {
         PageResponseDto<ItemResponse> result = itemService.searchItems(keyword, tags, userId, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("상품 조회가 완료되었습니다", result));
