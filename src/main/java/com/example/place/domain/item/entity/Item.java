@@ -2,7 +2,9 @@ package com.example.place.domain.item.entity;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.example.place.common.entity.BaseEntity;
 import com.example.place.common.exception.enums.ExceptionCode;
@@ -45,7 +47,7 @@ public class Item extends BaseEntity {
 	private List<Image> images = new ArrayList<>();
 
 	@OneToMany(mappedBy = "item", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
-	private List<ItemTag> itemTags = new ArrayList<>();
+	private Set<ItemTag> itemTags = new LinkedHashSet<>();
 
 	@OneToMany(mappedBy = "item", cascade = CascadeType.REMOVE, orphanRemoval = true)
 	private List<ItemComment> comments = new ArrayList<>();
