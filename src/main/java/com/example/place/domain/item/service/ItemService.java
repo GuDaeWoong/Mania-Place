@@ -99,7 +99,10 @@ public class ItemService {
 		if (request.getImageUrls() != null) {
 			imageService.updateImages(item, request.getImageUrls(), request.getMainIndex());
 		}
-
+		if(request.getItemTagNames() != null) {
+			item.getItemTags().clear();
+			tagService.saveTags(item, request.getItemTagNames());
+		}
 		return ItemResponse.from(item);
 	}
 
