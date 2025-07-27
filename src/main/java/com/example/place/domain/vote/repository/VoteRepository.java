@@ -19,8 +19,8 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
 		SELECT
 		    COUNT(CASE WHEN v.voteType = 'LIKE' THEN 1 END),
 		    COUNT(CASE WHEN v.voteType = 'DISLIKE' THEN 1 END),
-		    MAX(CASE WHEN v.voteType = 'LIKE' AND v.user.id = :userId THEN 1 ELSE 0 END),
-		    MAX(CASE WHEN v.voteType = 'DISLIKE' AND v.user.id = :userId THEN 1 ELSE 0 END)
+		    COALESCE(MAX(CASE WHEN v.voteType = 'LIKE' AND v.user.id = :userId THEN 1 ELSE 0 END), 0),
+		    COALESCE(MAX(CASE WHEN v.voteType = 'DISLIKE' AND v.user.id = :userId THEN 1 ELSE 0 END), 0)
 		FROM Vote v
 		JOIN v.post p
 		WHERE p.id = :postId""")
