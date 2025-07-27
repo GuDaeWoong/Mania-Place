@@ -65,7 +65,7 @@ public class VoteService {
 	}
 
 	@Transactional
-	public VoteResponseDto deleteVote(Long postId, @Valid VoteRequestDto request, Long userId) {
+	public VoteResponseDto deleteVote(Long postId, VoteRequestDto request, Long userId) {
 		User user = userService.findByIdOrElseThrow(userId);
 		Post post = postService.findByIdOrElseThrow(postId);
 
