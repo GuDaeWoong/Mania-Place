@@ -21,7 +21,7 @@ import com.example.place.domain.post.dto.request.PostCreateRequestDto;
 import com.example.place.domain.post.dto.request.PostUpdateRequestDto;
 import com.example.place.domain.post.dto.response.PostResponseDto;
 import com.example.place.domain.post.service.PostService;
-import com.example.place.domain.postcomment.service.PostDeleteService;
+import com.example.place.domain.post.service.PostDeleteService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
