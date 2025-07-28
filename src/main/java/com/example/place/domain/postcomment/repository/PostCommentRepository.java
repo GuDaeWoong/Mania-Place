@@ -1,5 +1,8 @@
 package com.example.place.domain.postcomment.repository;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -11,4 +14,6 @@ import com.example.place.domain.postcomment.entity.PostComment;
 public interface PostCommentRepository extends JpaRepository<PostComment, Long> {
 	@EntityGraph(attributePaths = {"user"})
 	Page<PostComment> findAllByPost(Post post, Pageable pageable);
+
+	List<PostComment> findByPostId(Long postId);
 }

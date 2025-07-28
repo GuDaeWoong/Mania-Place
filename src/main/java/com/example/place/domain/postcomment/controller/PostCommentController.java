@@ -72,7 +72,7 @@ public class PostCommentController {
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
 		Long userId = principal.getId();
-		postCommnetService.deletePostComment(postId, commentId, userId);
+		postCommnetService.softDeletePostComment(postId, commentId, userId);
 		return ResponseEntity.ok(ApiResponseDto.of("댓글 삭제가 완료되었습니다.", null));
 	}
 }

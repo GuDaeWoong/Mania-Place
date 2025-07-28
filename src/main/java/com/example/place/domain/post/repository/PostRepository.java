@@ -30,4 +30,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 		countQuery = "SELECT COUNT(p) FROM Post p WHERE p.user = :user"
 	)
 	Page<Post> findAllByUser(User user, Pageable pageable);
+
+	List<Post> findByItemId(Long itemId);
 }
