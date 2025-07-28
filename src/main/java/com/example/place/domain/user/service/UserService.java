@@ -146,7 +146,7 @@ public class UserService {
 
 	public Optional<Object> findByEmailOrElseThrow(String email) {
 		User user = userRepository.findByEmail(email)
-			.orElseThrow(() -> new CustomException(ExceptionCode.DELETED_USER));
+			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
 
 		if (user.isDeleted()) {
 			throw new CustomException(ExceptionCode.DELETED_USER);
