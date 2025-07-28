@@ -22,10 +22,13 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             WHERE (:keyword IS NULL OR i.itemName LIKE %:keyword%)
             AND (:userId IS NULL OR i.user.id = :userId)
             AND (:tags IS NULL OR t.tagName IN :tags)
+            AND (:itemDescription IS NULL OR i.itemDescription LIKE %:itemDescription%)
             """)
     List<Item> searchitems(
             @Param("keyword") String keyword,
             @Param("userId") Long userId,
-            @Param("tags") List<String> tags
+            @Param("tags") List<String> tags,
+            @Param("itemDescription") String itemDescription
     );
+    //
 }

@@ -129,8 +129,8 @@ public class ItemService {
 	}
 
 	@Transactional
-	public PageResponseDto<ItemResponse> searchItems(String keyword, List<String> tags, Long userId, Pageable pageable) {
-		List<Item> items = itemRepository.searchitems(keyword, userId, tags);
+	public PageResponseDto<ItemResponse> searchItems(String keyword, List<String> tags, Long userId, String itemDescription, Pageable pageable) {
+		List<Item> items = itemRepository.searchitems(keyword, userId, tags, itemDescription);
 
 		int total = items.size();
 		int start = (int) pageable.getOffset();
