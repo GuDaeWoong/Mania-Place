@@ -21,7 +21,6 @@ import com.example.place.domain.post.dto.request.PostCreateRequestDto;
 import com.example.place.domain.post.dto.request.PostUpdateRequestDto;
 import com.example.place.domain.post.dto.response.PostResponseDto;
 import com.example.place.domain.post.service.PostService;
-import com.example.place.domain.postcomment.service.PostDeleteService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +31,6 @@ import lombok.RequiredArgsConstructor;
 public class PostController {
 
 	private final PostService postService;
-	private final PostDeleteService postDeleteService;
 
 	//살까말까 생성
 	@PostMapping
@@ -89,7 +87,8 @@ public class PostController {
 		@PathVariable Long postId,
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
-		postDeleteService.removeReferencesAndDeletePost(postId, principal.getId());
+		postService.deletePost(postId, principal.getId());
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 삭제가 완료되었습니다.", null));
 	}
+
 }
