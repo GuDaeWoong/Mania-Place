@@ -15,6 +15,7 @@ import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.Image.service.ImageService;
 import com.example.place.domain.post.dto.response.PostResponseDto;
+import com.example.place.domain.postcomment.entity.PostComment;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.service.UserService;
 import com.example.place.domain.item.entity.Item;
@@ -131,5 +132,24 @@ public class PostService {
 			.collect(Collectors.groupingBy(img -> img.getItem().getId()));
 
 		return itemIdToImagesMap;
+	}
+
+	@Transactional
+	public void softDeletePost(Long postId, Long userId) {
+		Post post = findByIdOrElseThrow(postId);
+
+		if (!post.getUser().getId().equals(userId)) {
+			throw new CustomException(ExceptionCode.FORBIDDEN_POST_DELETE);
+		}
+		post.delete();
+	}
+
+	@Transactional
+	public void softAllDeletePost(Long itemId) {
+		List<Post> posts = postRepository.findByItemId(itemId);
+
+		for (Post post : posts) {
+			post.delete();
+		}
 	}
 }

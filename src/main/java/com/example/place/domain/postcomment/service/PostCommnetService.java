@@ -1,5 +1,7 @@
 package com.example.place.domain.postcomment.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -84,4 +86,27 @@ public class PostCommnetService {
 		postCommentRepository.delete(comment);
 	}
 
+	@Transactional
+	public void softDeletePostComment(Long postId, Long commentId, Long userId) {
+
+		postService.findByIdOrElseThrow(postId);
+
+		PostComment comment = postCommentRepository.findById(commentId)
+			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_COMMENT));
+
+		if (!comment.getUser().getId().equals(userId)) {
+			throw new CustomException(ExceptionCode.FORBIDDEN_COMMENT_ACCESS);
+		}
+		comment.delete();
+	}
+
+	@Transactional
+	public void softDeleteAllPostComment(Long postId) {
+
+		List<PostComment> comments = postCommentRepository.findByPostId(postId);
+
+		for (PostComment comment : comments) {
+			comment.delete();
+		}
+	}
 }
