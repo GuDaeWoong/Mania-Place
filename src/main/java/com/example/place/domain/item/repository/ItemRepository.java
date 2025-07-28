@@ -30,4 +30,5 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             @Param("tags") List<String> tags,
             @Param("itemDescription") String itemDescription
     );
+    //
 }
