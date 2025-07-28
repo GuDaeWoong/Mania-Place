@@ -2,6 +2,7 @@ package com.example.place.domain.postcomment.entity;
 
 
 import com.example.place.common.entity.BaseEntity;
+import com.example.place.common.entity.SoftDeleteEntity;
 import com.example.place.domain.post.entity.Post;
 import com.example.place.domain.user.entity.User;
 
@@ -20,7 +21,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "postcomments")
-public class PostComment extends BaseEntity {
+public class PostComment extends SoftDeleteEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
