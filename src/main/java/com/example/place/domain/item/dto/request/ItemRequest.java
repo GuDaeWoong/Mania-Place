@@ -28,7 +28,7 @@ public class ItemRequest {
     @NotNull(message = "대표 이미지 인덱스를 입력해주세요.")
     private Integer mainIndex;
     @NotNull(message = "태그 리스트는 null일 수 없습니다.")
-    @Size(min = 1, message = "최소 하나 이상의 태그가 필요합니다.")
+    @Size(min = 1, max = 10, message = "태그는 최소 1개 최대 10개가 가능합니다.")
     private Set<String> itemTagNames;
 
 
