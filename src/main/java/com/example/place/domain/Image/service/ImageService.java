@@ -2,16 +2,17 @@ package com.example.place.domain.Image.service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
-import com.example.place.common.exception.enums.ExceptionCode;
-import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.Image.repository.ImageRepository;
 import com.example.place.domain.item.entity.Item;
+import com.example.place.domain.post.entity.Post;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -98,5 +99,23 @@ public class ImageService {
 	@Transactional
 	public List<Image> findByItemIds(List<Long> itemIds) {
 		return imageRepository.findByItemIds(itemIds);
+	}
+
+	// 현재 페이지에 있는 상품의 이미지들을 맵으로 묶어 반환
+	public Map<Long, List<Image>> mapItemIdsToImagesFromPosts(Page<Post> postsPage) {
+		// 현재 페이지에 존재하는 상품 리스트
+		List<Long> itemIds = postsPage.stream()
+			.map(post -> post.getItem().getId())
+			.distinct()
+			.collect(Collectors.toList());
+
+		// 해당 상품들의 이미지들 조회
+		List<Image> images = findByItemIds(itemIds);
+
+		// 상품별로 이미지 리스트 생성
+		Map<Long, List<Image>> itemIdToImagesMap = images.stream()
+			.collect(Collectors.groupingBy(img -> img.getItem().getId()));
+
+		return itemIdToImagesMap;
 	}
 }
