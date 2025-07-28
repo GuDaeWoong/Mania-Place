@@ -12,6 +12,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class ItemResponse {
+    private Long id;
     private String itemName;
     private String itemDescription;
     private Double price;
@@ -38,6 +39,7 @@ public class ItemResponse {
                 .toList();
 
         ItemResponse response = new ItemResponse();
+        response.id = item.getId();
         response.itemName = item.getItemName();
         response.itemDescription = item.getItemDescription();
         response.price = item.getPrice();
