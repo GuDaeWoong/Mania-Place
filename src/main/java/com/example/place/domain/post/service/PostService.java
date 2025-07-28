@@ -2,7 +2,6 @@ package com.example.place.domain.post.service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +14,6 @@ import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.Image.service.ImageService;
 import com.example.place.domain.post.dto.response.PostResponseDto;
-import com.example.place.domain.postcomment.entity.PostComment;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.service.UserService;
 import com.example.place.domain.item.entity.Item;
@@ -55,21 +53,6 @@ public class PostService {
 		return PostResponseDto.from(post);
 	}
 
-	//살까말까 전체 조회
-	@Transactional(readOnly = true)
-	public PageResponseDto<PostResponseDto> getAllPosts(Pageable pageable) {
-
-		Page<Post> postsPage = postRepository.findAll(pageable);
-
-		// 현제 페이지의 게시글과 맵핑된 상품별로 이미지 리스트 생성
-		Map<Long, List<Image>> itemIdToImagesMap = mapItemIdsToImagesFromPosts(postsPage);
-
-		Page<PostResponseDto> dtoPage = postsPage.map(
-			post -> PostResponseDto.fromWithImages(post, itemIdToImagesMap.get(post.getItem().getId())));
-
-		return new PageResponseDto<>(dtoPage);
-	}
-
 	//살까말까 내 글 조회
 	@Transactional(readOnly = true)
 	public PageResponseDto<PostResponseDto> getMyPosts(Long userId, Pageable pageable) {
@@ -78,7 +61,7 @@ public class PostService {
 		Page<Post> postsPage = postRepository.findAllByUser(user, pageable);
 
 		// 현제 페이지의 게시글과 맵핑된 상품별로 이미지 리스트 생성
-		Map<Long, List<Image>> itemIdToImagesMap = mapItemIdsToImagesFromPosts(postsPage);
+		Map<Long, List<Image>> itemIdToImagesMap = imageService.mapItemIdsToImagesFromPosts(postsPage);
 
 		Page<PostResponseDto> dtoPage = postsPage.map(
 			post -> PostResponseDto.fromWithImages(post, itemIdToImagesMap.get(post.getItem().getId())));
@@ -116,23 +99,7 @@ public class PostService {
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_POST));
 	}
 
-	// 현재 페이지에 있는 상품의 이미지들을 맵으로 묶어 반환
-	private Map<Long, List<Image>> mapItemIdsToImagesFromPosts(Page<Post> postsPage) {
-		// 현재 페이지에 존재하는 상품 리스트
-		List<Long> itemIds = postsPage.stream()
-			.map(post -> post.getItem().getId())
-			.distinct()
-			.collect(Collectors.toList());
 
-		// 해당 상품들의 이미지들 조회
-		List<Image> images = imageService.findByItemIds(itemIds);
-
-		// 상품별로 이미지 리스트 생성
-		Map<Long, List<Image>> itemIdToImagesMap = images.stream()
-			.collect(Collectors.groupingBy(img -> img.getItem().getId()));
-
-		return itemIdToImagesMap;
-	}
 
 	@Transactional
 	public void softDeletePost(Long postId, Long userId) {

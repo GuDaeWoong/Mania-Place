@@ -25,4 +25,18 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
 		JOIN v.post p
 		WHERE p.id = :postId""")
 	List<Object[]> findVoteStatsByPostIds(@Param("postId") Long postId, @Param("userId") Long userId);
+
+	@Query("""
+       SELECT
+           p.id,
+           COUNT(CASE WHEN v.voteType = 'LIKE' THEN 1 END),
+           COUNT(CASE WHEN v.voteType = 'DISLIKE' THEN 1 END),
+           COALESCE(MAX(CASE WHEN v.voteType = 'LIKE' AND v.user.id = :userId THEN 1 ELSE 0 END), 0),
+           COALESCE(MAX(CASE WHEN v.voteType = 'DISLIKE' AND v.user.id = :userId THEN 1 ELSE 0 END), 0)
+       FROM Post p
+       LEFT JOIN Vote v ON p.id = v.post.id
+       WHERE p.id IN :postIds
+       GROUP BY p.id
+       """)
+	List<Object[]> findVoteStatsByPostIdsAndUser(@Param("postIds") List<Long> postIds, @Param("userId") Long userId);
 }

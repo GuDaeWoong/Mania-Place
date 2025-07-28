@@ -101,7 +101,7 @@ public class ItemCommentController {
 		@PathVariable Long itemCommentId,
 		@AuthenticationPrincipal CustomPrincipal principal) {
 
-		itemCommentService.deleteItemComment(itemId, itemCommentId, principal);
+		itemCommentService.softDeleteItemComment(itemId, itemCommentId, principal);
 
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("댓글을 삭제하였습니다.", null));
 	}

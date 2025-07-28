@@ -23,6 +23,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             AND (:userId IS NULL OR i.user.id = :userId)
             AND (:tags IS NULL OR t.tagName IN :tags)
             AND (:itemDescription IS NULL OR i.itemDescription LIKE %:itemDescription%)
+        AND i.isDeleted = false
             """)
     List<Item> searchitems(
             @Param("keyword") String keyword,

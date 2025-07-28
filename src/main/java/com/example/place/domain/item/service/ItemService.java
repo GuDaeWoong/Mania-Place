@@ -99,6 +99,7 @@ public class ItemService {
 		if (request.getImageUrls() != null) {
 			imageService.updateImages(item, request.getImageUrls(), request.getMainIndex());
 		}
+		// 연관 태그 수정
 		if(request.getItemTagNames() != null) {
 			item.getItemTags().clear();
 			tagService.saveTags(item, request.getItemTagNames());
@@ -114,6 +115,18 @@ public class ItemService {
 		}
 
 		itemRepository.deleteById(itemId);
+	}
+
+	@Transactional
+	public void softDeleteItem(Long itemId, Long userId) {
+		Item item = findByIdOrElseThrow(itemId);
+
+		if (!findByIdOrElseThrow(itemId).getUser().getId().equals(userId)) {
+			throw new CustomException(ExceptionCode.FORBIDDEN_ITEM_DELETE);
+		}
+
+		item.delete();
+
 	}
 
 	@Transactional
@@ -135,11 +148,15 @@ public class ItemService {
 	}
 
 	public Item findByIdOrElseThrow(Long id) {
-		return itemRepository.findById(id)
+		Item item = itemRepository.findById(id)
 				.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
+
+		if (item.isDeleted() == true) {
+			throw new CustomException(ExceptionCode.NOT_FOUND_ITEM);
+		}
+
+		return item;
 	}
-
-
 
 	public String getMainImageUrl(Long itemId) {
 		Item item =  itemRepository.findById(itemId)

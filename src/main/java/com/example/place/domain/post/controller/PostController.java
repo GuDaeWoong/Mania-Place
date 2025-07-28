@@ -20,8 +20,11 @@ import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.post.dto.request.PostCreateRequestDto;
 import com.example.place.domain.post.dto.request.PostUpdateRequestDto;
 import com.example.place.domain.post.dto.response.PostResponseDto;
+import com.example.place.domain.post.dto.response.PostSearchAllResponseDto;
+import com.example.place.domain.post.service.PostReadService;
 import com.example.place.domain.post.service.PostService;
-import com.example.place.domain.postcomment.service.PostDeleteService;
+import com.example.place.domain.post.service.PostDeleteService;
+import com.example.place.domain.vote.service.VoteService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 public class PostController {
 
 	private final PostService postService;
+	private final PostReadService postReadService;
 	private final PostDeleteService postDeleteService;
 
 	//살까말까 생성
@@ -53,13 +57,16 @@ public class PostController {
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 조회가 완료되었습니다.", post));
 	}
 
-	//살까말까 전체 조회
+	// 살까말까 전체 조회
 	@GetMapping
-	public ResponseEntity<ApiResponseDto<PageResponseDto<PostResponseDto>>> getAllPosts(
-		@PageableDefault Pageable pageable
+	public ResponseEntity<ApiResponseDto<PageResponseDto<PostSearchAllResponseDto>>> getAllPosts(
+		@PageableDefault Pageable pageable,
+		@AuthenticationPrincipal CustomPrincipal principal
 	) {
-		PageResponseDto<PostResponseDto> posts = postService.getAllPosts(pageable);
-		return ResponseEntity.ok(ApiResponseDto.of("성공", posts));
+		PageResponseDto<PostSearchAllResponseDto> response =
+			postReadService.getPostsWithVoteInfo(pageable, principal.getId());
+
+		return ResponseEntity.ok(ApiResponseDto.of("성공", response));
 	}
 
 	//살까말까 내 글 조회
