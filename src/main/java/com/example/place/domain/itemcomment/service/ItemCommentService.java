@@ -56,7 +56,7 @@ public class ItemCommentService {
 		itemService.findByIdOrElseThrow(itemId);
 
 		// 댓글 조회
-		Page<ItemComment> comments = itemCommentRepository.findPageByItemId(itemId, pageable);
+		Page<ItemComment> comments = itemCommentRepository.findByItemIdAndIsDeletedFalse(itemId, pageable);
 
 		Page<ItemCommentResponse> ItemCommentPage = comments.map(ItemCommentResponse::from);
 
@@ -69,8 +69,7 @@ public class ItemCommentService {
 	public ItemCommentResponse updateItemComment(Long itemId, Long itemCommentId, ItemCommentRequest request,
 		CustomPrincipal principal) {
 		// 수정할 댓글 조회
-		ItemComment comment = itemCommentRepository.findById(itemCommentId).
-			orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_COMMENT));
+		ItemComment comment = findByIdOrElseThrow(itemCommentId);
 
 		// 유효한 경로인지 확인(해당 itemCommentId의 대상 itemId가 일치하는지 확인)
 		if (comment.getItem().getId() != itemId) {
@@ -92,8 +91,7 @@ public class ItemCommentService {
 	@Transactional
 	public void deleteItemComment(Long itemId, Long itemCommentId, CustomPrincipal principal) {
 		// 삭제할 댓글 조회
-		ItemComment comment = itemCommentRepository.findById(itemCommentId).
-			orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_COMMENT));
+		ItemComment comment = findByIdOrElseThrow(itemCommentId);
 
 		// 유효한 경로인지 확인(해당 itemCommentId의 대상 itemId가 일치하는지 확인)
 		if (comment.getItem().getId() != itemId) {
@@ -113,8 +111,7 @@ public class ItemCommentService {
 	@Transactional
 	public void softDeleteItemComment(Long itemId, Long itemCommentId, CustomPrincipal principal) {
 		// 삭제할 댓글 조회
-		ItemComment comment = itemCommentRepository.findById(itemCommentId).
-			orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_COMMENT));
+		ItemComment comment = findByIdOrElseThrow(itemCommentId);
 
 		// 유효한 경로인지 확인(해당 itemCommentId의 대상 itemId가 일치하는지 확인)
 		if (comment.getItem().getId() != itemId) {
@@ -130,7 +127,7 @@ public class ItemCommentService {
 		comment.delete();
 	}
 
-	// 상품 댓글 삭제
+	// 특정 상품 연관 댓글 전체 삭제
 	@Transactional
 	public void softDeleteAllItemComment(Long itemId) {
 		// 삭제할 댓글 조회
@@ -139,5 +136,16 @@ public class ItemCommentService {
 		for (ItemComment comment : comments) {
 			comment.delete();
 		}
+	}
+
+	public ItemComment findByIdOrElseThrow(Long id) {
+		ItemComment comment = itemCommentRepository.findById(id).
+			orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_COMMENT));
+
+		if (comment.isDeleted() == true) {
+			throw new CustomException(ExceptionCode.NOT_FOUND_COMMENT);
+		}
+
+		return comment;
 	}
 }

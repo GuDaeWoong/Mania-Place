@@ -44,6 +44,11 @@ public class OrderService {
 
 		Item item = itemService.findByIdOrElseThrow(requestDto.getItemId());
 
+		// 상품 소프트딜리트 확인
+		if (item.isDeleted()) {
+			throw new CustomException(ExceptionCode.NOT_FOUND_ITEM);
+		}
+
 		// 수량 유무 확인
 		if (item.getCount() < requestDto.getQuantity()) {
 			throw new CustomException(ExceptionCode.OUT_OF_STOCK);
