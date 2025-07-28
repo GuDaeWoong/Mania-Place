@@ -47,7 +47,7 @@ public class OrderController {
 	}
 
 	// 주문 나의것 단건 조회
-	@GetMapping("/orders/my/{orderId}")
+	@GetMapping("/orders/me/{orderId}")
 	public ResponseEntity<ApiResponseDto> getMyOrder(
 		@PathVariable Long orderId,
 		@AuthenticationPrincipal CustomPrincipal userDetails
@@ -58,7 +58,7 @@ public class OrderController {
 		return ResponseEntity.status(HttpStatus.OK).body(success);	}
 
 	// 주문 나의것 다건 조회
-	@GetMapping("/orders/my")
+	@GetMapping("/orders/me")
 	public ResponseEntity<ApiResponseDto<PageResponseDto<SearchOrderResponseDto>>> getAllMyOrders(
 		@AuthenticationPrincipal CustomPrincipal userDetails,
 		@PageableDefault Pageable pageable
@@ -76,7 +76,7 @@ public class OrderController {
 	) {
 		Long userId = userDetails.getId();
 		UpdateOrderStatusResponseDto updatedOrder = orderService.updateOrderStatusToReady(orderId, userId);
-		ApiResponseDto success = ApiResponseDto.of("전체 주문 조회가 완료되었습니다.", updatedOrder);
+		ApiResponseDto success = ApiResponseDto.of("주문 상태가 배송중으로 변경되었습니다.", updatedOrder);
 		return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
 
@@ -88,7 +88,7 @@ public class OrderController {
 	) {
 		Long userId = userDetails.getId();
 		UpdateOrderStatusResponseDto updatedOrder = orderService.updateOrderStatusToCompleted(orderId, userId);
-		ApiResponseDto success = ApiResponseDto.of("주문 상태 변경 완료되었습니다.", updatedOrder);
+		ApiResponseDto success = ApiResponseDto.of("주문 상태가 거래완료로 변경되었습니다.", updatedOrder);
 		return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
 
@@ -100,7 +100,7 @@ public class OrderController {
 	) {
 		Long userId = userDetails.getId();
 		UpdateOrderStatusResponseDto canceledOrder = orderService.updateOrderStatusToCanceled(orderId, userId);
-		ApiResponseDto success = ApiResponseDto.of("주문 취소 완료되었습니다.", canceledOrder);
+		ApiResponseDto success = ApiResponseDto.of("주문 상태가 주문 취소로 변경되었습니다.", canceledOrder);
 		return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
 }

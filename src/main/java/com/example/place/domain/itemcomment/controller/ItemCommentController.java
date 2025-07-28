@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/item/{itemId}/comments")
+@RequestMapping("/api/items/{itemId}/comments")
 public class ItemCommentController {
 
 	private final ItemCommentService itemCommentService;
