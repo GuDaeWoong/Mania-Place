@@ -1,5 +1,7 @@
 package com.example.place.domain.itemcomment.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -54,7 +56,7 @@ public class ItemCommentService {
 		itemService.findByIdOrElseThrow(itemId);
 
 		// 댓글 조회
-		Page<ItemComment> comments = itemCommentRepository.findByItemId(itemId, pageable);
+		Page<ItemComment> comments = itemCommentRepository.findPageByItemId(itemId, pageable);
 
 		Page<ItemCommentResponse> ItemCommentPage = comments.map(ItemCommentResponse::from);
 
@@ -105,5 +107,37 @@ public class ItemCommentService {
 
 		// 댓글 삭제
 		itemCommentRepository.deleteById(itemCommentId);
+	}
+
+	// 상품 댓글 삭제
+	@Transactional
+	public void softDeleteItemComment(Long itemId, Long itemCommentId, CustomPrincipal principal) {
+		// 삭제할 댓글 조회
+		ItemComment comment = itemCommentRepository.findById(itemCommentId).
+			orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_COMMENT));
+
+		// 유효한 경로인지 확인(해당 itemCommentId의 대상 itemId가 일치하는지 확인)
+		if (comment.getItem().getId() != itemId) {
+			throw new CustomException(ExceptionCode.INVALID_PATH);
+		}
+
+		// 본인이 쓴 댓글인지 확인
+		if (comment.getUser().getId() != principal.getId()) {
+			throw new CustomException(ExceptionCode.FORBIDDEN_COMMENT_DELETE);
+		}
+
+		// 댓글 삭제
+		comment.delete();
+	}
+
+	// 상품 댓글 삭제
+	@Transactional
+	public void softDeleteAllItemComment(Long itemId) {
+		// 삭제할 댓글 조회
+		List<ItemComment> comments = itemCommentRepository.findByItemId(itemId);
+
+		for (ItemComment comment : comments) {
+			comment.delete();
+		}
 	}
 }
