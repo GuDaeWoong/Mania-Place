@@ -117,6 +117,18 @@ public class ItemService {
 	}
 
 	@Transactional
+	public void softDeleteItem(Long itemId, Long userId) {
+		Item item = findByIdOrElseThrow(itemId);
+
+		if (!findByIdOrElseThrow(itemId).getUser().getId().equals(userId)) {
+			throw new CustomException(ExceptionCode.FORBIDDEN_ITEM_DELETE);
+		}
+
+		item.delete();
+
+	}
+
+	@Transactional
 	public PageResponseDto<ItemResponse> searchItems(String keyword, List<String> tags, Long userId, Pageable pageable) {
 		List<Item> items = itemRepository.searchitems(keyword, userId, tags);
 

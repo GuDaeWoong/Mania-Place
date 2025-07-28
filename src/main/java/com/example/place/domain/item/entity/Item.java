@@ -6,7 +6,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.example.place.common.entity.BaseEntity;
+import com.example.place.common.entity.SoftDeleteEntity;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.Image.entity.Image;
@@ -26,7 +26,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "items")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Item extends BaseEntity {
+public class Item extends SoftDeleteEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

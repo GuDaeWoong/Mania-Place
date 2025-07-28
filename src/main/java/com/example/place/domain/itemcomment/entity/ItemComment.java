@@ -1,6 +1,7 @@
 package com.example.place.domain.itemcomment.entity;
 
 import com.example.place.common.entity.BaseEntity;
+import com.example.place.common.entity.SoftDeleteEntity;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.user.entity.User;
 
@@ -19,7 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "itemcomments")
-public class ItemComment extends BaseEntity {
+public class ItemComment extends SoftDeleteEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
