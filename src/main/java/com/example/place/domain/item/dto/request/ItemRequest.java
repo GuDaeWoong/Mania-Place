@@ -20,7 +20,9 @@ public class ItemRequest {
     @Positive(message = "올바른 가격을 입력해주세요.")
     private Double price;
     @NotNull(message = "수량은 필수입니다.")
-    private Long count;
+    @Min(value = 1, message = "총 수량은 1개 이상이어야 합니다.")
+    private Long totalCount;
+    private Boolean isLimited;
     private LocalDateTime salesStartAt;
     private LocalDateTime salesEndAt;
     @NotEmpty(message = "최소 1개의 이미지가 있어야합니다.")
@@ -30,6 +32,5 @@ public class ItemRequest {
     @NotNull(message = "태그 리스트는 null일 수 없습니다.")
     @Size(min = 1, max = 10, message = "태그는 최소 1개 최대 10개가 가능합니다.")
     private Set<String> itemTagNames;
-
 
 }
