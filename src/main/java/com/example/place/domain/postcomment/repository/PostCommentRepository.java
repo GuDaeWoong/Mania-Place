@@ -12,8 +12,11 @@ import com.example.place.domain.post.entity.Post;
 import com.example.place.domain.postcomment.entity.PostComment;
 
 public interface PostCommentRepository extends JpaRepository<PostComment, Long> {
-	@EntityGraph(attributePaths = {"user"})
-	Page<PostComment> findAllByPost(Post post, Pageable pageable);
 
-	List<PostComment> findByPostId(Long postId);
+	Optional<PostComment> findByIdAndIsDeletedFalse(Long id);
+
+	@EntityGraph(attributePaths = {"user"})
+	Page<PostComment> findAllByPostAndIsDeletedFalse(Post post, Pageable pageable);
+
+	List<PostComment> findByPostIdAndIsDeletedFalse(Long postId);
 }
