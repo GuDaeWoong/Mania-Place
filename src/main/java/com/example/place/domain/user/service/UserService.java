@@ -85,7 +85,7 @@ public class UserService {
 			userUpdateRequest.getImageUrl());
 
 		// 현재 유저태그 테이블을 전부 비운뒤에 태그를 새로 저장함
-		foundUser.getUserTags().clear();
+		tagService.deleteAllByUser(foundUser);
 		tagService.saveTags(foundUser, userUpdateRequest.getTags());
 
 		return UserResponse.from(foundUser);

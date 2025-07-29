@@ -43,7 +43,7 @@ public class User extends SoftDeleteEntity {
 	@Enumerated(EnumType.STRING)
 	private UserRole role;
 
-	@OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+	@OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
 	private List<UserTag> userTags = new ArrayList<>();
 
 
@@ -69,10 +69,5 @@ public class User extends SoftDeleteEntity {
 
 	public static User of(String name,String nickname,String email,String password , String imageUrl,UserRole role){
 		return new User(name,nickname,email,password,imageUrl,role);
-	}
-
-	// 태그 추가 메서드
-	public void addUserTag(UserTag userTag) {
-		this.userTags.add(userTag);
 	}
 }
