@@ -15,8 +15,8 @@ public class PostDeleteService {
 	private final PostCommnetService postCommnetService;
 
 	@Transactional
-	public void removeReferencesAndDeletePost(Long itemId, Long postId) {
-		postService.softAllDeletePost(postId);
-		postCommnetService.softDeleteAllPostComment(itemId);
+	public void removeReferencesAndDeletePost( Long postId, Long userId) {
+		postService.softDeletePost(postId,userId);
+		postCommnetService.softDeleteAllPostComment(postId);
 	}
 }
