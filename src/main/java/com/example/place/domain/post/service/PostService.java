@@ -58,7 +58,7 @@ public class PostService {
 	@Transactional(readOnly = true)
 	public PageResponseDto<PostResponseDto> getAllPosts(Pageable pageable) {
 
-		Page<Post> postsPage = postRepository.findAll(pageable);
+		Page<Post> postsPage = postRepository.findByItemIdAndIsDeletedFalse(pageable);
 
 		// 현제 페이지의 게시글과 맵핑된 상품별로 이미지 리스트 생성
 		Map<Long, List<Image>> itemIdToImagesMap = mapItemIdsToImagesFromPosts(postsPage);
@@ -74,7 +74,7 @@ public class PostService {
 	public PageResponseDto<PostResponseDto> getMyPosts(Long userId, Pageable pageable) {
 		User user = userService.findByIdOrElseThrow(userId);
 
-		Page<Post> postsPage = postRepository.findAllByUser(user, pageable);
+		Page<Post> postsPage = postRepository.findAllByUserAndIsDeletedFalse(user, pageable);
 
 		// 현제 페이지의 게시글과 맵핑된 상품별로 이미지 리스트 생성
 		Map<Long, List<Image>> itemIdToImagesMap = mapItemIdsToImagesFromPosts(postsPage);
@@ -111,9 +111,10 @@ public class PostService {
 	}
 
 	public Post findByIdOrElseThrow(Long id) {
-		return postRepository.findById(id)
+		return postRepository.findByIdAndIsDeletedFalse(id)
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_POST));
 	}
+
 
 	// 현재 페이지에 있는 상품의 이미지들을 맵으로 묶어 반환
 	private Map<Long, List<Image>> mapItemIdsToImagesFromPosts(Page<Post> postsPage) {
