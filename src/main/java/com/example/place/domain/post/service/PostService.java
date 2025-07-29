@@ -2,6 +2,7 @@ package com.example.place.domain.post.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -58,7 +59,7 @@ public class PostService {
 	public PageResponseDto<PostResponseDto> getMyPosts(Long userId, Pageable pageable) {
 		User user = userService.findByIdOrElseThrow(userId);
 
-		Page<Post> postsPage = postRepository.findAllByUser(user, pageable);
+		Page<Post> postsPage = postRepository.findAllByUserAndIsDeletedFalse(user, pageable);
 
 		// 현제 페이지의 게시글과 맵핑된 상품별로 이미지 리스트 생성
 		Map<Long, List<Image>> itemIdToImagesMap = imageService.mapItemIdsToImagesFromPosts(postsPage);
@@ -95,7 +96,7 @@ public class PostService {
 	}
 
 	public Post findByIdOrElseThrow(Long id) {
-		return postRepository.findById(id)
+		return postRepository.findByIdAndIsDeletedFalse(id)
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_POST));
 	}
 
