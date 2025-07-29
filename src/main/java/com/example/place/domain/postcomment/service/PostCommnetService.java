@@ -48,7 +48,7 @@ public class PostCommnetService {
 
 		User user = userService.findByIdOrElseThrow(principal.getId());
 
-		PostComment postComment = postCommentRepository.findById(commentId)
+		PostComment postComment = postCommentRepository.findByIdAndIsDeletedFalse(commentId)
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_COMMENT));
 
 		// 작성자 검증
@@ -65,7 +65,7 @@ public class PostCommnetService {
 	){
 		Post post = postService.findByIdOrElseThrow(postId);
 
-		Page<PostComment> commentPage = postCommentRepository.findAllByPost(post, pageable);
+		Page<PostComment> commentPage = postCommentRepository.findAllByPostAndIsDeletedFalse(post, pageable);
 
 		Page<PostCommentResponseDto> responsePage = commentPage.map(
 			comment -> PostCommentResponseDto.from(comment.getUser(), comment));
@@ -91,7 +91,7 @@ public class PostCommnetService {
 
 		postService.findByIdOrElseThrow(postId);
 
-		PostComment comment = postCommentRepository.findById(commentId)
+		PostComment comment = postCommentRepository.findByIdAndIsDeletedFalse(commentId)
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_COMMENT));
 
 		if (!comment.getUser().getId().equals(userId)) {
@@ -103,7 +103,7 @@ public class PostCommnetService {
 	@Transactional
 	public void softDeleteAllPostComment(Long postId) {
 
-		List<PostComment> comments = postCommentRepository.findByPostId(postId);
+		List<PostComment> comments = postCommentRepository.findByPostIdAndIsDeletedFalse(postId);
 
 		for (PostComment comment : comments) {
 			comment.delete();
