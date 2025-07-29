@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -64,7 +64,9 @@ public class ItemService {
 				request.getItemName(),
 				request.getItemDescription(),
 				request.getPrice(),
-				request.getCount(),
+				request.getTotalCount(),
+				request.getTotalCount(),
+				Objects.requireNonNullElse(request.getIsLimited(), false),
 				sales_start0_end1.get(0),
 				sales_start0_end1.get(1)
 				);
