@@ -1,5 +1,7 @@
 package com.example.place.domain.postcomment.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -46,7 +48,7 @@ public class PostCommnetService {
 
 		User user = userService.findByIdOrElseThrow(principal.getId());
 
-		PostComment postComment = postCommentRepository.findById(commentId)
+		PostComment postComment = postCommentRepository.findByIdAndIsDeletedFalse(commentId)
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_COMMENT));
 
 		// 작성자 검증
@@ -63,7 +65,7 @@ public class PostCommnetService {
 	){
 		Post post = postService.findByIdOrElseThrow(postId);
 
-		Page<PostComment> commentPage = postCommentRepository.findAllByPost(post, pageable);
+		Page<PostComment> commentPage = postCommentRepository.findAllByPostAndIsDeletedFalse(post, pageable);
 
 		Page<PostCommentResponseDto> responsePage = commentPage.map(
 			comment -> PostCommentResponseDto.from(comment.getUser(), comment));
@@ -84,4 +86,27 @@ public class PostCommnetService {
 		postCommentRepository.delete(comment);
 	}
 
+	@Transactional
+	public void softDeletePostComment(Long postId, Long commentId, Long userId) {
+
+		postService.findByIdOrElseThrow(postId);
+
+		PostComment comment = postCommentRepository.findByIdAndIsDeletedFalse(commentId)
+			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_COMMENT));
+
+		if (!comment.getUser().getId().equals(userId)) {
+			throw new CustomException(ExceptionCode.FORBIDDEN_COMMENT_ACCESS);
+		}
+		comment.delete();
+	}
+
+	@Transactional
+	public void softDeleteAllPostComment(Long postId) {
+
+		List<PostComment> comments = postCommentRepository.findByPostIdAndIsDeletedFalse(postId);
+
+		for (PostComment comment : comments) {
+			comment.delete();
+		}
+	}
 }

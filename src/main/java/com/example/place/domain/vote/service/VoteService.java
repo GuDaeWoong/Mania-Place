@@ -1,7 +1,10 @@
 package com.example.place.domain.vote.service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +22,6 @@ import com.example.place.domain.vote.entity.VoteType;
 import com.example.place.domain.vote.repository.VoteRepository;
 
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -91,5 +93,26 @@ public class VoteService {
 		boolean isDislike = ((Number)result[3]).intValue() == 1;
 
 		return VoteResponseDto.of(likeCount, dislikeCount, isLike, isDislike);
+	}
+
+	@Transactional(readOnly = true)
+	public Map<Long, VoteResponseDto> getVoteForPosts(List<Long> postIds, Long userId) {
+		if (postIds.isEmpty()) {
+			return Collections.emptyMap();
+		}
+
+		List<Object[]> results = voteRepository.findVoteStatsByPostIdsAndUser(postIds, userId);
+
+		// 결과 리스트를 postId를 키로 하는 Map으로 변환
+		return results.stream()
+			.collect(Collectors.toMap(
+				result -> ((Number) result[0]).longValue(),
+				result -> VoteResponseDto.of(
+					((Number) result[1]).longValue(), // likeCount
+					((Number) result[2]).longValue(), // disLikeCount
+					((Number) result[3]).intValue() == 1, // isLike
+					((Number) result[4]).intValue() == 1  // isDislike
+				)
+			));
 	}
 }

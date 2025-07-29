@@ -19,7 +19,6 @@ public class ItemDeleteService {
 
 	@Transactional
 	public void removeReferencesAndDeleteItem(Long itemId, Long userId) {
-		orderService.removeItemReferenceFromOrders(itemId);
 		itemService.softDeleteItem(itemId, userId);
 		itemCommentService.softDeleteAllItemComment(itemId);
 	}
