@@ -1,0 +1,18 @@
+services:
+  product-mysql:
+    image: mysql:8.0
+    container_name: mania_place-db
+    ports:
+      - "3307:3306"
+    environment:
+      - TZ=Asia/Seoul
+      - MYSQL_DATABASE=mania_place
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_USER=mania_place
+      - MYSQL_PASSWORD=mania_place
+
+  product-redis:
+    image: redis:7.2.7
+    container_name: mania_place-redis
+    ports:
+      - "6379:6379"
