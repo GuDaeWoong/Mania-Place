@@ -67,6 +67,10 @@ public class Item extends SoftDeleteEntity {
 		this.count += quantity;
 	}
 
+	// 한정상품 여부
+	public boolean isLimitedEdition() {
+		return this.isLimited != null && this.isLimited;
+	}
 
 	private Item(User user, String itemName, String itemDescription, Double price, Long count, Long totalCount, boolean isLimited, LocalDateTime salesStartAt, LocalDateTime salesEndAt) {
 		this.user = user;

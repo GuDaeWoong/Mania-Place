@@ -10,11 +10,11 @@ import com.example.place.domain.item.dto.response.ItemSummaryResponse;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.item.repository.ItemRepository;
 
-import com.example.place.domain.itemcomment.dto.response.ItemCommentResponse;
 import com.example.place.domain.tag.service.TagService;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.entity.UserRole;
 import com.example.place.domain.user.service.UserService;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -23,14 +23,14 @@ import org.springframework.stereotype.Service;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 
-
-
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ItemService {
@@ -39,23 +39,6 @@ public class ItemService {
     private final TagService tagService;
     private final UserService userService;
 	private final ImageService imageService;
-
-
-	// 재고 감소
-	@Transactional
-	public void decreaseStock(Long itemId, Long quantity) {
-		Item item = itemRepository.findById(itemId)
-			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
-		item.decreaseStock(quantity);
-	}
-
-	// 재고 증가
-	@Transactional
-	public void increaseStock(Long itemId, Long quantity) {
-		Item item = itemRepository.findById(itemId)
-			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
-		item.increaseStock(quantity);
-	}
 
     @Transactional
     public ItemResponse createItem(Long userId, ItemRequest request) {

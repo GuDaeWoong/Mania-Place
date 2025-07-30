@@ -55,6 +55,12 @@ public enum ExceptionCode {
 	EXISTS_EMAIL(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다."),
 	EXISTS_NICKNAME(HttpStatus.CONFLICT, "이미 존재하는 닉네임입니다."),
 	BLACKLISTED_TOKEN(HttpStatus.CONFLICT, "다시 로그인 해주세요."),
+	DUPLICATED_TAG_NAME(HttpStatus.CONFLICT,"이미 존재하는 태그명입니다."),
+
+	// 동시성 제어 관련 예외
+	STOCK_LOCK_FAILED(HttpStatus.CONFLICT, "재고 처리 중입니다. 잠시 후 다시 시도해주세요."),
+	OPERATION_INTERRUPTED(HttpStatus.INTERNAL_SERVER_ERROR, "작업 처리 중 오류가 발생했습니다.");
+
 	DUPLICATED_TAG_NAME(HttpStatus.CONFLICT, "이미 존재하는 태그명입니다.");
 
 	private final HttpStatus httpStatus;
