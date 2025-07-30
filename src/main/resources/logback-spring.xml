@@ -1,0 +1,19 @@
+<configuration>
+
+    <appender name="ROLLINGFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/app.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- 로그 저장 기간, 저장 용량 제한 -->
+            <maxFileSize>10KB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>50KB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%-4relative [%thread] %-5level %logger{35} -%kvp- %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="ROLLINGFILE" />
+    </root>
+</configuration>
