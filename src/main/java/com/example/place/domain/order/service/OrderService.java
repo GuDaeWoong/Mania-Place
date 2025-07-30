@@ -6,6 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.example.place.common.annotation.Loggable;
 import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
@@ -37,6 +39,7 @@ public class OrderService {
 		this.itemService = itemService;
 	}
 
+	@Loggable
 	@Transactional
 	public CreateOrderResponseDto createOrder(CreateOrderRequestDto requestDto,Long userId
 	) {
@@ -77,6 +80,7 @@ public class OrderService {
 		return CreateOrderResponseDto.from(order,mainImageUrl);
 	}
 
+	@Loggable
 	public SearchOrderResponseDto getMyOrder(Long orderId, Long userId) {
 
 		Order order = orderRepository.findById(orderId)
@@ -92,6 +96,7 @@ public class OrderService {
 		return SearchOrderResponseDto.from(order,mainImageUrl);
 	}
 
+	@Loggable
 	public PageResponseDto<SearchOrderResponseDto> getAllMyOrders(Long userId, Pageable pageable
 	) {
 		Page<Order> orders = orderRepository.findAllByUserIdWithItemAndUser(userId, pageable);
@@ -107,6 +112,7 @@ public class OrderService {
 	}
 
 
+	@Loggable
 	@Transactional
 	public UpdateOrderStatusResponseDto updateOrderStatusToReady(Long orderId, Long userId) {
 		Order order = orderRepository.findById(orderId)
@@ -126,6 +132,7 @@ public class OrderService {
 		return UpdateOrderStatusResponseDto.from(order,mainImageUrl);
 	}
 
+	@Loggable
 	@Transactional
 	public UpdateOrderStatusResponseDto updateOrderStatusToCompleted(Long orderId, Long userId) {
 		Order order = orderRepository.findById(orderId)
@@ -146,6 +153,7 @@ public class OrderService {
 		return UpdateOrderStatusResponseDto.from(order,mainImageUrl);
 	}
 
+	@Loggable
 	@Transactional
 	public UpdateOrderStatusResponseDto updateOrderStatusToCanceled(Long orderId, Long userId) {
 		Order order = orderRepository.findById(orderId)

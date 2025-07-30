@@ -2,6 +2,7 @@ package com.example.place.domain.item.service;
 
 import org.springframework.stereotype.Service;
 
+import com.example.place.common.annotation.Loggable;
 import com.example.place.domain.itemcomment.service.ItemCommentService;
 import com.example.place.domain.order.service.OrderService;
 

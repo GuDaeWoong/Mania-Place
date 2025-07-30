@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.place.common.annotation.Loggable;
 import com.example.place.common.dto.PageResponseDto;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.Image.service.ImageService;
@@ -35,6 +36,7 @@ public class PostReadService {
 	}
 
 	// PostSearchAllResponseDto 페이지로 변환하는 메서드
+	@Loggable
 	public PageResponseDto<PostSearchAllResponseDto> getPostsWithVoteInfo(
 		Pageable pageable,
 		Long userId

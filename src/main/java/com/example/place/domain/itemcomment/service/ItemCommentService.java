@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.example.place.common.annotation.Loggable;
 import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
@@ -32,6 +33,7 @@ public class ItemCommentService {
 	private final UserService userService;
 
 	// 상품 댓글 저장
+	@Loggable
 	@Transactional
 	public ItemCommentResponse createItemComment(Long itemId, ItemCommentRequest request,
 		CustomPrincipal principal) {
@@ -50,6 +52,7 @@ public class ItemCommentService {
 	}
 
 	// 상품 댓글 조회
+	@Loggable
 	@Transactional(readOnly = true)
 	public PageResponseDto<ItemCommentResponse> getAllItemComments(Long itemId, Pageable pageable) {
 		// 해당 상품이 존재하는지 여부 확인
@@ -65,6 +68,7 @@ public class ItemCommentService {
 	}
 
 	// 상품 댓글 수정
+	@Loggable
 	@Transactional
 	public ItemCommentResponse updateItemComment(Long itemId, Long itemCommentId, ItemCommentRequest request,
 		CustomPrincipal principal) {
@@ -88,6 +92,7 @@ public class ItemCommentService {
 	}
 
 	// 상품 댓글 삭제
+	@Loggable
 	@Transactional
 	public void deleteItemComment(Long itemId, Long itemCommentId, CustomPrincipal principal) {
 		// 삭제할 댓글 조회
@@ -108,6 +113,7 @@ public class ItemCommentService {
 	}
 
 	// 상품 댓글 삭제
+	@Loggable
 	@Transactional
 	public void softDeleteItemComment(Long itemId, Long itemCommentId, CustomPrincipal principal) {
 		// 삭제할 댓글 조회

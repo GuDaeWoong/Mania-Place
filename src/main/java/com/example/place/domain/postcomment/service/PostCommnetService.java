@@ -6,6 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.example.place.common.annotation.Loggable;
 import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
@@ -29,6 +31,7 @@ public class PostCommnetService {
 	private final PostService postService;
 	private final UserService userService;
 
+	@Loggable
 	@Transactional
 	public PostCommentResponseDto createPostComment(Long postId, PostCommentRequestDto request, CustomPrincipal principal) {
 		User user = userService.findByIdOrElseThrow(principal.getId());
@@ -41,6 +44,7 @@ public class PostCommnetService {
 		return PostCommentResponseDto.from(user, postComment);
 	}
 
+	@Loggable
 	@Transactional
 	public PostCommentResponseDto updatePostComment(Long postId ,Long commentId, PostCommentRequestDto request, CustomPrincipal principal) {
 
@@ -61,6 +65,8 @@ public class PostCommnetService {
 		return PostCommentResponseDto.from(user, postComment);
 	}
 
+	@Loggable
+	@Transactional
 	public PageResponseDto<PostCommentResponseDto> getAllCommentsByPosts(Long postId, Pageable pageable
 	){
 		Post post = postService.findByIdOrElseThrow(postId);
@@ -86,6 +92,7 @@ public class PostCommnetService {
 		postCommentRepository.delete(comment);
 	}
 
+	@Loggable
 	@Transactional
 	public void softDeletePostComment(Long postId, Long commentId, Long userId) {
 
