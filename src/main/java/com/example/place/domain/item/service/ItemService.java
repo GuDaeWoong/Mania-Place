@@ -1,13 +1,16 @@
 package com.example.place.domain.item.service;
 
 import com.example.place.common.dto.PageResponseDto;
+import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.Image.service.ImageService;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.item.dto.request.ItemRequest;
 import com.example.place.domain.item.dto.response.ItemResponse;
+import com.example.place.domain.item.dto.response.ItemSummaryResponse;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.item.repository.ItemRepository;
 
+import com.example.place.domain.itemcomment.dto.response.ItemCommentResponse;
 import com.example.place.domain.tag.service.TagService;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.service.UserService;
@@ -147,6 +150,17 @@ public class ItemService {
 		return new PageResponseDto<>(page);
 	}
 
+	@Transactional
+	public PageResponseDto<ItemSummaryResponse> getAllItemsWIthUserTag(CustomPrincipal principal, Pageable pageable) {
+		User user = userService.findByIdOrElseThrow(principal.getId());
+
+		Page<Item> pagedItems = itemRepository.findByUserTag(user, pageable);
+
+		Page<ItemSummaryResponse> response = pagedItems.map(ItemSummaryResponse::from);
+
+		return new PageResponseDto<>(response);
+	}
+
 	public Item findByIdOrElseThrow(Long id) {
 		Item item = itemRepository.findById(id)
 				.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
@@ -168,6 +182,7 @@ public class ItemService {
 			.map(Image::getImageUrl)
 			.orElse(null);
 	}
+
 	private List<LocalDateTime> setSalesTime(ItemRequest request) {
 
 		LocalDateTime salesStartAt = request.getSalesStartAt() != null

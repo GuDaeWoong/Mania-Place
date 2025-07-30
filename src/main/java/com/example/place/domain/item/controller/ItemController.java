@@ -5,6 +5,7 @@ import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.item.dto.request.ItemRequest;
 import com.example.place.domain.item.dto.response.ItemResponse;
+import com.example.place.domain.item.dto.response.ItemSummaryResponse;
 import com.example.place.domain.item.service.ItemDeleteService;
 import com.example.place.domain.item.service.ItemService;
 import org.springframework.data.domain.Pageable;
@@ -73,6 +74,15 @@ public class ItemController {
             @PageableDefault Pageable pageable
             ) {
         PageResponseDto<ItemResponse> result = itemService.searchItems(keyword, tags, userId, itemDescription, pageable);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("상품 조회가 완료되었습니다", result));
+    }
+
+    @GetMapping("/search/interest")
+    public ResponseEntity<ApiResponseDto<PageResponseDto<ItemSummaryResponse>>> searchItemWithUserTag(
+        @PageableDefault Pageable pageable,
+        @AuthenticationPrincipal CustomPrincipal principal
+    ) {
+        PageResponseDto<ItemSummaryResponse> result = itemService.getAllItemsWIthUserTag(principal, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("상품 조회가 완료되었습니다", result));
     }
 
