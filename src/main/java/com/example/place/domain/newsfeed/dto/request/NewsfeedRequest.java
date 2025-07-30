@@ -13,9 +13,9 @@ import lombok.NoArgsConstructor;
 public class NewsfeedRequest {
 
 	@NotBlank(message = "제목을 입력해주세요.")
-	private String NewsfeedTitle;
+	private String newsfeedTitle;
 	@NotBlank(message = "내용을 입력해주세요.")
-	private String NewsfeedContent;
+	private String newsfeedContent;
 	@NotEmpty(message = "최소 1개의 이미지가 있어야합니다.")
 	private List<String> imageUrls;
 	@NotNull(message = "대표 이미지 인덱스를 입력해주세요.")

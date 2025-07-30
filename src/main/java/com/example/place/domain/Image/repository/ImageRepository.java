@@ -15,5 +15,8 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
 
 	@Query("SELECT i FROM Image i WHERE i.item.id IN :itemIds")
 	List<Image> findByItemIds(@Param("itemIds") List<Long> itemIds);
+
+	@Query("SELECT i FROM Image i WHERE i.newsfeed.id IN :newsfeedIds")
+	List<Image> findByNewsfeedIds(@Param("newsfeedIds") List<Long> newsfeedIds);
 }
 

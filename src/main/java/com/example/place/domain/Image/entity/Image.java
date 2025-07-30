@@ -38,12 +38,18 @@ public class Image {
 	private boolean isMain = false;
 
 	private Image(Item item, String imageUrl, Boolean isMain) {
+		if (item == null) {
+			throw new IllegalArgumentException("Item cannot be null");
+		}
 		this.item = item;
 		this.imageUrl = imageUrl;
 		this.isMain = isMain;
 	}
 
 	private Image(Newsfeed newsfeed, String imageUrl, Boolean isMain) {
+		if (newsfeed == null) {
+			throw new IllegalArgumentException("Newsfeed cannot be null");
+		}
 		this.newsfeed = newsfeed;
 		this.imageUrl = imageUrl;
 		this.isMain = isMain;
