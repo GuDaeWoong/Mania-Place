@@ -24,7 +24,7 @@ public class LoggingAspect {
 	// 로그에서 마스킹 처리할 민감한 필드 이름들
 	private static final Set<String> SENSITIVE_FIELDS = Set.of(
 		"email", "password", "accessToken", "refreshToken",
-		"authorization", "secret", "key", "credential"
+		"authorization", "secret", "key"
 	);
 
 	public LoggingAspect(ObjectMapper objectMapper) {
