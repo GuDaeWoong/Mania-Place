@@ -2,16 +2,20 @@ package com.example.place.domain.item.service;
 
 import com.example.place.common.annotation.Loggable;
 import com.example.place.common.dto.PageResponseDto;
+import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.Image.service.ImageService;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.item.dto.request.ItemRequest;
 import com.example.place.domain.item.dto.response.ItemResponse;
+import com.example.place.domain.item.dto.response.ItemSummaryResponse;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.item.repository.ItemRepository;
 
 import com.example.place.domain.tag.service.TagService;
 import com.example.place.domain.user.entity.User;
+import com.example.place.domain.user.entity.UserRole;
 import com.example.place.domain.user.service.UserService;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -20,15 +24,14 @@ import org.springframework.stereotype.Service;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 
-
-
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ItemService {
@@ -38,41 +41,30 @@ public class ItemService {
     private final UserService userService;
 	private final ImageService imageService;
 
-
-	// 재고 감소
-	@Transactional
-	public void decreaseStock(Long itemId, Long quantity) {
-		Item item = itemRepository.findById(itemId)
-			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
-		item.decreaseStock(quantity);
-	}
-
-	// 재고 증가
-	@Transactional
-	public void increaseStock(Long itemId, Long quantity) {
-		Item item = itemRepository.findById(itemId)
-			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
-		item.increaseStock(quantity);
-	}
-
-	@Loggable
     @Transactional
     public ItemResponse createItem(Long userId, ItemRequest request) {
         User user = userService.findByIdOrElseThrow(userId);
 		List<LocalDateTime> sales_start0_end1 = setSalesTime(request);
+
+		boolean isAdminItem = user.getRole() == UserRole.ADMIN;
 
         Item item = Item.of(
                 user,
 				request.getItemName(),
 				request.getItemDescription(),
 				request.getPrice(),
-				request.getCount(),
+				request.getTotalCount(),
+				request.getTotalCount(),
+				isAdminItem,
 				sales_start0_end1.get(0),
 				sales_start0_end1.get(1)
 				);
         itemRepository.save(item);
+
 		// 연관 이미지 저장
 		imageService.createImages(item, request.getImageUrls(), request.getMainIndex());
+
+		// 연관 태그 저장
 		tagService.saveTags(item, request.getItemTagNames());
 
 		return ItemResponse.from(item);
@@ -86,6 +78,17 @@ public class ItemService {
 	}
 
 	@Loggable
+	@Transactional(readOnly = true)
+	public PageResponseDto<ItemSummaryResponse> getAllItemsWIthUserTag(CustomPrincipal principal, Pageable pageable) {
+		User user = userService.findByIdOrElseThrow(principal.getId());
+
+		Page<Item> pagedItems = itemRepository.findByUserTag(user, pageable);
+
+		Page<ItemSummaryResponse> response = pagedItems.map(ItemSummaryResponse::from);
+
+		return new PageResponseDto<>(response);
+	}
+  
 	@Transactional
 	public ItemResponse updateItem(Long itemId, ItemRequest request, Long userId) {
 		Item item = findByIdOrElseThrow(itemId);
@@ -103,11 +106,13 @@ public class ItemService {
 		if (request.getImageUrls() != null) {
 			imageService.updateImages(item, request.getImageUrls(), request.getMainIndex());
 		}
+
 		// 연관 태그 수정
 		if(request.getItemTagNames() != null) {
 			item.getItemTags().clear();
 			tagService.saveTags(item, request.getItemTagNames());
 		}
+
 		return ItemResponse.from(item);
 	}
 
@@ -174,6 +179,7 @@ public class ItemService {
 			.map(Image::getImageUrl)
 			.orElse(null);
 	}
+
 	private List<LocalDateTime> setSalesTime(ItemRequest request) {
 
 		LocalDateTime salesStartAt = request.getSalesStartAt() != null

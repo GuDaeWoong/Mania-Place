@@ -13,6 +13,7 @@ import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.item.service.ItemService;
+import com.example.place.domain.item.service.StockService;
 import com.example.place.domain.order.dto.request.CreateOrderRequestDto;
 import com.example.place.domain.order.dto.response.CreateOrderResponseDto;
 import com.example.place.domain.order.dto.response.SearchOrderResponseDto;
@@ -24,20 +25,15 @@ import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.entity.UserRole;
 import com.example.place.domain.user.service.UserService;
 
+import lombok.RequiredArgsConstructor;
 
 @Service
-// @RequiredArgsConstructor
+@RequiredArgsConstructor
 public class OrderService {
 	private final OrderRepository orderRepository;
 	private final UserService userService;
 	private final ItemService itemService;
-
-
-	public OrderService(OrderRepository orderRepository,UserService userService, ItemService itemService) {
-		this.orderRepository = orderRepository;
-		this.userService = userService;
-		this.itemService = itemService;
-	}
+	private final StockService stockService;
 
 	@Loggable
 	@Transactional
@@ -72,7 +68,7 @@ public class OrderService {
 		orderRepository.save(order);
 
 		// 주문으로 인한 재고 차감
-		itemService.decreaseStock(item.getId(),requestDto.getQuantity());
+		stockService.decreaseStock(item.getId(),requestDto.getQuantity());
 
 		// 메인 이미지 추가
 		String mainImageUrl = itemService.getMainImageUrl(item.getId());
@@ -171,7 +167,7 @@ public class OrderService {
 		Item item = order.getItem();
 
 		// 주문취소 인한 재고 증가
-		itemService.increaseStock(item.getId(),order.getQuantity());
+		stockService.increaseStock(item.getId(),order.getQuantity());
 
 		String mainImageUrl = itemService.getMainImageUrl(item.getId());
 

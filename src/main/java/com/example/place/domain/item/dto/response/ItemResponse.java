@@ -17,6 +17,7 @@ public class ItemResponse {
     private String itemDescription;
     private Double price;
     private Long count;
+    private Boolean isLimited;
     private LocalDateTime salesStartAt;
     private LocalDateTime salesEndAt;
     private List<String> imageUrls;
@@ -44,6 +45,8 @@ public class ItemResponse {
         response.itemDescription = item.getItemDescription();
         response.price = item.getPrice();
         response.count = item.getCount();
+        response.isLimited = item.getIsLimited();
+
         response.salesStartAt = item.getSalesStartAt();
         response.salesEndAt = item.getSalesEndAt();
         response.imageUrls = imageUrls;
