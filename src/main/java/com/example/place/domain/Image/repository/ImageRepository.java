@@ -11,6 +11,9 @@ import com.example.place.domain.Image.entity.Image;
 public interface ImageRepository extends JpaRepository<Image, Long> {
 	List<Image> findByItemId(Long itemId);
 
+	List<Image> findByNewsfeedId(Long newsfeedId);
+
 	@Query("SELECT i FROM Image i WHERE i.item.id IN :itemIds")
 	List<Image> findByItemIds(@Param("itemIds") List<Long> itemIds);
 }
+

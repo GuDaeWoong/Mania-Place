@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.Image.repository.ImageRepository;
 import com.example.place.domain.item.entity.Item;
+import com.example.place.domain.newsfeed.entity.Newsfeed;
 import com.example.place.domain.post.entity.Post;
 
 import jakarta.transaction.Transactional;
@@ -37,6 +38,21 @@ public class ImageService {
 			imageRepository.save(image);
 
 			item.addImage(image); // 연관관계 양방향 설정
+		}
+	}
+
+	// newsfeed 의 이미지 저장
+	@Transactional
+	public void createImages(Newsfeed newsfeed, List<String> imageUrls, int mainIndex) {
+
+		int validatedMainIndex = validMainIndex(imageUrls.size(), mainIndex);
+
+		for (int i = 0; i < imageUrls.size(); i++) {
+			boolean isMain = (validatedMainIndex == i);
+			Image image = Image.of(newsfeed, imageUrls.get(i), isMain);
+
+			imageRepository.save(image);
+			newsfeed.addImage(image);
 		}
 	}
 
@@ -89,6 +105,13 @@ public class ImageService {
 		List<Image> images = imageRepository.findByItemId(itemId);
 		imageRepository.deleteAll(images);
 	}
+
+	// //특정 NewsfeedId와 연관된 이미지를 일괄로 삭제
+	// @Transactional
+	// public void deleteImageByNewsfeedId(Long newsfeedId) {
+	// 	List<Image> images = imageRepository.findByNewsfeedId(newsfeedId);
+	// 	imageRepository.deleteAll(images);
+	// }
 
 	// 대표 이미지 인덱스 검증
 	private int validMainIndex(int listSize, int mainIndex) {
