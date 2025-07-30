@@ -1,12 +1,15 @@
 package com.example.place.domain.item.service;
 
 import com.example.place.common.dto.PageResponseDto;
+import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.Image.service.ImageService;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.item.dto.request.ItemRequest;
 import com.example.place.domain.item.dto.response.ItemResponse;
+import com.example.place.domain.item.dto.response.ItemSummaryResponse;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.item.repository.ItemRepository;
+
 import com.example.place.domain.tag.service.TagService;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.entity.UserRole;
@@ -56,8 +59,11 @@ public class ItemService {
 				sales_start0_end1.get(1)
 				);
         itemRepository.save(item);
+
 		// 연관 이미지 저장
 		imageService.createImages(item, request.getImageUrls(), request.getMainIndex());
+
+		// 연관 태그 저장
 		tagService.saveTags(item, request.getItemTagNames());
 
 		return ItemResponse.from(item);
@@ -67,6 +73,17 @@ public class ItemService {
 	public ItemResponse getItem(Long itemId) {
 		Item item = findByIdOrElseThrow(itemId);
 		return ItemResponse.from(item);
+	}
+
+	@Transactional(readOnly = true)
+	public PageResponseDto<ItemSummaryResponse> getAllItemsWIthUserTag(CustomPrincipal principal, Pageable pageable) {
+		User user = userService.findByIdOrElseThrow(principal.getId());
+
+		Page<Item> pagedItems = itemRepository.findByUserTag(user, pageable);
+
+		Page<ItemSummaryResponse> response = pagedItems.map(ItemSummaryResponse::from);
+
+		return new PageResponseDto<>(response);
 	}
 
 	@Transactional
@@ -86,11 +103,13 @@ public class ItemService {
 		if (request.getImageUrls() != null) {
 			imageService.updateImages(item, request.getImageUrls(), request.getMainIndex());
 		}
+
 		// 연관 태그 수정
 		if(request.getItemTagNames() != null) {
 			item.getItemTags().clear();
 			tagService.saveTags(item, request.getItemTagNames());
 		}
+
 		return ItemResponse.from(item);
 	}
 
@@ -155,6 +174,7 @@ public class ItemService {
 			.map(Image::getImageUrl)
 			.orElse(null);
 	}
+
 	private List<LocalDateTime> setSalesTime(ItemRequest request) {
 
 		LocalDateTime salesStartAt = request.getSalesStartAt() != null

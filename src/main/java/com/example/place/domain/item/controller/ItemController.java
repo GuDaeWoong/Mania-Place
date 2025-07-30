@@ -5,6 +5,7 @@ import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.item.dto.request.ItemRequest;
 import com.example.place.domain.item.dto.response.ItemResponse;
+import com.example.place.domain.item.dto.response.ItemSummaryResponse;
 import com.example.place.domain.item.service.ItemDeleteService;
 import com.example.place.domain.item.service.ItemService;
 import org.springframework.data.domain.Pageable;
@@ -28,10 +29,10 @@ public class ItemController {
     private final ItemDeleteService itemDeleteService;
 
     /**
-     * 상품 생성 기존 Tag가 있다면 사용 없다면 생성해서 상품등록
+     * 상품 생성
      *
      * @param request
-     * @param
+     * @param principal
      * @return
      */
     @PostMapping
@@ -56,11 +57,12 @@ public class ItemController {
     }
 
     /**
-     * 원하는 값으로 조회
+     * 상품 서치
      *
      * @param keyword
      * @param tags
      * @param userId
+     * @param itemDescription
      * @param pageable
      * @return
      */
@@ -77,9 +79,27 @@ public class ItemController {
     }
 
     /**
-     * 상품 단건 수정
+     * 로그인한 유저의 관심태그가 포함된 상품 전체 조회
      *
+     * @param pageable
+     * @param principal
+     * @return
+     */
+    @GetMapping("/search/interest")
+    public ResponseEntity<ApiResponseDto<PageResponseDto<ItemSummaryResponse>>> searchItemWithUserTag(
+        @PageableDefault Pageable pageable,
+        @AuthenticationPrincipal CustomPrincipal principal
+    ) {
+        PageResponseDto<ItemSummaryResponse> response = itemService.getAllItemsWIthUserTag(principal, pageable);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("상품 조회가 완료되었습니다", response));
+    }
+
+    /**
+     * 상품 수정
+     *
+     * @param itemId
      * @param request
+     * @param principal
      * @return
      */
     @PatchMapping("/{itemId}")

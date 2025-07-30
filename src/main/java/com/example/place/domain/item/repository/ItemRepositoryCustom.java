@@ -1,0 +1,11 @@
+package com.example.place.domain.item.repository;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import com.example.place.domain.item.entity.Item;
+import com.example.place.domain.user.entity.User;
+
+public interface ItemRepositoryCustom {
+	Page<Item> findByUserTag(User user, Pageable pageable);
+}
