@@ -26,8 +26,8 @@ public class Newsfeed extends SoftDeleteEntity {
 	@JoinColumn(name = "user_id")
 	private User user;
 
-	private String newsfeedTitle;
-	private String newsfeedContent;
+	private String title;
+	private String content;
 
 	@OneToMany(mappedBy = "newsfeed", cascade = CascadeType.REMOVE, orphanRemoval = true)
 	private List<Image> images = new ArrayList<>();
@@ -36,14 +36,14 @@ public class Newsfeed extends SoftDeleteEntity {
 	// @OneToMany(mappedBy = "newsfeed", cascade = CascadeType.REMOVE, orphanRemoval = true)
 	// private List<newsfeedComment> comments = new ArrayList<>();
 
-	private Newsfeed(User user, String newsfeedTitle, String newsfeedContent) {
+	private Newsfeed(User user, String title, String content) {
 		this.user = user;
-		this.newsfeedTitle = newsfeedTitle;
-		this.newsfeedContent = newsfeedContent;
+		this.title = title;
+		this.content = content;
 	}
 
-	public static Newsfeed of(User user, String newsfeedTitle, String newsfeedContent) {
-		return new Newsfeed(user, newsfeedTitle, newsfeedContent);
+	public static Newsfeed of(User user, String title, String content) {
+		return new Newsfeed(user, title, content);
 	}
 
 	public void addImage(Image image) {

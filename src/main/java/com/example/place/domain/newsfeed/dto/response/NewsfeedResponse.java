@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 public class NewsfeedResponse {
 
 	private Long id;
-	private String newsfeedTitle;
-	private String newsfeedContent;
+	private String title;
+	private String content;
 	private List<String> imageUrls;
 	private int mainIndex;
 
@@ -32,8 +32,8 @@ public class NewsfeedResponse {
 
 		com.example.place.domain.newsfeed.dto.response.NewsfeedResponse response = new com.example.place.domain.newsfeed.dto.response.NewsfeedResponse();
 		response.id = newsfeed.getId();
-		response.newsfeedTitle = newsfeed.getNewsfeedTitle();
-		response.newsfeedContent = newsfeed.getNewsfeedContent();
+		response.title = newsfeed.getTitle();
+		response.content = newsfeed.getContent();
 		response.imageUrls = imageUrls;
 		response.mainIndex = mainIndex;
 		return response;

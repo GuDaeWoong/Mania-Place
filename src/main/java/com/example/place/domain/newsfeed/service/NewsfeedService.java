@@ -32,8 +32,8 @@ public class NewsfeedService {
 
 		Newsfeed newsfeed = Newsfeed.of(
 			user,
-			request.getNewsfeedTitle(),
-			request.getNewsfeedContent()
+			request.getTitle(),
+			request.getContent()
 		);
 		Newsfeed savedNewsfeed = newsfeedRepository.save(newsfeed);
 		// 이미지 저장
