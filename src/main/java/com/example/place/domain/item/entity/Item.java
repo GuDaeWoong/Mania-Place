@@ -41,7 +41,7 @@ public class Item extends SoftDeleteEntity {
 	private double price;
 	private Long count;
 	private Long totalCount;
-	private boolean isLimited;
+	private Boolean isLimited;
 	private LocalDateTime salesStartAt;
 	private LocalDateTime salesEndAt;
 
@@ -80,7 +80,7 @@ public class Item extends SoftDeleteEntity {
 		this.salesEndAt = salesEndAt;
 	}
 	public static Item of(User user, String itemName, String itemDescription, Double price, Long count, Long totalCount, boolean isLimited, LocalDateTime salesStartAt, LocalDateTime salesEndAt) {
-		return new Item(user, itemName, itemDescription, price, count, totalCount, isLimited,salesStartAt, salesEndAt);
+		return new Item(user, itemName, itemDescription, price, count, totalCount, isLimited, salesStartAt, salesEndAt);
 	}
 
 

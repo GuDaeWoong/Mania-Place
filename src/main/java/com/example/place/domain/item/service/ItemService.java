@@ -10,6 +10,7 @@ import com.example.place.domain.item.repository.ItemRepository;
 
 import com.example.place.domain.tag.service.TagService;
 import com.example.place.domain.user.entity.User;
+import com.example.place.domain.user.entity.UserRole;
 import com.example.place.domain.user.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -26,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -59,6 +59,8 @@ public class ItemService {
         User user = userService.findByIdOrElseThrow(userId);
 		List<LocalDateTime> sales_start0_end1 = setSalesTime(request);
 
+		boolean isAdminItem = user.getRole() == UserRole.ADMIN;
+
         Item item = Item.of(
                 user,
 				request.getItemName(),
@@ -66,7 +68,7 @@ public class ItemService {
 				request.getPrice(),
 				request.getTotalCount(),
 				request.getTotalCount(),
-				Objects.requireNonNullElse(request.getIsLimited(), false),
+				isAdminItem,
 				sales_start0_end1.get(0),
 				sales_start0_end1.get(1)
 				);

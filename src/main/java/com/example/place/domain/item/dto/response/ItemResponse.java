@@ -45,7 +45,8 @@ public class ItemResponse {
         response.itemDescription = item.getItemDescription();
         response.price = item.getPrice();
         response.count = item.getCount();
-        response.isLimited = item.isLimited();
+        response.isLimited = item.getIsLimited();
+
         response.salesStartAt = item.getSalesStartAt();
         response.salesEndAt = item.getSalesEndAt();
         response.imageUrls = imageUrls;
