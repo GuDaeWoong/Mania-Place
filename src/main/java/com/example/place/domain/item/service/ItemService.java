@@ -88,7 +88,7 @@ public class ItemService {
 		return ItemResponse.from(item);
 	}
 
-	@Transactional
+	@Transactional(readOnly = true)
 	public PageResponseDto<ItemSummaryResponse> getAllItemsWIthUserTag(CustomPrincipal principal, Pageable pageable) {
 		User user = userService.findByIdOrElseThrow(principal.getId());
 
