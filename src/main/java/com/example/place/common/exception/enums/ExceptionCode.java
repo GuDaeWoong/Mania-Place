@@ -61,8 +61,6 @@ public enum ExceptionCode {
 	STOCK_LOCK_FAILED(HttpStatus.CONFLICT, "재고 처리 중입니다. 잠시 후 다시 시도해주세요."),
 	OPERATION_INTERRUPTED(HttpStatus.INTERNAL_SERVER_ERROR, "작업 처리 중 오류가 발생했습니다.");
 
-	DUPLICATED_TAG_NAME(HttpStatus.CONFLICT, "이미 존재하는 태그명입니다.");
-
 	private final HttpStatus httpStatus;
 	private final String message;
 
