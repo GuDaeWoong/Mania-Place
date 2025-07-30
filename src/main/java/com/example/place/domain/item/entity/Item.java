@@ -96,6 +96,7 @@ public class Item extends SoftDeleteEntity {
 		}
 		if (request.getTotalCount() != null) {
 			this.count = request.getTotalCount();
+			this.totalCount = request.getTotalCount();
 		}
 		if (request.getSalesStartAt() != null) {
 			this.salesStartAt = request.getSalesStartAt();
