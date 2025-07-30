@@ -72,8 +72,11 @@ public class ItemService {
 				sales_start0_end1.get(1)
 				);
         itemRepository.save(item);
+
 		// 연관 이미지 저장
 		imageService.createImages(item, request.getImageUrls(), request.getMainIndex());
+
+		// 연관 태그 저장
 		tagService.saveTags(item, request.getItemTagNames());
 
 		return ItemResponse.from(item);
@@ -83,6 +86,17 @@ public class ItemService {
 	public ItemResponse getItem(Long itemId) {
 		Item item = findByIdOrElseThrow(itemId);
 		return ItemResponse.from(item);
+	}
+
+	@Transactional
+	public PageResponseDto<ItemSummaryResponse> getAllItemsWIthUserTag(CustomPrincipal principal, Pageable pageable) {
+		User user = userService.findByIdOrElseThrow(principal.getId());
+
+		Page<Item> pagedItems = itemRepository.findByUserTag(user, pageable);
+
+		Page<ItemSummaryResponse> response = pagedItems.map(ItemSummaryResponse::from);
+
+		return new PageResponseDto<>(response);
 	}
 
 	@Transactional
@@ -102,11 +116,13 @@ public class ItemService {
 		if (request.getImageUrls() != null) {
 			imageService.updateImages(item, request.getImageUrls(), request.getMainIndex());
 		}
+
 		// 연관 태그 수정
 		if(request.getItemTagNames() != null) {
 			item.getItemTags().clear();
 			tagService.saveTags(item, request.getItemTagNames());
 		}
+
 		return ItemResponse.from(item);
 	}
 
@@ -148,17 +164,6 @@ public class ItemService {
 		Page<ItemResponse> page = new PageImpl<>(itemResponses, pageable, total);
 
 		return new PageResponseDto<>(page);
-	}
-
-	@Transactional
-	public PageResponseDto<ItemSummaryResponse> getAllItemsWIthUserTag(CustomPrincipal principal, Pageable pageable) {
-		User user = userService.findByIdOrElseThrow(principal.getId());
-
-		Page<Item> pagedItems = itemRepository.findByUserTag(user, pageable);
-
-		Page<ItemSummaryResponse> response = pagedItems.map(ItemSummaryResponse::from);
-
-		return new PageResponseDto<>(response);
 	}
 
 	public Item findByIdOrElseThrow(Long id) {

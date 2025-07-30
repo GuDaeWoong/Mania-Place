@@ -8,7 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
-import com.example.place.domain.item.dto.response.ItemSummaryResponse;
+import com.example.place.domain.Image.entity.QImage;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.item.entity.QItem;
 import com.example.place.domain.itemtag.entity.QItemTag;
@@ -61,6 +61,7 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
 			.distinct()
 			.join(item.itemTags, itemTag).fetchJoin()
 			.join(itemTag.tag, tag).fetchJoin()
+			.join(item.images).fetchJoin()
 			.where(item.id.in(itemIds))
 			.fetch();
 
