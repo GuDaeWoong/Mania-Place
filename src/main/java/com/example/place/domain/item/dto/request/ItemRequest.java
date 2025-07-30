@@ -22,6 +22,7 @@ public class ItemRequest {
     @NotNull(message = "수량은 필수입니다.")
     @Min(value = 1, message = "총 수량은 1개 이상이어야 합니다.")
     private Long totalCount;
+    private Boolean isLimited;
     private LocalDateTime salesStartAt;
     private LocalDateTime salesEndAt;
     @NotEmpty(message = "최소 1개의 이미지가 있어야합니다.")

@@ -68,7 +68,7 @@ public class Item extends SoftDeleteEntity {
 	}
 
 
-	private Item(User user, String itemName, String itemDescription, Double price, Long count, Long totalCount, boolean isLimited,LocalDateTime salesStartAt, LocalDateTime salesEndAt) {
+	private Item(User user, String itemName, String itemDescription, Double price, Long count, Long totalCount, boolean isLimited, LocalDateTime salesStartAt, LocalDateTime salesEndAt) {
 		this.user = user;
 		this.itemName = itemName;
 		this.itemDescription = itemDescription;
