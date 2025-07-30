@@ -43,6 +43,11 @@ dependencies {
 
 	implementation 'me.paulschwarz:spring-dotenv:3.0.0'
 
+	// Redisson만 사용
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	// Redisson 분산락 사용
+	implementation 'org.redisson:redisson:3.35.0'
+
 }
 
 tasks.named('test') {
