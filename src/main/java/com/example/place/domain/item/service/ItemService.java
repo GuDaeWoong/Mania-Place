@@ -1,5 +1,6 @@
 package com.example.place.domain.item.service;
 
+import com.example.place.common.annotation.Loggable;
 import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.Image.service.ImageService;
@@ -69,12 +70,14 @@ public class ItemService {
 		return ItemResponse.from(item);
     }
 
+	@Loggable
 	@Transactional(readOnly = true)
 	public ItemResponse getItem(Long itemId) {
 		Item item = findByIdOrElseThrow(itemId);
 		return ItemResponse.from(item);
 	}
 
+	@Loggable
 	@Transactional(readOnly = true)
 	public PageResponseDto<ItemSummaryResponse> getAllItemsWIthUserTag(CustomPrincipal principal, Pageable pageable) {
 		User user = userService.findByIdOrElseThrow(principal.getId());
@@ -85,7 +88,7 @@ public class ItemService {
 
 		return new PageResponseDto<>(response);
 	}
-
+  
 	@Transactional
 	public ItemResponse updateItem(Long itemId, ItemRequest request, Long userId) {
 		Item item = findByIdOrElseThrow(itemId);
@@ -123,6 +126,7 @@ public class ItemService {
 		itemRepository.deleteById(itemId);
 	}
 
+	@Loggable
 	@Transactional
 	public void softDeleteItem(Long itemId, Long userId) {
 		Item item = findByIdOrElseThrow(itemId);
@@ -135,6 +139,7 @@ public class ItemService {
 
 	}
 
+	@Loggable
 	@Transactional
 	public PageResponseDto<ItemResponse> searchItems(String keyword, List<String> tags, Long userId, String itemDescription, Pageable pageable) {
 		List<Item> items = itemRepository.searchitems(keyword, userId, tags, itemDescription);

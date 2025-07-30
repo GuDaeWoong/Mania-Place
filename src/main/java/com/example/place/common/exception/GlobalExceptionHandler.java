@@ -12,12 +12,15 @@ import com.example.place.common.dto.ErrorResponseDto;
 import com.example.place.common.exception.exceptionclass.CustomException;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
 	@ExceptionHandler(CustomException.class)
 	public ResponseEntity<ErrorResponseDto> customException(CustomException exception, HttpServletRequest request) {
+
 		return customErrorResponse(exception.getExceptionCode().getHttpStatus(), exception.getMessage(),
 			request.getRequestURI());
 	}
@@ -30,6 +33,8 @@ public class GlobalExceptionHandler {
 			.stream()
 			.map(error -> error.getField() + ": " + error.getDefaultMessage())
 			.collect(Collectors.joining(", "));
+
+		log.warn("[ValidationException] {} | Path: {}", errorMessage, request.getRequestURI());
 
 		return customErrorResponse(HttpStatus.BAD_REQUEST, errorMessage, request.getRequestURI());
 	}

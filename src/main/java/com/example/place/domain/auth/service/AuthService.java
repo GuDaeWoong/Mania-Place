@@ -4,6 +4,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.place.common.annotation.Loggable;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.common.security.jwt.JwtUtil;
@@ -22,6 +23,8 @@ public class AuthService {
 	private final JwtBlacklistService jwtBlacklistService;
 	private final JwtUtil jwtUtil;
 
+	@Transactional
+	@Loggable
 	public LoginResponseDto login(LoginRequestDto requestDto) {
 		User user = (User)userService.findByEmailOrElseThrow(requestDto.getEmail())
 			.orElseThrow(() -> new CustomException(ExceptionCode.INVALID_EMAIL_OR_PASSWORD));
@@ -37,6 +40,7 @@ public class AuthService {
 	}
 
 	@Transactional
+	@Loggable
 	public void logout(String bearerToken, String refreshToken) {
 
 		String accessToken = jwtUtil.subStringToken(bearerToken);
@@ -48,6 +52,7 @@ public class AuthService {
 	}
 
 	@Transactional
+	@Loggable
 	public LoginResponseDto refreshAccessToken(String refreshToken) {
 
 		if (!jwtUtil.validateToken(refreshToken)) {

@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.place.common.annotation.Loggable;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.tag.service.TagService;
@@ -28,6 +29,7 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final TagService tagService;
 
+	@Loggable
 	@Transactional
 	public UserRegisterResponse register(UserRegisterRequest userRegisterRequest, UserRole userRole) {
 		// 이메일 중복 검증
@@ -58,17 +60,22 @@ public class UserService {
 	}
 
 	// 어드민 검색용
+	@Loggable
+	@Transactional(readOnly = true)
 	public UserResponse findUser(Long userId) {
 		User foundUser = findByIdOrElseThrow(userId);
 		return UserResponse.from(foundUser);
 	}
 
 	// 마이페이지 조회용
+	@Loggable
+	@Transactional(readOnly = true)
 	public UserResponse findMyInfo(Long userId) {
 		User myInfo = findByIdOrElseThrow(userId);
 		return UserResponse.from(myInfo);
 	}
 
+	@Loggable
 	@Transactional
 	public UserResponse modifyUser(Long userId, UserUpdateRequest userUpdateRequest) {
 		User foundUser = findByIdOrElseThrow(userId);
@@ -91,6 +98,7 @@ public class UserService {
 		return UserResponse.from(foundUser);
 	}
 
+	@Loggable
 	@Transactional
 	public Void modifyPassword(Long userId, UserPasswordRequest userPasswordRequest) {
 		User foundUser = findByIdOrElseThrow(userId);
@@ -117,6 +125,7 @@ public class UserService {
 		return null;
 	}
 
+	@Loggable
 	@Transactional
 	public Void deleteUser(Long userId, UserDeleteRequest userDeleteRequest) {
 		User foundUser = findByIdOrElseThrow(userId);

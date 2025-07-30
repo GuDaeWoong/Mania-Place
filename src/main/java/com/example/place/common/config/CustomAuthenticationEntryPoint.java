@@ -15,8 +15,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 	private final ObjectMapper objectMapper;
@@ -26,6 +28,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 		HttpServletResponse response,
 		AuthenticationException authException
 	) throws IOException {
+
 		HttpStatus status = HttpStatus.UNAUTHORIZED;
 
 		ErrorResponseDto errorResponseDto = new ErrorResponseDto(
@@ -34,6 +37,9 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 			"인증에 실패 했습니다.",
 			request.getRequestURI()
 		);
+
+		log.warn("[AUTH FAILED] {} {} | Message: {}", request.getMethod(), request.getRequestURI(), errorResponseDto.getMessage());
+
 		String responseBody = objectMapper.writeValueAsString(errorResponseDto);
 
 		response.setStatus(status.value());

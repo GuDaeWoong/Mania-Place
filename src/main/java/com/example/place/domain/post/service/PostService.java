@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.place.common.annotation.Loggable;
 import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
@@ -36,6 +37,7 @@ public class PostService {
 	private final ImageService imageService;
 
 	//살까말까 생성
+	@Loggable
 	@Transactional
 	public PostResponseDto createPost(Long userId, PostCreateRequestDto request) {
 		User user = userService.findByIdOrElseThrow(userId);
@@ -48,6 +50,7 @@ public class PostService {
 	}
 
 	//살까말까 단건 조회
+	@Loggable
 	@Transactional(readOnly = true)
 	public PostResponseDto getPost(Long postId) {
 		Post post = findByIdOrElseThrow(postId);
@@ -55,6 +58,7 @@ public class PostService {
 	}
 
 	//살까말까 내 글 조회
+	@Loggable
 	@Transactional(readOnly = true)
 	public PageResponseDto<PostResponseDto> getMyPosts(Long userId, Pageable pageable) {
 		User user = userService.findByIdOrElseThrow(userId);
@@ -71,6 +75,7 @@ public class PostService {
 	}
 
 	//살까말까 수정
+	@Loggable
 	@Transactional
 	public PostResponseDto updatePost(Long postId, PostUpdateRequestDto request, Long userId) {
 		Post post = findByIdOrElseThrow(postId);
@@ -102,6 +107,7 @@ public class PostService {
 
 
 
+	@Loggable
 	@Transactional
 	public void softDeletePost(Long postId, Long userId) {
 		Post post = findByIdOrElseThrow(postId);

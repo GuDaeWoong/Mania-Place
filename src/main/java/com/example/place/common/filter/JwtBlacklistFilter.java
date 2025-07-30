@@ -15,7 +15,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 public class JwtBlacklistFilter extends OncePerRequestFilter implements Ordered {
 
@@ -33,11 +35,18 @@ public class JwtBlacklistFilter extends OncePerRequestFilter implements Ordered 
 		HttpServletResponse response,
 		FilterChain filterChain
 	) throws ServletException, IOException {
+
 		String bearerToken = request.getHeader("Authorization");
 
 		if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
 			String token = bearerToken.substring(7);
 			if (jwtBlacklistService.isBlacklisted(token)) {
+				log.warn("[JWT BLACKLIST] 차단된 토큰 사용 시도 - URI: {}, IP: {}, Token: {}",
+					request.getRequestURI(),
+					request.getRemoteAddr(),
+					truncateString(bearerToken, 30)
+				);
+
 				sendErrorResponse(request, response);
 				return;
 			}
@@ -59,5 +68,11 @@ public class JwtBlacklistFilter extends OncePerRequestFilter implements Ordered 
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		response.setCharacterEncoding("UTF-8");
 		response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+	}
+
+	private String truncateString(String str, int maxLength) {
+		if (str == null) return "null";
+		if (str.length() <= maxLength) return str;
+		return str.substring(0, maxLength) + "... (truncated)";
 	}
 }
