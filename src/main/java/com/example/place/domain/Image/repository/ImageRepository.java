@@ -11,12 +11,11 @@ import com.example.place.domain.Image.entity.Image;
 public interface ImageRepository extends JpaRepository<Image, Long> {
 	List<Image> findByItemId(Long itemId);
 
-	List<Image> findByNewsfeedId(Long newsfeedId);
-
 	@Query("SELECT i FROM Image i WHERE i.item.id IN :itemIds")
 	List<Image> findByItemIds(@Param("itemIds") List<Long> itemIds);
 
-	@Query("SELECT i FROM Image i WHERE i.newsfeed.id IN :newsfeedIds")
-	List<Image> findByNewsfeedIds(@Param("newsfeedIds") List<Long> newsfeedIds);
+	//뉴스피드 전체 조회 이미지 리스트
+	@Query("SELECT i FROM Image i WHERE i.newsfeed.id IN :newsfeedIds AND i.isMain = true")
+	List<Image> findMainImagesByNewsfeedIds(@Param("newsfeedIds") List<Long> newsfeedIds);
 }
 
