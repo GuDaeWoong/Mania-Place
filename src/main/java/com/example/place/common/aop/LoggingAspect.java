@@ -46,7 +46,7 @@ public class LoggingAspect {
 		String methodName = joinPoint.getSignature().toShortString();
 
 		// 입력 파라미터 JSON 직렬화 + 마스킹
-		String paramsJson = serializeAndMaskResponse(joinPoint.getArgs());
+		String paramsJson = serializeAndMask(joinPoint.getArgs());
 
 		try {
 			// 실제 대상 메서드 실행
@@ -57,7 +57,7 @@ public class LoggingAspect {
 			RequestInfo requestInfo = captureRequestInfo();
 
 			// 결과 객체를 JSON으로 직렬화하고 민감 데이터 마스킹 처리
-			String responseBody = serializeAndMaskResponse(result);
+			String responseBody = serializeAndMask(result);
 
 			// 성공 로그 기록 (메서드명과 파라미터 포함)
 			logSuccess(requestInfo, methodName, responseBody, duration, paramsJson);
@@ -114,17 +114,17 @@ public class LoggingAspect {
 	}
 
 	// 응답 객체를 JSON 문자열로 직렬화하고 민감정보를 마스킹 처리하는 메서드
-	private String serializeAndMaskResponse(Object response) {
-		if (response == null) {
+	private String serializeAndMask(Object data) {
+		if (data == null) {
 			return "null";
 		}
 
 		try {
-			String json = objectMapper.writeValueAsString(response);
+			String json = objectMapper.writeValueAsString(data);
 			return maskSensitiveData(json);
 		} catch (Exception e) {
-			log.warn("Response 직렬화 실패: {}", e.getMessage());
-			return "Response 직렬화 실패";
+			log.warn("직렬화 실패: {}", e.getMessage());
+			return "직렬화 실패";
 		}
 	}
 
