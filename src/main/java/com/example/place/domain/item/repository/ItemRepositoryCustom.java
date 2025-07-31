@@ -9,7 +9,7 @@ import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.user.entity.User;
 
 public interface ItemRepositoryCustom {
+	Page<Item> findAllCustom(Pageable pageable);
 	Page<Item> findByUserTag(User user, Pageable pageable);
-
 	Page<Item> search(String keyword, List<String> tags, Long userId, Pageable pageable);
 }

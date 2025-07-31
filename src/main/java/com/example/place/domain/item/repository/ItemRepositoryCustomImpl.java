@@ -37,6 +37,12 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
+	public Page<Item> findAllCustom(Pageable pageable) {
+		BooleanExpression whereCondition = null;
+		return createPagedItem(whereCondition, pageable);
+	}
+
+	@Override
 	public Page<Item> findByUserTag(User user, Pageable pageable) {
 
 		// 유저의 관심 태그를 조회하는 서브쿼리
