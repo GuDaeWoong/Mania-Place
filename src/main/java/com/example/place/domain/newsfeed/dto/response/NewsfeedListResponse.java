@@ -11,13 +11,11 @@ import lombok.NoArgsConstructor;
 public class NewsfeedListResponse {
 	private Long id;
 	private String title;
-	private String content;
 	private String mainImageUrl;
 
-	private NewsfeedListResponse(Long id, String title, String content, String mainImageUrl) {
+	private NewsfeedListResponse(Long id, String title, String mainImageUrl) {
 		this.id = id;
 		this.title = title;
-		this.content = content;
 		this.mainImageUrl = mainImageUrl;
 	}
 
@@ -25,7 +23,6 @@ public class NewsfeedListResponse {
 		return new NewsfeedListResponse(
 			newsfeed.getId(),
 			newsfeed.getTitle(),
-			newsfeed.getContent(),
 			mainImageUrl
 		);
 	}
