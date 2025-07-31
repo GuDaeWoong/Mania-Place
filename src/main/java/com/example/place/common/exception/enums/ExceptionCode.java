@@ -15,6 +15,7 @@ public enum ExceptionCode {
 	INVALID_ORDER_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "허용되지 않은 주문 상태 변환입니다."),
 	INVALID_IMAGE_UPDATE_REQUEST(HttpStatus.BAD_REQUEST, "이미지 수정을 위해서는 이미지 URL 목록과 대표 이미지 인덱스를 함께 보내주세요"),
 	INVALID_PATH(HttpStatus.BAD_REQUEST, "유효하지 않는 주소입니다."),
+	TOO_MANY_TAGS(HttpStatus.BAD_REQUEST, "태그는 최대 10개까지만 입력이 가능합니다."),
 
 	// 401 Unauthorized
 	PASSWORD_MISMATCH(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."),
