@@ -6,10 +6,14 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.example.place.common.security.jwt.CustomPrincipal;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,8 +27,7 @@ public class LoggingAspect {
 
 	// 로그에서 마스킹 처리할 민감한 필드 이름들
 	private static final Set<String> SENSITIVE_FIELDS = Set.of(
-		"email", "password", "accessToken", "refreshToken",
-		"authorization", "secret", "key"
+		"email", "password", "accessToken", "refreshToken"
 	);
 
 	public LoggingAspect(ObjectMapper objectMapper) {
@@ -32,11 +35,18 @@ public class LoggingAspect {
 	}
 
 	@Pointcut("@annotation(com.example.place.common.annotation.Loggable)")
-	public void loggableMethods() {}
+	public void loggableMethods() {
+	}
 
 	@Around("loggableMethods()")
 	public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
 		long start = System.currentTimeMillis();
+
+		// 호출된 메서드 이름
+		String methodName = joinPoint.getSignature().toShortString();
+
+		// 입력 파라미터 JSON 직렬화 + 마스킹
+		String paramsJson = serializeAndMaskResponse(joinPoint.getArgs());
 
 		try {
 			// 실제 대상 메서드 실행
@@ -49,8 +59,9 @@ public class LoggingAspect {
 			// 결과 객체를 JSON으로 직렬화하고 민감 데이터 마스킹 처리
 			String responseBody = serializeAndMaskResponse(result);
 
-			// 성공 로그 기록
-			logSuccess(requestInfo, responseBody, duration);
+			// 성공 로그 기록 (메서드명과 파라미터 포함)
+			logSuccess(requestInfo, methodName, responseBody, duration, paramsJson);
+
 			return result;
 
 		} catch (Exception e) {
@@ -58,8 +69,10 @@ public class LoggingAspect {
 
 			// 요청 정보 다시 추출 (예외 상황이라도 정보 로깅 시도)
 			RequestInfo requestInfo = captureRequestInfo();
-			// 실패 로그 기록
-			logFailure(requestInfo, duration, e);
+
+			// 실패 로그 기록 (메서드명과 파라미터 포함)
+			logFailure(requestInfo, methodName, duration, e, paramsJson);
+
 			throw e; // 예외 재던지기
 		}
 	}
@@ -67,7 +80,7 @@ public class LoggingAspect {
 	// 현재 HTTP 요청으로부터 요청 정보를 안전하게 추출하는 메서드
 	private RequestInfo captureRequestInfo() {
 		try {
-			ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+			ServletRequestAttributes attrs = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
 
 			// 요청이 없거나 비동기 호출인 경우 빈 기본값 반환
 			if (attrs == null) {
@@ -77,9 +90,9 @@ public class LoggingAspect {
 			HttpServletRequest req = attrs.getRequest();
 			String method = req.getMethod(); // HTTP 메서드(GET, POST 등)
 			String uri = req.getRequestURI(); // 요청 URI
-			String userEmail = extractUserEmail(req); // 사용자 식별 정보 추출
+			String userId = extractUserIdentifier(); // 사용자 식별 정보 추출
 
-			return RequestInfo.of(method, uri, userEmail);
+			return RequestInfo.of(method, uri, userId);
 
 		} catch (Exception e) {
 			log.warn("Request 정보 추출 실패: {}", e.getMessage());
@@ -88,11 +101,16 @@ public class LoggingAspect {
 	}
 
 	// 사용자 인증 정보에서 사용자 email을 추출하는 메서드
-	private String extractUserEmail(HttpServletRequest request) {
-		if (request.getUserPrincipal() != null) {
-			return request.getUserPrincipal().getName();
+	private String extractUserIdentifier() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication == null || !authentication.isAuthenticated()
+			|| authentication instanceof AnonymousAuthenticationToken) {
+			return "ANONYMOUS";
 		}
-		return "anonymous";
+		if (authentication.getPrincipal() instanceof CustomPrincipal userDetails) {
+			return userDetails.getId().toString();
+		}
+		return "UNKNOWN";
 	}
 
 	// 응답 객체를 JSON 문자열로 직렬화하고 민감정보를 마스킹 처리하는 메서드
@@ -128,15 +146,18 @@ public class LoggingAspect {
 	}
 
 	// 성공 로그 출력용 메서드
-	private void logSuccess(RequestInfo requestInfo, String responseBody, long durationMs) {
-		log.info("[{}] {} - {} ({} ms) | Response: {}",
-			requestInfo.method(), requestInfo.uri(), requestInfo.userId(), durationMs, responseBody);
+	private void logSuccess(RequestInfo requestInfo, String methodName, String responseBody, long duration,
+		String paramsJson) {
+		log.info("[{}] {} - {} - (USER ID: {}) ({} ms) | Params: {} | Response: {}",
+			requestInfo.method(), requestInfo.uri(), methodName, requestInfo.userId(), duration, paramsJson,
+			responseBody);
 	}
 
 	// 실패 로그 출력용 메서드
-	private void logFailure(RequestInfo requestInfo, long durationMs, Exception e) {
-		log.error("[{}] {} - {} ({} ms) - ERROR: {}",
-			requestInfo.method(), requestInfo.uri(), requestInfo.userId(), durationMs, e.getMessage());
+	private void logFailure(RequestInfo requestInfo, String methodName, long duration, Exception e, String paramsJson) {
+		log.error("[{}] {} - {} - (USER ID: {}) ({} ms) - ERROR: {} | Params: {}",
+			requestInfo.method(), requestInfo.uri(), methodName, requestInfo.userId(), duration, e.getMessage(),
+			paramsJson);
 	}
 
 	// 요청 정보 데이터를 불변으로 캡슐화하는 record 클래스
