@@ -27,7 +27,6 @@ public class ImageService {
 
 	// 이미지 저장
 	@Transactional
-	@Loggable
 	public void createImages(Item item, List<String> imageUrls, int mainIndex) {
 
 		int validatedMainIndex = validMainIndex(imageUrls.size(), mainIndex);
@@ -60,7 +59,6 @@ public class ImageService {
 
 	// 이미지 수정
 	@Transactional
-	@Loggable
 	public void updateImages(Item item, List<String> newImageUrls, int mainIndex) {
 		// 새롭게 전달받은 이미지
 		Set<String> newImageSet = new HashSet<>(newImageUrls);
@@ -103,7 +101,6 @@ public class ImageService {
 
 	// 특정 itemId와 연관된 이미지를 일괄로 삭제
 	@Transactional
-	@Loggable
 	public void deleteImageByItemId(Long itemId) {
 		// 연관 이미지들 삭제
 		List<Image> images = imageRepository.findByItemId(itemId);
@@ -124,7 +121,6 @@ public class ImageService {
 	}
 
 	@Transactional
-	@Loggable
 	public List<Image> findByItemIds(List<Long> itemIds) {
 		return imageRepository.findByItemIds(itemIds);
 	}

@@ -40,7 +40,9 @@ public class ItemService {
     private final UserService userService;
 	private final ImageService imageService;
 
+
     @Transactional
+	@Loggable
     public ItemResponse createItem(Long userId, ItemRequest request) {
         User user = userService.findByIdOrElseThrow(userId);
 		List<LocalDateTime> sales_start0_end1 = setSalesTime(request);
