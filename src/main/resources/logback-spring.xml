@@ -4,24 +4,24 @@
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>logs/app.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <!-- 로그 저장 기간, 저장 용량 제한 -->
-            <maxFileSize>10KB</maxFileSize>
+            <maxFileSize>1MB</maxFileSize>
             <maxHistory>30</maxHistory>
-            <totalSizeCap>50KB</totalSizeCap>
+            <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %magenta(%-4relative) %highlight(%-5level) [%thread] %cyan(%logger{35}) - %msg%n</pattern>
         </encoder>
     </appender>
 
     <!-- 콘솔 출력용 Appender 추가 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %magenta(%-4relative) %highlight(%-5level) [%thread] %cyan(%logger{35}) - %msg%n</pattern>
         </encoder>
     </appender>
 
     <root level="INFO">
-        <appender-ref ref="CONSOLE" />
-        <appender-ref ref="ROLLINGFILE" />
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="ROLLINGFILE"/>
     </root>
 </configuration>
