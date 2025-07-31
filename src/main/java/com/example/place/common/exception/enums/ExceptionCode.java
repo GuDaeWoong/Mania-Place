@@ -30,6 +30,8 @@ public enum ExceptionCode {
 	FORBIDDEN_ITEM_DELETE(HttpStatus.FORBIDDEN, "본인 외에 상품은 삭제할 수 없습니다."),
 	FORBIDDEN_POST_ACCESS(HttpStatus.FORBIDDEN, "본인 외의 게시글은 수정할 수 없습니다."),
 	FORBIDDEN_POST_DELETE(HttpStatus.FORBIDDEN, "본인 외의 게시글은 삭제할 수 없습니다."),
+	FORBIDDEN_NEWSFEED_ACCESS(HttpStatus.FORBIDDEN, "본인 외의 게시글은 수정할 수 없습니다."),
+	FORBIDDEN_NEWSFEED_DELETE(HttpStatus.FORBIDDEN, "본인 외의 게시글은 삭제할 수 없습니다."),
 	FORBIDDEN_ORDER_ACCESS(HttpStatus.FORBIDDEN, "해당 주문은 본인의 주문이 아닙니다."),
 	ORDER_CANCEL_ACCESS_DENIED(HttpStatus.FORBIDDEN, "주문을 취소할 권한이 없습니다."),
 	ITEM_HAS_ACTIVE_ORDERS(HttpStatus.FORBIDDEN, "아직 진행 중인 주문이 있어 취소할 수 없습니다."),
@@ -56,7 +58,7 @@ public enum ExceptionCode {
 	EXISTS_EMAIL(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다."),
 	EXISTS_NICKNAME(HttpStatus.CONFLICT, "이미 존재하는 닉네임입니다."),
 	BLACKLISTED_TOKEN(HttpStatus.CONFLICT, "다시 로그인 해주세요."),
-	DUPLICATED_TAG_NAME(HttpStatus.CONFLICT,"이미 존재하는 태그명입니다."),
+	DUPLICATED_TAG_NAME(HttpStatus.CONFLICT, "이미 존재하는 태그명입니다."),
 
 	// 동시성 제어 관련 예외
 	STOCK_LOCK_FAILED(HttpStatus.CONFLICT, "재고 처리 중입니다. 잠시 후 다시 시도해주세요."),

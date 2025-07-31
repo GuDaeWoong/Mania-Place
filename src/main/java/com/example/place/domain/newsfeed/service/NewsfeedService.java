@@ -113,5 +113,39 @@ public class NewsfeedService {
 				Image::getImageUrl
 			));
 	}
+
+	// 새소식 수정
+	@Transactional
+	public NewsfeedResponse updateNewsfeed(Long newsfeedId, NewsfeedRequest request, Long userId) {
+		Newsfeed newsfeed = findByIdOrElseThrow(newsfeedId);
+
+		if (!newsfeed.getUser().getId().equals(userId)) {
+			throw new CustomException(ExceptionCode.FORBIDDEN_NEWSFEED_ACCESS);
+		}
+		newsfeed.updateNewsfeed(request);
+
+		// 이미지 수정
+		if (((request.getImageUrls() == null || request.getImageUrls().isEmpty()) && request.getMainIndex() != null)
+			|| (request.getImageUrls() != null && request.getMainIndex() == null)) {
+			throw new CustomException(ExceptionCode.INVALID_IMAGE_UPDATE_REQUEST);
+		}
+		if (request.getImageUrls() != null) {
+			imageService.updateImages(newsfeed, request.getImageUrls(), request.getMainIndex());
+		}
+
+		return NewsfeedResponse.from(newsfeed);
+	}
+
+	@Loggable
+	@Transactional
+	public void softDeleteNewsfeed(Long newsfeedId, Long userId) {
+		Newsfeed newsfeed = findByIdOrElseThrow(newsfeedId);
+
+		if (!findByIdOrElseThrow(newsfeedId).getUser().getId().equals(userId)) {
+			throw new CustomException(ExceptionCode.FORBIDDEN_NEWSFEED_DELETE);
+		}
+
+		newsfeed.delete();
+	}
 }
 
