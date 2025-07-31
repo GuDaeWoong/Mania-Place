@@ -62,20 +62,18 @@ public class ItemController {
      * @param keyword
      * @param tags
      * @param userId
-     * @param itemDescription
      * @param pageable
      * @return
      */
     @GetMapping("/search")
-    public ResponseEntity<ApiResponseDto<PageResponseDto<ItemResponse>>> searchItem(
+    public ResponseEntity<ApiResponseDto<PageResponseDto<ItemSummaryResponse>>> searchItem(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) List<String> tags,
             @RequestParam(required = false) Long userId,
-            @RequestParam(required = false) String itemDescription,
             @PageableDefault Pageable pageable
             ) {
-        PageResponseDto<ItemResponse> result = itemService.searchItems(keyword, tags, userId, itemDescription, pageable);
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("상품 조회가 완료되었습니다", result));
+        PageResponseDto<ItemSummaryResponse> respone = itemService.searchItems(keyword, tags, userId, pageable);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("상품 조회가 완료되었습니다", respone));
     }
 
     /**

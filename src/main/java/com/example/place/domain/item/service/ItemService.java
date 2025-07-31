@@ -78,6 +78,18 @@ public class ItemService {
 	}
 
 	@Loggable
+	@Transactional
+	public PageResponseDto<ItemSummaryResponse> searchItems(String keyword, List<String> tags, Long userId,
+		Pageable pageable) {
+
+		Page<Item> pagedItems = itemRepository.search(keyword, tags, userId, pageable);
+
+		Page<ItemSummaryResponse> response = pagedItems.map(ItemSummaryResponse::from);
+
+		return new PageResponseDto<>(response);
+	}
+
+	@Loggable
 	@Transactional(readOnly = true)
 	public PageResponseDto<ItemSummaryResponse> getAllItemsWIthUserTag(CustomPrincipal principal, Pageable pageable) {
 		User user = userService.findByIdOrElseThrow(principal.getId());
@@ -137,25 +149,6 @@ public class ItemService {
 
 		item.delete();
 
-	}
-
-	@Loggable
-	@Transactional
-	public PageResponseDto<ItemResponse> searchItems(String keyword, List<String> tags, Long userId, String itemDescription, Pageable pageable) {
-		List<Item> items = itemRepository.searchitems(keyword, userId, tags, itemDescription);
-
-		int total = items.size();
-		int start = (int) pageable.getOffset();
-		int end = Math.min(start + pageable.getPageSize(), total);
-
-		List<Item> pagedItems = items.subList(start, end);
-
-		List<ItemResponse> itemResponses = pagedItems.stream()
-				.map(ItemResponse::from)
-				.toList();
-		Page<ItemResponse> page = new PageImpl<>(itemResponses, pageable, total);
-
-		return new PageResponseDto<>(page);
 	}
 
 	public Item findByIdOrElseThrow(Long id) {
