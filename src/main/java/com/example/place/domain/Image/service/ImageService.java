@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
-import com.example.place.common.annotation.Loggable;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.Image.repository.ImageRepository;
 import com.example.place.domain.item.entity.Item;
@@ -58,13 +57,30 @@ public class ImageService {
 	}
 
 	// 이미지 수정
+	// Item 이미지 수정
 	@Transactional
 	public void updateImages(Item item, List<String> newImageUrls, int mainIndex) {
+		updateImagesCommon(item.getId(), null, item, null, newImageUrls, mainIndex);
+	}
+
+	// Newsfeed 이미지 수정
+	@Transactional
+	public void updateImages(Newsfeed newsfeed, List<String> newImageUrls, Integer mainIndex) {
+		int validMainIndex = (mainIndex != null) ? mainIndex : 0;
+		updateImagesCommon(null, newsfeed.getId(), null, newsfeed, newImageUrls, validMainIndex);
+	}
+
+	@Transactional
+	public void updateImagesCommon(Long itemId, Long newsfeedId, Item item, Newsfeed newsfeed,
+		List<String> newImageUrls, int mainIndex) {
 		// 새롭게 전달받은 이미지
 		Set<String> newImageSet = new HashSet<>(newImageUrls);
 
 		// 현재 저장되어 있는 이미지
-		List<Image> existingImages = imageRepository.findByItemId(item.getId());
+		List<Image> existingImages = (itemId != null)
+			? imageRepository.findByItemId(itemId)
+			: imageRepository.findByNewsfeedId(newsfeedId);
+
 		Set<String> existingImageSet = existingImages.stream()
 			.map(Image::getImageUrl)
 			.collect(Collectors.toSet());
@@ -107,12 +123,12 @@ public class ImageService {
 		imageRepository.deleteAll(images);
 	}
 
-	// //특정 NewsfeedId와 연관된 이미지를 일괄로 삭제
-	// @Transactional
-	// public void deleteImageByNewsfeedId(Long newsfeedId) {
-	// 	List<Image> images = imageRepository.findByNewsfeedId(newsfeedId);
-	// 	imageRepository.deleteAll(images);
-	// }
+	//특정 NewsfeedId와 연관된 이미지를 일괄로 삭제
+	@Transactional
+	public void deleteImageByNewsfeedId(Long newsfeedId) {
+		List<Image> images = imageRepository.findByNewsfeedId(newsfeedId);
+		imageRepository.deleteAll(images);
+	}
 
 	// 대표 이미지 인덱스 검증
 	private int validMainIndex(int listSize, int mainIndex) {

@@ -12,4 +12,5 @@ import org.springframework.stereotype.Repository;
 public interface NewsfeedRepository extends JpaRepository<Newsfeed, Long> {
 
 	Page<Newsfeed> findByIsDeletedFalse(Pageable pageable);
+
 }
