@@ -91,7 +91,7 @@ public class ItemController {
      */
     @GetMapping("/search/interest")
     public ResponseEntity<ApiResponseDto<PageResponseDto<ItemSummaryResponse>>> searchItemWithUserTag(
-        @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+        @PageableDefault Pageable pageable,
         @AuthenticationPrincipal CustomPrincipal principal
     ) {
         PageResponseDto<ItemSummaryResponse> response = itemService.getAllItemsWIthUserTag(principal, pageable);
