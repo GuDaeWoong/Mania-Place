@@ -5,17 +5,26 @@ import static com.example.place.domain.itemtag.entity.QItemTag.*;
 import static com.example.place.domain.tag.entity.QTag.*;
 import static com.example.place.domain.usertag.entity.QUserTag.*;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.hibernate.query.sqm.PathElementException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
+import com.example.place.common.exception.enums.ExceptionCode;
+import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.user.entity.User;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -71,6 +80,9 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
 
 	private Page<Item> createPagedItem(BooleanExpression whereCondition, Pageable pageable) {
 
+		// 정렬 조건
+		OrderSpecifier<?> orderSpecifier = getOrderSpecifiers(pageable);
+
 		// 페이지의 id 조회
 		List<Long> itemIds = queryFactory
 			.select(item.id)
@@ -80,6 +92,7 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
 			.where(
 				item.isDeleted.isFalse(),
 				whereCondition)
+			.orderBy(orderSpecifier)
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
 			.fetch();
@@ -96,6 +109,7 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
 			.join(itemTag.tag, tag).fetchJoin()
 			.join(item.images).fetchJoin()
 			.where(item.id.in(itemIds))
+			.orderBy(orderSpecifier)
 			.fetch();
 
 		// 페이징 처리를 위한 전체 열 카운트
@@ -112,5 +126,21 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
 		).orElse(0L);
 
 		return new PageImpl<>(items, pageable, total);
+	}
+
+	private OrderSpecifier<?> getOrderSpecifiers(Pageable pageable) {
+		// Query DSL 필드 접근 경로(path) 지정 도구
+		PathBuilder<Item> path = new PathBuilder<>(Item.class, "item");
+
+		// 필터링해서 createdAt 정렬만 받고, 없으면 기본값(최신순) 세팅
+		Sort.Order firstOrder = pageable.getSort().stream()
+			.filter(order -> "createdAt".equals(order.getProperty()))
+			.findFirst()
+			.orElse(new Sort.Order(Sort.Direction.DESC, "createdAt"));
+
+		// pageable의 정렬 값을 Query DSL에 적용가능한 형탤 변환 ("createdAt,desc" -> item.createdAt.desc())
+		return new OrderSpecifier<>(
+			firstOrder.isAscending() ? Order.ASC : Order.DESC,               // .asc()/.desc() 판별
+			path.getComparable(firstOrder.getProperty(), Comparable.class)); // "createdAt" -> item.createdAt
 	}
 }

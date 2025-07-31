@@ -70,10 +70,10 @@ public class ItemController {
      */
     @GetMapping("/search")
     public ResponseEntity<ApiResponseDto<PageResponseDto<ItemSummaryResponse>>> searchItem(
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) List<String> tags,
-            @RequestParam(required = false) Long userId,
-            @PageableDefault Pageable pageable
+        @RequestParam(required = false) String keyword,
+        @RequestParam(required = false) List<String> tags,
+        @RequestParam(required = false) Long userId,
+        @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
             ) {
         if (tags != null && tags.size() > 10) {
             throw new CustomException(ExceptionCode.TOO_MANY_TAGS);
@@ -91,7 +91,7 @@ public class ItemController {
      */
     @GetMapping("/search/interest")
     public ResponseEntity<ApiResponseDto<PageResponseDto<ItemSummaryResponse>>> searchItemWithUserTag(
-        @PageableDefault Pageable pageable,
+        @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
         @AuthenticationPrincipal CustomPrincipal principal
     ) {
         PageResponseDto<ItemSummaryResponse> response = itemService.getAllItemsWIthUserTag(principal, pageable);
