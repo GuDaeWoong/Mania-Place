@@ -14,6 +14,8 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
 	@Query("SELECT i FROM Image i WHERE i.item.id IN :itemIds AND i.isMain = true")
 	List<Image> findMainImagesByItemIds(@Param("itemIds") List<Long> itemIds);
 
+	List<Image> findByNewsfeedId(Long newsfeedId);
+
 	//뉴스피드 전체 조회 이미지 리스트
 	@Query("SELECT i FROM Image i WHERE i.newsfeed.id IN :newsfeedIds AND i.isMain = true")
 	List<Image> findMainImagesByNewsfeedIds(@Param("newsfeedIds") List<Long> newsfeedIds);

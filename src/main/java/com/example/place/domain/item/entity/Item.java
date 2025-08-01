@@ -40,7 +40,7 @@ public class Item extends SoftDeleteEntity {
 
 	private double price;
 	private Long count;
-	private Long totalCount;
+	// private Long totalCount;
 	private Boolean isLimited;
 	private LocalDateTime salesStartAt;
 	private LocalDateTime salesEndAt;
@@ -72,19 +72,18 @@ public class Item extends SoftDeleteEntity {
 		return this.isLimited != null && this.isLimited;
 	}
 
-	private Item(User user, String itemName, String itemDescription, Double price, Long count, Long totalCount, boolean isLimited, LocalDateTime salesStartAt, LocalDateTime salesEndAt) {
+	private Item(User user, String itemName, String itemDescription, Double price, Long count, boolean isLimited, LocalDateTime salesStartAt, LocalDateTime salesEndAt) {
 		this.user = user;
 		this.itemName = itemName;
 		this.itemDescription = itemDescription;
 		this.price = price;
 		this.count = count;
-		this.totalCount = totalCount;
 		this.isLimited = isLimited;
 		this.salesStartAt = salesStartAt;
 		this.salesEndAt = salesEndAt;
 	}
-	public static Item of(User user, String itemName, String itemDescription, Double price, Long count, Long totalCount, boolean isLimited, LocalDateTime salesStartAt, LocalDateTime salesEndAt) {
-		return new Item(user, itemName, itemDescription, price, count, totalCount, isLimited, salesStartAt, salesEndAt);
+	public static Item of(User user, String itemName, String itemDescription, Double price, Long count,  boolean isLimited, LocalDateTime salesStartAt, LocalDateTime salesEndAt) {
+		return new Item(user, itemName, itemDescription, price, count, isLimited, salesStartAt, salesEndAt);
 	}
 
 
@@ -98,9 +97,8 @@ public class Item extends SoftDeleteEntity {
 		if (request.getPrice() != null) {
 			this.price = request.getPrice();
 		}
-		if (request.getTotalCount() != null) {
-			this.count = request.getTotalCount();
-			this.totalCount = request.getTotalCount();
+		if (request.getCount() != null) {
+			this.count = request.getCount();
 		}
 		if (request.getSalesStartAt() != null) {
 			this.salesStartAt = request.getSalesStartAt();

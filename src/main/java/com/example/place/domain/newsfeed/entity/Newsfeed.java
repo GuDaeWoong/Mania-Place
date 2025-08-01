@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.example.place.common.entity.SoftDeleteEntity;
 import com.example.place.domain.Image.entity.Image;
+import com.example.place.domain.newsfeed.dto.request.NewsfeedRequest;
 import com.example.place.domain.user.entity.User;
 
 import jakarta.persistence.*;
@@ -40,6 +41,11 @@ public class Newsfeed extends SoftDeleteEntity {
 		this.user = user;
 		this.title = title;
 		this.content = content;
+	}
+
+	public void updateNewsfeed(NewsfeedRequest request) {
+		this.title = request.getTitle();
+		this.content = request.getContent();
 	}
 
 	public static Newsfeed of(User user, String title, String content) {
