@@ -53,4 +53,24 @@ public class NewsfeedController {
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 전체 조회가 완료되었습니다", response));
 	}
 
+	//새소식 수정
+	@PatchMapping("/{newsfeedId}")
+	public ResponseEntity<ApiResponseDto<NewsfeedResponse>> updateNewsfeed(
+		@PathVariable Long newsfeedId,
+		@RequestBody NewsfeedRequest request,
+		@AuthenticationPrincipal CustomPrincipal principal
+	) {
+		NewsfeedResponse updateNewsfeed = newsfeedService.updateNewsfeed(newsfeedId, request, principal.getId());
+		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 수정이 완료되었습니다.", updateNewsfeed));
+	}
+
+	//새소식 삭제
+	@DeleteMapping("/{newsfeedId}")
+	public ResponseEntity<ApiResponseDto<Void>> softDeleteNewsfeed(
+		@PathVariable Long newsfeedId,
+		@AuthenticationPrincipal CustomPrincipal principal
+	) {
+		newsfeedService.softDeleteNewsfeed(newsfeedId, principal.getId());
+		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 삭제가 완료되었습니다.", null));
+	}
 }
