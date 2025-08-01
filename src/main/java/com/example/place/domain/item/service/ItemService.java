@@ -55,8 +55,7 @@ public class ItemService {
 				request.getItemName(),
 				request.getItemDescription(),
 				request.getPrice(),
-				request.getTotalCount(),
-				request.getTotalCount(),
+				request.getCount(),
 				isAdminItem,
 				sales_start0_end1.get(0),
 				sales_start0_end1.get(1)
