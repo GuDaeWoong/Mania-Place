@@ -35,7 +35,7 @@ public class PostReadService {
 		// PostRepository에서 게시글 엔티티 페이지를 조회
 		Page<Post> pagedPosts = postRepository.findAll(pageable);
 
-		return buildGetALLPosts(pagedPosts, userId);
+		return buildGetAllPosts(pagedPosts, userId);
 	}
 
 	// 살까말까 내 글 조회
@@ -45,13 +45,13 @@ public class PostReadService {
 		// PostRepository에서 게시글 엔티티 페이지를 조회
 		Page<Post> pagedPosts = postRepository.findAllByUserAndIsDeletedFalse(userId, pageable);
 
-		return buildGetALLPosts(pagedPosts, userId);
+		return buildGetAllPosts(pagedPosts, userId);
 	}
 
 	// 전체 조회 빌더 (공통 로직 메서드)
 	@Loggable
 	@Transactional(readOnly = true)
-	private PageResponseDto<PostGetAllResponseDto> buildGetALLPosts(Page<Post> pagedPosts, Long userId) {
+	protected PageResponseDto<PostGetAllResponseDto> buildGetAllPosts(Page<Post> pagedPosts, Long userId) {
 
 		// 해당 게시글 ID 목록에 대한 이미지 정보를 반환
 		Map<Long, Image> imagesMap = imageService.getMainImagesForPosts(pagedPosts);
