@@ -1,6 +1,7 @@
 package com.example.place.domain.post.controller;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,11 +21,10 @@ import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.post.dto.request.PostCreateRequestDto;
 import com.example.place.domain.post.dto.request.PostUpdateRequestDto;
 import com.example.place.domain.post.dto.response.PostResponseDto;
-import com.example.place.domain.post.dto.response.PostSearchAllResponseDto;
+import com.example.place.domain.post.dto.response.PostGetAllResponseDto;
 import com.example.place.domain.post.service.PostReadService;
 import com.example.place.domain.post.service.PostService;
 import com.example.place.domain.post.service.PostDeleteService;
-import com.example.place.domain.vote.service.VoteService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -59,24 +59,22 @@ public class PostController {
 
 	// 살까말까 전체 조회
 	@GetMapping
-	public ResponseEntity<ApiResponseDto<PageResponseDto<PostSearchAllResponseDto>>> getAllPosts(
-		@PageableDefault Pageable pageable,
+	public ResponseEntity<ApiResponseDto<PageResponseDto<PostGetAllResponseDto>>> getAllPosts(
+		@PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
-		PageResponseDto<PostSearchAllResponseDto> response =
-			postReadService.getPostsWithVoteInfo(pageable, principal.getId());
-
-		return ResponseEntity.ok(ApiResponseDto.of("성공", response));
+		PageResponseDto<PostGetAllResponseDto> response = postReadService.getAllPosts(pageable, principal.getId());
+		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 전체 조회가 완료되었습니다.", response));
 	}
 
 	//살까말까 내 글 조회
 	@GetMapping("/me")
-	public ResponseEntity<ApiResponseDto<PageResponseDto<PostResponseDto>>> getMyPosts(
-		@PageableDefault Pageable pageable,
+	public ResponseEntity<ApiResponseDto<PageResponseDto<PostGetAllResponseDto>>> getMyPosts(
+		@PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
-		PageResponseDto<PostResponseDto> posts = postService.getMyPosts(principal.getId(), pageable);
-		return ResponseEntity.ok(ApiResponseDto.of("성공", posts));
+		PageResponseDto<PostGetAllResponseDto> response = postReadService.getMyPosts(principal.getId(), pageable);
+		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("내 게시글 전체 조회가 완료되었습니다.", response));
 	}
 
 	//살까말까 수정

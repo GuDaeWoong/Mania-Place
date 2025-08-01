@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -96,11 +97,17 @@ public class VoteService {
 	}
 
 	@Transactional(readOnly = true)
-	public Map<Long, VoteResponseDto> getVoteForPosts(List<Long> postIds, Long userId) {
+	public Map<Long, VoteResponseDto> getVotesForPosts(Page<Post> pagedPosts, Long userId) {
+		// 현재 페이지에 존재하는 postId 리스트
+		List<Long> postIds = pagedPosts.getContent().stream()
+			.map(Post::getId)
+			.toList();
+
 		if (postIds.isEmpty()) {
 			return Collections.emptyMap();
 		}
 
+		// 해당 게시글의 투표 통계 조회
 		List<Object[]> results = voteRepository.findVoteStatsByPostIdsAndUser(postIds, userId);
 
 		// 결과 리스트를 postId를 키로 하는 Map으로 변환

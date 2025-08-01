@@ -1,7 +1,5 @@
 package com.example.place.domain.post.service;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
@@ -13,7 +11,7 @@ import com.example.place.common.annotation.Loggable;
 import com.example.place.common.dto.PageResponseDto;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.Image.service.ImageService;
-import com.example.place.domain.post.dto.response.PostSearchAllResponseDto;
+import com.example.place.domain.post.dto.response.PostGetAllResponseDto;
 import com.example.place.domain.post.entity.Post;
 import com.example.place.domain.post.repository.PostRepository;
 import com.example.place.domain.vote.dto.response.VoteResponseDto;
@@ -31,48 +29,51 @@ public class PostReadService {
 	private final VoteService voteService;
 
 	// 살까말까 전체 조회
-	public Page<Post> getPostsPageOnly(Pageable pageable) {
-		return postRepository.findAll(pageable);
+	@Loggable
+	@Transactional(readOnly = true)
+	public PageResponseDto<PostGetAllResponseDto> getAllPosts(Pageable pageable, Long userId) {
+		// PostRepository에서 게시글 엔티티 페이지를 조회
+		Page<Post> pagedPosts = postRepository.findAll(pageable);
+
+		return buildGetAllPosts(pagedPosts, userId);
 	}
 
-	// PostSearchAllResponseDto 페이지로 변환하는 메서드
+	// 살까말까 내 글 조회
 	@Loggable
-	public PageResponseDto<PostSearchAllResponseDto> getPostsWithVoteInfo(
-		Pageable pageable,
-		Long userId
-	) {
-		// PostRepository에서 게시글 엔티티 페이지를 반환
-		Page<Post> postsPage = getPostsPageOnly(pageable);
+	@Transactional(readOnly = true)
+	public PageResponseDto<PostGetAllResponseDto> getMyPosts(Long userId, Pageable pageable) {
+		// PostRepository에서 게시글 엔티티 페이지를 조회
+		Page<Post> pagedPosts = postRepository.findAllByUserAndIsDeletedFalse(userId, pageable);
 
-		// 게시글 페이지에서 모든 게시글 ID 목록을 추출
-		List<Long> postIds = postsPage.getContent().stream()
-			.map(Post::getId)
-			.toList();
+		return buildGetAllPosts(pagedPosts, userId);
+	}
+
+	// 전체 조회 빌더 (공통 로직 메서드)
+	@Loggable
+	@Transactional(readOnly = true)
+	protected PageResponseDto<PostGetAllResponseDto> buildGetAllPosts(Page<Post> pagedPosts, Long userId) {
+
+		// 해당 게시글 ID 목록에 대한 이미지 정보를 반환
+		Map<Long, Image> imagesMap = imageService.getMainImagesForPosts(pagedPosts);
 
 		// 해당 게시글 ID 목록에 대한 투표 정보를 반환
-		Map<Long, VoteResponseDto> voteMap = voteService.getVoteForPosts(postIds, userId);
+		Map<Long, VoteResponseDto> voteMap = voteService.getVotesForPosts(pagedPosts, userId);
 
-		// Post,Vote 사용해서  PostSearchAllResponseDto로 변환
-		Map<Long, List<Image>> itemIdToImagesMap = imageService.mapItemIdsToImagesFromPosts(postsPage);
-
-		Page<PostSearchAllResponseDto> dtoPage = postsPage.map(post -> {
+		// 조합
+		Page<PostGetAllResponseDto> dtoPage = pagedPosts.map(post -> {
 			Long postId = post.getId();
 			Long itemId = post.getItem().getId();
 
-			// 메인이미지
-			String mainImageUrl = itemIdToImagesMap.getOrDefault(itemId, Collections.emptyList()).stream()
-				.filter(Image::isMain)
-				.findFirst()
-				.map(Image::getImageUrl)
-				.orElse(null);
+			// --메인이미지 조합
+			Image mainImage = imagesMap.getOrDefault(itemId, null);
 
-			// 게시글의 투표 정보 반환
+			// --투표 정보 조합
 			VoteResponseDto voteInfo = voteMap.getOrDefault(postId, VoteResponseDto.empty());
 
-			return PostSearchAllResponseDto.from(
+			return PostGetAllResponseDto.from(
 				postId,
 				post.getContent(),
-				mainImageUrl,
+				mainImage.getImageUrl(),
 				voteInfo.getLikeCount(),
 				voteInfo.getDisLikeCount(),
 				voteInfo.isLike(),

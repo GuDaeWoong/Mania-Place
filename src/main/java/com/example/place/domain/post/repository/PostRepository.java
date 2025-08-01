@@ -30,14 +30,14 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             SELECT DISTINCT p FROM Post p
             JOIN FETCH p.user
             JOIN FETCH p.item
-            WHERE p.user = :user AND p.isDeleted = false
+			    WHERE p.user.id = :userId AND p.isDeleted = false
         """,
 		countQuery = """
             SELECT COUNT(p) FROM Post p
-            WHERE p.user = :user AND p.isDeleted = false
+			WHERE p.user.id = :userId AND p.isDeleted = false
         """
 	)
-	Page<Post> findAllByUserAndIsDeletedFalse(@Param("user") User user, Pageable pageable);
+	Page<Post> findAllByUserAndIsDeletedFalse(Long userId, Pageable pageable);
 
 	@Query("""
     SELECT p FROM Post p
