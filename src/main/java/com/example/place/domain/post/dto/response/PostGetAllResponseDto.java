@@ -3,7 +3,7 @@ package com.example.place.domain.post.dto.response;
 import lombok.Getter;
 
 @Getter
-public class PostSearchAllResponseDto {
+public class PostGetAllResponseDto {
 
 	private Long postId;
 	private String content;
@@ -13,9 +13,8 @@ public class PostSearchAllResponseDto {
 	private boolean isLike;
 	private boolean isDislike;
 
-	private PostSearchAllResponseDto(Long postId, String content, String mainImageUrl,
-		Long likeCount, Long disLikeCount,
-		boolean isLike, boolean isDislike) {
+	private PostGetAllResponseDto(Long postId, String content, String mainImageUrl,
+		Long likeCount, Long disLikeCount, boolean isLike, boolean isDislike) {
 		this.postId = postId;
 		this.content = content;
 		this.mainImageUrl = mainImageUrl;
@@ -25,15 +24,9 @@ public class PostSearchAllResponseDto {
 		this.isDislike = isDislike;
 	}
 
-	public static PostSearchAllResponseDto from(
-		Long postId,
-		String content,
-		String mainImageUrl,
-		Long likeCount,
-		Long disLikeCount,
-		boolean isLike,
-		boolean isDislike) {
-		return new PostSearchAllResponseDto(
+	public static PostGetAllResponseDto from(Long postId, String content, String mainImageUrl,
+		Long likeCount, Long disLikeCount, boolean isLike, boolean isDislike) {
+		return new PostGetAllResponseDto(
 			postId,
 			content,
 			mainImageUrl,
