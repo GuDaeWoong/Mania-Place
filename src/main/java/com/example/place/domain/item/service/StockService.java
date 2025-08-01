@@ -22,7 +22,7 @@ public class StockService {
 
 	// 분산락 재고감소
 	public void decreaseStock(Long itemId, Long quantity) {
-		String lockKey = "DistributedLock:" + itemId;
+		String lockKey = "Lock:" + itemId;
 		RLock lock = redissonClient.getLock(lockKey);
 
 		try {
@@ -53,7 +53,7 @@ public class StockService {
 
 	// 분산락 재고증가
 	public void increaseStock(Long itemId, Long quantity) {
-		String lockKey = "DistributedLock:" + itemId;
+		String lockKey = "Lock:" + itemId;
 		RLock lock = redissonClient.getLock(lockKey);
 		try {
 			boolean acquired = lock.tryLock(3000, 10000, TimeUnit.MILLISECONDS);
