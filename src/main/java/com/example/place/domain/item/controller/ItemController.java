@@ -5,6 +5,7 @@ import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.common.security.jwt.CustomPrincipal;
+import com.example.place.domain.item.dto.PagedItemSummaryResponse;
 import com.example.place.domain.item.dto.request.ItemRequest;
 import com.example.place.domain.item.dto.response.ItemResponse;
 import com.example.place.domain.item.dto.response.ItemSummaryResponse;
@@ -70,10 +71,10 @@ public class ItemController {
      */
     @GetMapping("/search")
     public ResponseEntity<ApiResponseDto<PageResponseDto<ItemSummaryResponse>>> searchItem(
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) List<String> tags,
-            @RequestParam(required = false) Long userId,
-            @PageableDefault Pageable pageable
+        @RequestParam(required = false) String keyword,
+        @RequestParam(required = false) List<String> tags,
+        @RequestParam(required = false) Long userId,
+        @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
             ) {
         if (tags != null && tags.size() > 10) {
             throw new CustomException(ExceptionCode.TOO_MANY_TAGS);
@@ -91,11 +92,18 @@ public class ItemController {
      */
     @GetMapping("/search/interest")
     public ResponseEntity<ApiResponseDto<PageResponseDto<ItemSummaryResponse>>> searchItemWithUserTag(
-        @PageableDefault Pageable pageable,
+        @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
         @AuthenticationPrincipal CustomPrincipal principal
     ) {
-        PageResponseDto<ItemSummaryResponse> response = itemService.getAllItemsWIthUserTag(principal, pageable);
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("상품 조회가 완료되었습니다", response));
+        PagedItemSummaryResponse result = itemService.getAllItemsWIthUserTag(principal, pageable);
+        PageResponseDto<ItemSummaryResponse> response = result.getResponse();
+        String message;
+        if (result.isFindByUserTag()) {
+            message = "관심 태그에 기반한 상품 조회가 완료되었습니다.";
+        } else {
+            message = "관심 태그에 기반한 상품이 없습니다. 전체 조회 결과입니다.";
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of(message, response));
     }
 
     /**

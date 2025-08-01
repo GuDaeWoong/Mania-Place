@@ -5,6 +5,7 @@ import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.Image.service.ImageService;
 import com.example.place.domain.Image.entity.Image;
+import com.example.place.domain.item.dto.PagedItemSummaryResponse;
 import com.example.place.domain.item.dto.request.ItemRequest;
 import com.example.place.domain.item.dto.response.ItemResponse;
 import com.example.place.domain.item.dto.response.ItemSummaryResponse;
@@ -79,7 +80,7 @@ public class ItemService {
 	}
 
 	@Loggable
-	@Transactional
+	@Transactional(readOnly = true)
 	public PageResponseDto<ItemSummaryResponse> searchItems(String keyword, List<String> tags, Long userId,
 		Pageable pageable) {
 
@@ -92,14 +93,21 @@ public class ItemService {
 
 	@Loggable
 	@Transactional(readOnly = true)
-	public PageResponseDto<ItemSummaryResponse> getAllItemsWIthUserTag(CustomPrincipal principal, Pageable pageable) {
+	public PagedItemSummaryResponse getAllItemsWIthUserTag(CustomPrincipal principal, Pageable pageable) {
 		User user = userService.findByIdOrElseThrow(principal.getId());
 
 		Page<Item> pagedItems = itemRepository.findByUserTag(user, pageable);
+		boolean isFindByUserTag = true;
+
+		// 조회 결과가 빈 페이지일 때
+		if (pagedItems.isEmpty()) {
+			pagedItems = itemRepository.findAllCustom(pageable);
+			isFindByUserTag = false;
+		}
 
 		Page<ItemSummaryResponse> response = pagedItems.map(ItemSummaryResponse::from);
 
-		return new PageResponseDto<>(response);
+		return PagedItemSummaryResponse.of(new PageResponseDto<>(response), isFindByUserTag);
 	}
   
 	@Transactional
@@ -149,7 +157,6 @@ public class ItemService {
 		}
 
 		item.delete();
-
 	}
 
 	public Item findByIdOrElseThrow(Long id) {
