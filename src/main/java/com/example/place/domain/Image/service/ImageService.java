@@ -100,16 +100,21 @@ public class ImageService {
 		Set<String> toSave = new HashSet<>(newImageSet);
 		toSave.removeAll(existingImageSet);
 
-		// 추가 처리
+		// 추가 처리(+Item/Newsfeed 구분해서)
 		for (String imageUrl : toSave) {
-			Image image = Image.of(item, imageUrl, false);  // 임시로 대표 이미지 false로 세팅
+			Image image = (item != null)
+				? Image.of(item, imageUrl, false)
+				: Image.of(newsfeed, imageUrl, false);  // 임시로 대표 이미지 false로 세팅
 			imageRepository.save(image);
 		}
 
 		// 대표 이미지 재설정
 		int validatedMainIndex = validMainIndex(newImageUrls.size(), mainIndex);
 		String mainImageUrl = newImageUrls.get(validatedMainIndex);
-		List<Image> images = imageRepository.findByItemId(item.getId());
+		// Item/Newsfeed 구분해서 조회
+		List<Image> images = (itemId != null)
+			? imageRepository.findByItemId(itemId)
+			: imageRepository.findByNewsfeedId(newsfeedId);
 		for (Image image : images) {
 			image.updateIsMain(image.getImageUrl().equals(mainImageUrl));
 		}
