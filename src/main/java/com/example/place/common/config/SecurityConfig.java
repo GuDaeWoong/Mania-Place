@@ -25,50 +25,51 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true)
-public class    SecurityConfig {
+public class SecurityConfig {
 
-	private final JwtUtil jwtUtil;
-	private final ObjectMapper objectMapper;
-	private final CustomUserDetailsService customUserDetailsService;
-	private final JwtBlacklistService jwtBlacklistService;
-	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final JwtUtil jwtUtil;
+    private final ObjectMapper objectMapper;
+    private final CustomUserDetailsService customUserDetailsService;
+    private final JwtBlacklistService jwtBlacklistService;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-	@Bean
-	public JwtBlacklistFilter jwtBlacklistFilter() {
-		return new JwtBlacklistFilter(jwtBlacklistService, objectMapper);
-	}
+    @Bean
+    public JwtBlacklistFilter jwtBlacklistFilter() {
+        return new JwtBlacklistFilter(jwtBlacklistService, objectMapper);
+    }
 
-	@Bean
-	public JwtFilter jwtFilter() {
-		return new JwtFilter(jwtUtil, customUserDetailsService);
-	}
+    @Bean
+    public JwtFilter jwtFilter() {
+        return new JwtFilter(jwtUtil, customUserDetailsService);
+    }
 
-	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		return http
-			.csrf(AbstractHttpConfigurer::disable)
-			.httpBasic(AbstractHttpConfigurer::disable)
-			.formLogin(AbstractHttpConfigurer::disable)
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .csrf(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
 
-			.addFilterBefore(jwtBlacklistFilter(), UsernamePasswordAuthenticationFilter.class)
-			.addFilterBefore(jwtFilter(), JwtBlacklistFilter.class)
+                .addFilterBefore(jwtBlacklistFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtFilter(), JwtBlacklistFilter.class)
 
-			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/api/login", "/api/accounts").permitAll()
-				.requestMatchers("/error", "/api/refresh").permitAll()
-				.requestMatchers("/api/admin/**").hasRole("ADMIN")
-				.requestMatchers("/api/**").hasAnyRole("USER", "ADMIN")
-				.anyRequest().authenticated()
-			)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/login", "/api/accounts").permitAll()
+                        .requestMatchers("/ws/chat", "/sub", "/pub").permitAll()
+                        .requestMatchers("/error", "/api/refresh").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/**").hasAnyRole("USER", "ADMIN")
+                        .anyRequest().authenticated()
+                )
 
-			.exceptionHandling(configurer -> configurer
-				.authenticationEntryPoint(customAuthenticationEntryPoint)
-			)
-			.build();
-	}
+                .exceptionHandling(configurer -> configurer
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                )
+                .build();
+    }
 }
