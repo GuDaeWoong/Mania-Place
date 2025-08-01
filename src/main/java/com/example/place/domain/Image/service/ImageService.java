@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.Image.repository.ImageRepository;
@@ -16,7 +17,6 @@ import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.newsfeed.entity.Newsfeed;
 import com.example.place.domain.post.entity.Post;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -121,7 +121,7 @@ public class ImageService {
 	}
 
 	// 현재 페이지에 있는 상품의 이미지들을 맵으로 묶어 반환
-	@Transactional
+	@Transactional(readOnly = true)
 	public Map<Long, Image> getMainImagesForPosts(Page<Post> pagedPosts) {
 		// 현재 페이지에 존재하는 itemId 리스트
 		List<Long> itemIds = pagedPosts.getContent().stream()
