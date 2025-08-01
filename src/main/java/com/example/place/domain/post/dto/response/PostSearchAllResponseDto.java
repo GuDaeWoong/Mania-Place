@@ -14,8 +14,7 @@ public class PostSearchAllResponseDto {
 	private boolean isDislike;
 
 	private PostSearchAllResponseDto(Long postId, String content, String mainImageUrl,
-		Long likeCount, Long disLikeCount,
-		boolean isLike, boolean isDislike) {
+		Long likeCount, Long disLikeCount, boolean isLike, boolean isDislike) {
 		this.postId = postId;
 		this.content = content;
 		this.mainImageUrl = mainImageUrl;
@@ -25,14 +24,8 @@ public class PostSearchAllResponseDto {
 		this.isDislike = isDislike;
 	}
 
-	public static PostSearchAllResponseDto from(
-		Long postId,
-		String content,
-		String mainImageUrl,
-		Long likeCount,
-		Long disLikeCount,
-		boolean isLike,
-		boolean isDislike) {
+	public static PostSearchAllResponseDto from(Long postId, String content, String mainImageUrl,
+		Long likeCount, Long disLikeCount, boolean isLike, boolean isDislike) {
 		return new PostSearchAllResponseDto(
 			postId,
 			content,

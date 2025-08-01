@@ -69,15 +69,15 @@ public class PostController {
 		return ResponseEntity.ok(ApiResponseDto.of("성공", response));
 	}
 
-	//살까말까 내 글 조회
-	@GetMapping("/me")
-	public ResponseEntity<ApiResponseDto<PageResponseDto<PostResponseDto>>> getMyPosts(
-		@PageableDefault Pageable pageable,
-		@AuthenticationPrincipal CustomPrincipal principal
-	) {
-		PageResponseDto<PostResponseDto> posts = postService.getMyPosts(principal.getId(), pageable);
-		return ResponseEntity.ok(ApiResponseDto.of("성공", posts));
-	}
+	// //살까말까 내 글 조회
+	// @GetMapping("/me")
+	// public ResponseEntity<ApiResponseDto<PageResponseDto<PostResponseDto>>> getMyPosts(
+	// 	@PageableDefault Pageable pageable,
+	// 	@AuthenticationPrincipal CustomPrincipal principal
+	// ) {
+	// 	PageResponseDto<PostResponseDto> posts = postService.getMyPosts(principal.getId(), pageable);
+	// 	return ResponseEntity.ok(ApiResponseDto.of("성공", posts));
+	// }
 
 	//살까말까 수정
 	@PatchMapping("/{postId}")

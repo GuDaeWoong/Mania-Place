@@ -1,5 +1,6 @@
 package com.example.place.domain.Image.service;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +10,6 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
-import com.example.place.common.annotation.Loggable;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.Image.repository.ImageRepository;
 import com.example.place.domain.item.entity.Item;
@@ -25,7 +25,7 @@ public class ImageService {
 
 	private final ImageRepository imageRepository;
 
-	// 이미지 저장
+	// item의 이미지 저장
 	@Transactional
 	public void createImages(Item item, List<String> imageUrls, int mainIndex) {
 
@@ -42,7 +42,7 @@ public class ImageService {
 		}
 	}
 
-	// newsfeed 의 이미지 저장
+	// newsfeed의 이미지 저장
 	@Transactional
 	public void createImages(Newsfeed newsfeed, List<String> imageUrls, int mainIndex) {
 
@@ -57,7 +57,7 @@ public class ImageService {
 		}
 	}
 
-	// 이미지 수정
+	// item의 이미지 수정
 	@Transactional
 	public void updateImages(Item item, List<String> newImageUrls, int mainIndex) {
 		// 새롭게 전달받은 이미지
@@ -120,26 +120,30 @@ public class ImageService {
 		return (mainIndex < 0 || mainIndex >= listSize) ? 0 : mainIndex;
 	}
 
-	@Transactional
-	public List<Image> findByItemIds(List<Long> itemIds) {
-		return imageRepository.findByItemIds(itemIds);
-	}
-
 	// 현재 페이지에 있는 상품의 이미지들을 맵으로 묶어 반환
-	public Map<Long, List<Image>> mapItemIdsToImagesFromPosts(Page<Post> postsPage) {
-		// 현재 페이지에 존재하는 상품 리스트
-		List<Long> itemIds = postsPage.stream()
+	@Transactional
+	public Map<Long, Image> getMainImagesForPosts(Page<Post> pagedPosts) {
+		// 현재 페이지에 존재하는 itemId 리스트
+		List<Long> itemIds = pagedPosts.getContent().stream()
 			.map(post -> post.getItem().getId())
 			.distinct()
 			.collect(Collectors.toList());
 
+		if (itemIds.isEmpty()) {
+			return Collections.emptyMap();
+		}
+
 		// 해당 상품들의 이미지들 조회
-		List<Image> images = findByItemIds(itemIds);
+		List<Image> images = imageRepository.findMainImagesByItemIds(itemIds);
 
-		// 상품별로 이미지 리스트 생성
-		Map<Long, List<Image>> itemIdToImagesMap = images.stream()
-			.collect(Collectors.groupingBy(img -> img.getItem().getId()));
-
-		return itemIdToImagesMap;
+		// 결과 리스트를 itemId를 키로 하는 Map으로 변환
+		return images.stream()
+			.collect(Collectors.toMap(
+				img -> img.getItem().getId(),
+				img -> img
+			));
 	}
+
+	// 대표 이미지 인덱스 검증
+
 }
