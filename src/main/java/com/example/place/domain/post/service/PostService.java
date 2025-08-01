@@ -56,23 +56,6 @@ public class PostService {
 		return PostResponseDto.from(post);
 	}
 
-	// //살까말까 내 글 조회
-	// @Loggable
-	// @Transactional(readOnly = true)
-	// public PageResponseDto<PostResponseDto> getMyPosts(Long userId, Pageable pageable) {
-	// 	User user = userService.findByIdOrElseThrow(userId);
-	//
-	// 	Page<Post> postsPage = postRepository.findAllByUserAndIsDeletedFalse(user, pageable);
-	//
-	// 	// 현제 페이지의 게시글과 맵핑된 상품별로 이미지 리스트 생성
-	// 	Map<Long, List<Image>> itemIdToImagesMap = imageService.getMainImagesForPosts(postsPage);
-	//
-	// 	Page<PostResponseDto> dtoPage = postsPage.map(
-	// 		post -> PostResponseDto.fromWithImages(post, itemIdToImagesMap.get(post.getItem().getId())));
-	//
-	// 	return new PageResponseDto<>(dtoPage);
-	// }
-
 	//살까말까 수정
 	@Loggable
 	@Transactional

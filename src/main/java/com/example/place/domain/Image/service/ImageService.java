@@ -133,7 +133,7 @@ public class ImageService {
 			return Collections.emptyMap();
 		}
 
-		// 해당 상품들의 이미지들 조회
+		// 해당 상품들의 이미지 조회
 		List<Image> images = imageRepository.findMainImagesByItemIds(itemIds);
 
 		// 결과 리스트를 itemId를 키로 하는 Map으로 변환
@@ -143,7 +143,4 @@ public class ImageService {
 				img -> img
 			));
 	}
-
-	// 대표 이미지 인덱스 검증
-
 }
