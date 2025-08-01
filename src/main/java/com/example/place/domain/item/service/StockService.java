@@ -26,7 +26,7 @@ public class StockService {
 	public void decreaseStock(Long itemId, Long quantity) {
 		Item item = itemService.findByIdOrElseThrow(itemId);
 		// 총 개수 1개 + 일반 상품
-		if (item.getTotalCount() == 1L && !item.isLimitedEdition()) {
+		if (item.getCount() == 1L) {
 			decreaseStockWithDistributedLock(itemId, quantity);
 		}
 	}
@@ -36,7 +36,7 @@ public class StockService {
 	public void increaseStock(Long itemId, Long quantity) {
 		Item item = itemService.findByIdOrElseThrow(itemId);
 
-		if (item.getTotalCount() == 1L && !item.isLimitedEdition()) {
+		if (item.getCount() == 1L && !item.isLimitedEdition()) {
 			increaseStockWithDistributedLock(itemId, quantity);
 		}
 	}
