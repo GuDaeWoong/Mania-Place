@@ -28,7 +28,7 @@ public class PostReadService {
 	private final ImageService imageService;
 	private final VoteService voteService;
 
-	// PostSearchAllResponseDto 페이지로 변환하는 메서드
+	// 살까말까 전체 조회
 	@Loggable
 	@Transactional(readOnly = true)
 	public PageResponseDto<PostGetAllResponseDto> getAllPosts(Pageable pageable, Long userId) {
