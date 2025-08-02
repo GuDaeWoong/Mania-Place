@@ -1,11 +1,14 @@
 package com.example.place.common.aop;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -44,9 +47,15 @@ public class LoggingAspect {
 
 		// 호출된 메서드 이름
 		String methodName = joinPoint.getSignature().toShortString();
+		Object[] args = joinPoint.getArgs();
+		String[] paramNames = ((MethodSignature) joinPoint.getSignature()).getParameterNames();
 
-		// 입력 파라미터 JSON 직렬화 + 마스킹
-		String paramsJson = serializeAndMask(joinPoint.getArgs());
+		Map<String, Object> paramMap = new LinkedHashMap<>();
+		for (int i = 0; i < paramNames.length; i++) {
+			paramMap.put(paramNames[i], args[i]);
+		}
+
+		String paramsJson = serializeAndMask(paramMap);
 
 		try {
 			// 실제 대상 메서드 실행
