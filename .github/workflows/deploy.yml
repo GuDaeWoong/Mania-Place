@@ -2,7 +2,7 @@ name: CI/CD Deploy
 
 on:
   push:
-    branches: [ master ]  
+    branches: [ sprint_1 ]
 
 jobs:
   build:
@@ -63,3 +63,4 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             bash /home/ubuntu/app/run-deploy.sh
+
