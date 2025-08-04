@@ -12,6 +12,7 @@ import com.example.place.common.annotation.Loggable;
 import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
+import com.example.place.domain.Image.dto.ImageDto;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.Image.service.ImageService;
 import com.example.place.domain.post.dto.response.PostResponseDto;
@@ -45,7 +46,8 @@ public class PostService {
 		Post post = Post.of(user, item, request.getContent());
 		Post saved = postRepository.save(post);
 
-		return PostResponseDto.from(saved);
+		ImageDto imageDto = imageService.getImages(saved.getItem().getId());
+		return PostResponseDto.from(saved, imageDto);
 	}
 
 	//살까말까 단건 조회
@@ -53,7 +55,9 @@ public class PostService {
 	@Transactional(readOnly = true)
 	public PostResponseDto getPost(Long postId) {
 		Post post = findByIdOrElseThrow(postId);
-		return PostResponseDto.from(post);
+
+		ImageDto imageDto = imageService.getImages(post.getItem().getId());
+		return PostResponseDto.from(post, imageDto);
 	}
 
 	//살까말까 수정
@@ -67,7 +71,8 @@ public class PostService {
 		}
 
 		post.update(request.getContent());
-		return PostResponseDto.from(post);
+		ImageDto imageDto = imageService.getImages(post.getItem().getId());
+		return PostResponseDto.from(post, imageDto);
 	}
 
 	//살까말까 삭제

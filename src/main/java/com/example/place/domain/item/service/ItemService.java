@@ -80,6 +80,7 @@ public class ItemService {
 	@Transactional(readOnly = true)
 	public ItemResponse getItem(Long itemId) {
 		Item item = findByIdOrElseThrow(itemId);
+
 		ImageDto imageDto = imageService.getImages(itemId);
 		return ItemResponse.from(item, imageDto);
 	}
