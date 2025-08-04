@@ -1,5 +1,6 @@
 package com.example.place.domain.Image.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.place.domain.Image.dto.ImageDto;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.Image.repository.ImageRepository;
 import com.example.place.domain.item.entity.Item;
@@ -27,7 +29,7 @@ public class ImageService {
 
 	// item의 이미지 저장
 	@Transactional
-	public void createImages(Item item, List<String> imageUrls, int mainIndex) {
+	public ImageDto createImages(Item item, List<String> imageUrls, int mainIndex) {
 
 		int validatedMainIndex = validMainIndex(imageUrls.size(), mainIndex);
 
@@ -40,6 +42,8 @@ public class ImageService {
 
 			item.addImage(image); // 연관관계 양방향 설정
 		}
+
+		return ImageDto.of(imageUrls, validatedMainIndex);
 	}
 
 	// newsfeed의 이미지 저장
@@ -57,21 +61,37 @@ public class ImageService {
 		}
 	}
 
+	@Transactional(readOnly = true)
+	public ImageDto getImages(Long itemId) {
+		List<Image> images = imageRepository.findByItemId(itemId);
+
+		List<String> imageUrls = new ArrayList<>();
+		int mainIndex = 0;
+		for (int i = 0; i < images.size(); i++) {
+			imageUrls.add(images.get(i).getImageUrl());
+			if (images.get(i).isMain()) {
+				mainIndex = i;
+			}
+		}
+
+		return ImageDto.of(imageUrls, mainIndex);
+	}
+
 	// item의 이미지 수정
 	@Transactional
-	public void updateImages(Item item, List<String> newImageUrls, int mainIndex) {
-		updateImagesCommon(item.getId(), null, item, null, newImageUrls, mainIndex);
+	public ImageDto updateImages(Item item, List<String> newImageUrls, int mainIndex) {
+		return updateImagesCommon(item.getId(), null, item, null, newImageUrls, mainIndex);
 	}
 
 	// Newsfeed 이미지 수정
 	@Transactional
-	public void updateImages(Newsfeed newsfeed, List<String> newImageUrls, Integer mainIndex) {
+	public ImageDto updateImages(Newsfeed newsfeed, List<String> newImageUrls, Integer mainIndex) {
 		int validMainIndex = (mainIndex != null) ? mainIndex : 0;
-		updateImagesCommon(null, newsfeed.getId(), null, newsfeed, newImageUrls, validMainIndex);
+		return updateImagesCommon(null, newsfeed.getId(), null, newsfeed, newImageUrls, validMainIndex);
 	}
 
 	@Transactional
-	public void updateImagesCommon(Long itemId, Long newsfeedId, Item item, Newsfeed newsfeed,
+	public ImageDto updateImagesCommon(Long itemId, Long newsfeedId, Item item, Newsfeed newsfeed,
 		List<String> newImageUrls, int mainIndex) {
 		// 새롭게 전달받은 이미지
 		Set<String> newImageSet = new HashSet<>(newImageUrls);
@@ -108,16 +128,31 @@ public class ImageService {
 			imageRepository.save(image);
 		}
 
-		// 대표 이미지 재설정
+		// 대표 이미지 재설정 및 반환값 담기
 		int validatedMainIndex = validMainIndex(newImageUrls.size(), mainIndex);
 		String mainImageUrl = newImageUrls.get(validatedMainIndex);
 		// Item/Newsfeed 구분해서 조회
 		List<Image> images = (itemId != null)
 			? imageRepository.findByItemId(itemId)
 			: imageRepository.findByNewsfeedId(newsfeedId);
-		for (Image image : images) {
-			image.updateIsMain(image.getImageUrl().equals(mainImageUrl));
+
+		List<String> resultImageUrls = new ArrayList<>();
+		int resultMainIndex = 0;
+
+		for (int i = 0; i < images.size(); i++) {
+			Image image = images.get(i);
+
+			if (image.getImageUrl().equals(mainImageUrl)) {
+				image.updateIsMain(true); // 대표 이미지 여부 재설정
+				resultMainIndex = i;      // 대표 이미지 인덱스 반환을 위해
+			} else {
+				image.updateIsMain(false);
+			}
+
+			resultImageUrls.add(image.getImageUrl());
 		}
+
+		return ImageDto.of(resultImageUrls, resultMainIndex);
 	}
 
 	// 특정 itemId와 연관된 이미지를 일괄로 삭제

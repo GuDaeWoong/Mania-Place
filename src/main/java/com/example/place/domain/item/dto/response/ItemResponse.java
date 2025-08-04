@@ -1,5 +1,6 @@
 package com.example.place.domain.item.dto.response;
 
+import com.example.place.domain.Image.dto.ImageDto;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.item.entity.Item;
 import lombok.Getter;
@@ -24,17 +25,7 @@ public class ItemResponse {
     private int mainIndex;
     private List<String> tags;
 
-    public static ItemResponse from(Item item) {
-        List<Image> images = item.getImages();
-        List<String> imageUrls = new ArrayList<>();
-        int mainIndex = 0;
-        for (int i = 0; i < images.size(); i++) {
-            imageUrls.add(images.get(i).getImageUrl());
-            if (images.get(i).isMain()) {
-                mainIndex = i;
-            }
-        }
-
+    public static ItemResponse from(Item item, ImageDto imageDto) {
         List<String> tagNames = item.getItemTags().stream()
                 .map(itemTag -> itemTag.getTag().getTagName())
                 .toList();
@@ -49,8 +40,8 @@ public class ItemResponse {
 
         response.salesStartAt = item.getSalesStartAt();
         response.salesEndAt = item.getSalesEndAt();
-        response.imageUrls = imageUrls;
-        response.mainIndex = mainIndex;
+        response.imageUrls = imageDto.getImageUrls();
+        response.mainIndex = imageDto.getMainIndex();
         response.tags = tagNames;
         return response;
     }
