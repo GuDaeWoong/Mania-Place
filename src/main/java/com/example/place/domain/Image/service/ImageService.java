@@ -146,7 +146,7 @@ public class ImageService {
 	public Map<Long, Image> getMainImagesForItems(Page<Item> pagedItems) {
 		// 현재 페이지에 존재하는 itemId 리스트
 		List<Long> itemIds = pagedItems.getContent().stream()
-			.map(item -> item.getId())
+			.map(Item::getId)
 			.distinct()
 			.collect(Collectors.toList());
 
@@ -154,7 +154,7 @@ public class ImageService {
 			return Collections.emptyMap();
 		}
 
-		// 해당 상품들의 이미지 조회
+		// 해당 상품들의 대표 이미지 조회
 		List<Image> images = imageRepository.findMainImagesByItemIds(itemIds);
 
 		// 결과 리스트를 itemId를 키로 하는 Map으로 변환
@@ -178,7 +178,7 @@ public class ImageService {
 			return Collections.emptyMap();
 		}
 
-		// 해당 상품들의 이미지 조회
+		// 해당 게시글들의 대표 이미지 조회
 		List<Image> images = imageRepository.findMainImagesByItemIds(itemIds);
 
 		// 결과 리스트를 itemId를 키로 하는 Map으로 변환
@@ -188,4 +188,28 @@ public class ImageService {
 				img -> img
 			));
 	}
+
+	// 현재 새소식 페이지에 있는 상품의 이미지들을 맵으로 묶어 반환
+	@Transactional(readOnly = true)
+	public Map<Long, Image> getMainImagesForNewsfeeds(Page<Newsfeed> pagedNewsfeeds) {
+		// 현재 페이지에 존재하는 newsfeedId 리스트
+		List<Long> newsfeedIds = pagedNewsfeeds.getContent().stream()
+			.map(Newsfeed::getId)
+			.collect(Collectors.toList());
+
+		if (newsfeedIds.isEmpty()) {
+			return Collections.emptyMap();
+		}
+
+		// 해당 새소식의 대표 이미지 조회
+		List<Image> mainImages = imageRepository.findMainImagesByNewsfeedIds(newsfeedIds);
+
+		// 결과 리스트를 newsfeedId를 키로 하는 Map으로 변환
+		return mainImages.stream()
+			.collect(Collectors.toMap(
+				image -> image.getNewsfeed().getId(),
+				img -> img
+			));
+	}
+
 }
