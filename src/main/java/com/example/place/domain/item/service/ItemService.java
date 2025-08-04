@@ -158,6 +158,16 @@ public class ItemService {
 		item.delete();
 	}
 
+	/**
+	 * 채팅을위해 상품의 판매자 조회
+	 * @param itemId
+	 * @return
+	 */
+	public User getSeller(Long itemId) {
+		Item item = findByIdOrElseThrow(itemId);
+		return item.getUser();
+	}
+
 	public Item findByIdOrElseThrow(Long id) {
 		Item item = itemRepository.findById(id)
 				.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
