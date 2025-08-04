@@ -55,7 +55,7 @@ public class ItemController {
      * @return
      */
     @GetMapping("/{itemId}")
-    public ResponseEntity<ApiResponseDto<ItemResponse>> getItme(@PathVariable Long itemId) {
+    public ResponseEntity<ApiResponseDto<ItemResponse>> getItem(@PathVariable Long itemId) {
         ItemResponse item = itemService.getItem(itemId);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("상품 조회가 완료되었습니다.", item));
     }
