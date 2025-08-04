@@ -1,0 +1,37 @@
+package com.example.place.domain.newsfeedcomment.controller;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.place.common.dto.ApiResponseDto;
+import com.example.place.common.security.jwt.CustomPrincipal;
+import com.example.place.domain.newsfeedcomment.dto.request.NewsfeedCommentRequest;
+import com.example.place.domain.newsfeedcomment.dto.response.NewsfeedCommentResponse;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/newsfeeds")
+public class NewsfeedCommentController {
+
+	private final NewsfeedCommnetService newsfeedCommnetService;
+
+	@PostMapping("/{newsfeedId}/comments")
+	public ResponseEntity<ApiResponseDto<NewsfeedCommentResponse>> createNewsfeedComment(
+		@PathVariable Long newsfeedId,
+		@Valid @RequestBody NewsfeedCommentRequest request,
+		@AuthenticationPrincipal CustomPrincipal principal) {
+
+		NewsfeedCommentResponse response = newsfeedCommnetService.createNewsfeedComment(newsfeedId, request, principal);
+		ApiResponseDto<NewsfeedCommentResponse> success = ApiResponseDto.of("댓글이 등록되었습니다.", response);
+		return ResponseEntity.status(HttpStatus.OK).body(success);
+	}
+}
