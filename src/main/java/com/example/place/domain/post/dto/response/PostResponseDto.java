@@ -3,6 +3,7 @@ package com.example.place.domain.post.dto.response;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.place.domain.Image.dto.ImageDto;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.post.entity.Post;
 
@@ -25,22 +26,12 @@ public class PostResponseDto {
 		this.mainIndex = mainIndex;
 	}
 
-	public static PostResponseDto from(Post post) {
-		List<Image> images = post.getItem().getImages();
-		List<String> imageUrls = new ArrayList<>();
-		int mainIndex = 0;
-		for (int i = 0; i < images.size(); i++) {
-			imageUrls.add(images.get(i).getImageUrl());
-			if (images.get(i).isMain()) {
-				mainIndex = i;
-			}
-		}
-
+	public static PostResponseDto from(Post post, ImageDto imageDto) {
 		return new PostResponseDto(
 			post.getContent(),
 			post.getUser().getNickname(),
 			post.getItem().getId(),
-			imageUrls,
-			mainIndex);
+			imageDto.getImageUrls(),
+			imageDto.getMainIndex());
 	}
 }

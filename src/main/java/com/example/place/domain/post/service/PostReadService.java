@@ -49,12 +49,11 @@ public class PostReadService {
 	}
 
 	// 전체 조회 빌더 (공통 로직 메서드)
-	@Loggable
 	@Transactional(readOnly = true)
 	protected PageResponseDto<PostGetAllResponseDto> buildGetAllPosts(Page<Post> pagedPosts, Long userId) {
 
 		// 해당 게시글 ID 목록에 대한 이미지 정보를 반환
-		Map<Long, Image> imagesMap = imageService.getMainImagesForPosts(pagedPosts);
+		Map<Long, Image> mainImagesMap = imageService.getMainImagesForPosts(pagedPosts);
 
 		// 해당 게시글 ID 목록에 대한 투표 정보를 반환
 		Map<Long, VoteResponseDto> voteMap = voteService.getVotesForPosts(pagedPosts, userId);
@@ -65,7 +64,7 @@ public class PostReadService {
 			Long itemId = post.getItem().getId();
 
 			// --메인이미지 조합
-			Image mainImage = imagesMap.getOrDefault(itemId, null);
+			Image mainImage = mainImagesMap.getOrDefault(itemId, null);
 
 			// --투표 정보 조합
 			VoteResponseDto voteInfo = voteMap.getOrDefault(postId, VoteResponseDto.empty());

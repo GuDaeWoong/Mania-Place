@@ -9,7 +9,7 @@ import com.example.place.domain.item.entity.Item;
 import lombok.Getter;
 
 @Getter
-public class ItemSummaryResponse {
+public class ItemGetAllResponse {
 	private Long id;
 	private String itemName;
 	private Double price;
@@ -17,7 +17,7 @@ public class ItemSummaryResponse {
 	private String mainImageUrl;
 	private List<String> tags;
 
-	private ItemSummaryResponse(Long id, String itemName, Double price, Long count, String mainImageUrl,
+	private ItemGetAllResponse(Long id, String itemName, Double price, Long count, String mainImageUrl,
 		List<String> tags) {
 		this.id = id;
 		this.itemName = itemName;
@@ -27,17 +27,13 @@ public class ItemSummaryResponse {
 		this.tags = tags;
 	}
 
-	public static ItemSummaryResponse from(Item item) {
-		return new ItemSummaryResponse(
+	public static ItemGetAllResponse from(Item item, String mainImageUrl) {
+		return new ItemGetAllResponse(
 			item.getId(),
 			item.getItemName(),
 			item.getPrice(),
 			item.getCount(),
-			item.getImages().stream()
-				.filter(Image::isMain)
-				.findFirst()
-				.map(Image::getImageUrl)
-				.orElse(null),
+			mainImageUrl,
 			item.getItemTags().stream()
 				.map(itemTag -> itemTag.getTag().getTagName())
 				.collect(Collectors.toList())

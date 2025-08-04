@@ -5,10 +5,10 @@ import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.common.security.jwt.CustomPrincipal;
-import com.example.place.domain.item.dto.PagedItemSummaryResponse;
+import com.example.place.domain.item.dto.ItemsAndIsFindByUserTag;
 import com.example.place.domain.item.dto.request.ItemRequest;
 import com.example.place.domain.item.dto.response.ItemResponse;
-import com.example.place.domain.item.dto.response.ItemSummaryResponse;
+import com.example.place.domain.item.dto.response.ItemGetAllResponse;
 import com.example.place.domain.item.service.ItemDeleteService;
 import com.example.place.domain.item.service.ItemService;
 import org.springframework.data.domain.Pageable;
@@ -70,7 +70,7 @@ public class ItemController {
      * @return
      */
     @GetMapping("/search")
-    public ResponseEntity<ApiResponseDto<PageResponseDto<ItemSummaryResponse>>> searchItem(
+    public ResponseEntity<ApiResponseDto<PageResponseDto<ItemGetAllResponse>>> searchItem(
         @RequestParam(required = false) String keyword,
         @RequestParam(required = false) List<String> tags,
         @RequestParam(required = false) Long userId,
@@ -79,7 +79,7 @@ public class ItemController {
         if (tags != null && tags.size() > 10) {
             throw new CustomException(ExceptionCode.TOO_MANY_TAGS);
         }
-        PageResponseDto<ItemSummaryResponse> respone = itemService.searchItems(keyword, tags, userId, pageable);
+        PageResponseDto<ItemGetAllResponse> respone = itemService.searchItems(keyword, tags, userId, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("상품 조회가 완료되었습니다", respone));
     }
 
@@ -91,12 +91,12 @@ public class ItemController {
      * @return
      */
     @GetMapping("/search/interest")
-    public ResponseEntity<ApiResponseDto<PageResponseDto<ItemSummaryResponse>>> searchItemWithUserTag(
+    public ResponseEntity<ApiResponseDto<PageResponseDto<ItemGetAllResponse>>> searchItemWithUserTag(
         @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
         @AuthenticationPrincipal CustomPrincipal principal
     ) {
-        PagedItemSummaryResponse result = itemService.getAllItemsWIthUserTag(principal, pageable);
-        PageResponseDto<ItemSummaryResponse> response = result.getResponse();
+        ItemsAndIsFindByUserTag result = itemService.getAllItemsWIthUserTag(principal, pageable);
+        PageResponseDto<ItemGetAllResponse> response = result.getResponse();
         String message;
         if (result.isFindByUserTag()) {
             message = "관심 태그에 기반한 상품 조회가 완료되었습니다.";

@@ -3,22 +3,18 @@ package com.example.place.domain.item.repository;
 import static com.example.place.domain.item.entity.QItem.*;
 import static com.example.place.domain.itemtag.entity.QItemTag.*;
 import static com.example.place.domain.tag.entity.QTag.*;
+import static com.example.place.domain.user.entity.QUser.*;
 import static com.example.place.domain.usertag.entity.QUserTag.*;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.hibernate.query.sqm.PathElementException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import com.example.place.common.exception.enums.ExceptionCode;
-import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.user.entity.User;
 import com.querydsl.core.types.Order;
@@ -39,7 +35,7 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
 	@Override
 	public Page<Item> findAllCustom(Pageable pageable) {
 		BooleanExpression whereCondition = null;
-		return createPagedItem(whereCondition, pageable);
+		return buildPagedItem(whereCondition, pageable);
 	}
 
 	@Override
@@ -53,7 +49,7 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
 		// 유저의 관심 태그가 있는 상품 조회를 위한 where절
 		BooleanExpression whereCondition = tag.id.in(interestedTagIds);
 
-		return createPagedItem(whereCondition, pageable);
+		return buildPagedItem(whereCondition, pageable);
 	}
 
 	@Override
@@ -81,10 +77,10 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
 			whereCondition = whereCondition == null ? userCondition : whereCondition.and(userCondition);
 		}
 
-		return createPagedItem(whereCondition, pageable);
+		return buildPagedItem(whereCondition, pageable);
 	}
 
-	private Page<Item> createPagedItem(BooleanExpression whereCondition, Pageable pageable) {
+	private Page<Item> buildPagedItem(BooleanExpression whereCondition, Pageable pageable) {
 
 		// 정렬 조건
 		OrderSpecifier<?> orderSpecifier = getOrderSpecifiers(pageable);
@@ -111,9 +107,9 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
 		List<Item> items = queryFactory
 			.selectFrom(item)
 			.distinct()
+			.join(item.user).fetchJoin()
 			.join(item.itemTags, itemTag).fetchJoin()
 			.join(itemTag.tag, tag).fetchJoin()
-			.join(item.images).fetchJoin()
 			.where(item.id.in(itemIds))
 			.orderBy(orderSpecifier)
 			.fetch();

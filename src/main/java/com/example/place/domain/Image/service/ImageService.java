@@ -1,5 +1,6 @@
 package com.example.place.domain.Image.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.place.domain.Image.dto.ImageDto;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.Image.repository.ImageRepository;
 import com.example.place.domain.item.entity.Item;
@@ -27,7 +29,7 @@ public class ImageService {
 
 	// item의 이미지 저장
 	@Transactional
-	public void createImages(Item item, List<String> imageUrls, int mainIndex) {
+	public ImageDto createImages(Item item, List<String> imageUrls, int mainIndex) {
 
 		int validatedMainIndex = validMainIndex(imageUrls.size(), mainIndex);
 
@@ -37,14 +39,15 @@ public class ImageService {
 			Image image = Image.of(item, imageUrls.get(i), isMain);
 
 			imageRepository.save(image);
-
 			item.addImage(image); // 연관관계 양방향 설정
 		}
+
+		return ImageDto.of(imageUrls, validatedMainIndex);
 	}
 
 	// newsfeed의 이미지 저장
 	@Transactional
-	public void createImages(Newsfeed newsfeed, List<String> imageUrls, int mainIndex) {
+	public ImageDto createImages(Newsfeed newsfeed, List<String> imageUrls, int mainIndex) {
 
 		int validatedMainIndex = validMainIndex(imageUrls.size(), mainIndex);
 
@@ -55,31 +58,64 @@ public class ImageService {
 			imageRepository.save(image);
 			newsfeed.addImage(image);
 		}
+
+		return ImageDto.of(imageUrls, validatedMainIndex);
+	}
+
+	@Transactional(readOnly = true)
+	public ImageDto getItemImages(Long itemId) {
+		List<Image> images = imageRepository.findByItemId(itemId);
+
+		List<String> imageUrls = new ArrayList<>();
+		int mainIndex = 0;
+		for (int i = 0; i < images.size(); i++) {
+			imageUrls.add(images.get(i).getImageUrl());
+			if (images.get(i).isMain()) {
+				mainIndex = i;
+			}
+		}
+
+		return ImageDto.of(imageUrls, mainIndex);
+	}
+
+	@Transactional(readOnly = true)
+	public ImageDto getNewsfeedImages(Long newsfeedId) {
+		List<Image> images = imageRepository.findByNewsfeedId(newsfeedId);
+
+		List<String> imageUrls = new ArrayList<>();
+		int mainIndex = 0;
+		for (int i = 0; i < images.size(); i++) {
+			imageUrls.add(images.get(i).getImageUrl());
+			if (images.get(i).isMain()) {
+				mainIndex = i;
+			}
+		}
+
+		return ImageDto.of(imageUrls, mainIndex);
 	}
 
 	// item의 이미지 수정
 	@Transactional
-	public void updateImages(Item item, List<String> newImageUrls, int mainIndex) {
-		updateImagesCommon(item.getId(), null, item, null, newImageUrls, mainIndex);
+	public ImageDto updateImages(Item item, List<String> newImageUrls, int mainIndex) {
+		return updateImagesCommon(item, null, newImageUrls, mainIndex);
 	}
 
 	// Newsfeed 이미지 수정
 	@Transactional
-	public void updateImages(Newsfeed newsfeed, List<String> newImageUrls, Integer mainIndex) {
+	public ImageDto updateImages(Newsfeed newsfeed, List<String> newImageUrls, Integer mainIndex) {
 		int validMainIndex = (mainIndex != null) ? mainIndex : 0;
-		updateImagesCommon(null, newsfeed.getId(), null, newsfeed, newImageUrls, validMainIndex);
+		return updateImagesCommon(null, newsfeed, newImageUrls, validMainIndex);
 	}
 
 	@Transactional
-	public void updateImagesCommon(Long itemId, Long newsfeedId, Item item, Newsfeed newsfeed,
-		List<String> newImageUrls, int mainIndex) {
+	public ImageDto updateImagesCommon(Item item, Newsfeed newsfeed, List<String> newImageUrls, int mainIndex) {
 		// 새롭게 전달받은 이미지
 		Set<String> newImageSet = new HashSet<>(newImageUrls);
 
 		// 현재 저장되어 있는 이미지
-		List<Image> existingImages = (itemId != null)
-			? imageRepository.findByItemId(itemId)
-			: imageRepository.findByNewsfeedId(newsfeedId);
+		List<Image> existingImages = (item != null)
+			? imageRepository.findByItemId(item.getId())
+			: imageRepository.findByNewsfeedId(newsfeed.getId());
 
 		Set<String> existingImageSet = existingImages.stream()
 			.map(Image::getImageUrl)
@@ -108,16 +144,31 @@ public class ImageService {
 			imageRepository.save(image);
 		}
 
-		// 대표 이미지 재설정
+		// 대표 이미지 재설정 및 반환값 담기
 		int validatedMainIndex = validMainIndex(newImageUrls.size(), mainIndex);
 		String mainImageUrl = newImageUrls.get(validatedMainIndex);
 		// Item/Newsfeed 구분해서 조회
-		List<Image> images = (itemId != null)
-			? imageRepository.findByItemId(itemId)
-			: imageRepository.findByNewsfeedId(newsfeedId);
-		for (Image image : images) {
-			image.updateIsMain(image.getImageUrl().equals(mainImageUrl));
+		List<Image> images = (item != null)
+			? imageRepository.findByItemId(item.getId())
+			: imageRepository.findByNewsfeedId(newsfeed.getId());
+
+		List<String> resultImageUrls = new ArrayList<>();
+		int resultMainIndex = 0;
+
+		for (int i = 0; i < images.size(); i++) {
+			Image image = images.get(i);
+
+			if (image.getImageUrl().equals(mainImageUrl)) {
+				image.updateIsMain(true); // 대표 이미지 여부 재설정
+				resultMainIndex = i;      // 대표 이미지 인덱스 반환을 위해
+			} else {
+				image.updateIsMain(false);
+			}
+
+			resultImageUrls.add(image.getImageUrl());
 		}
+
+		return ImageDto.of(resultImageUrls, resultMainIndex);
 	}
 
 	// 특정 itemId와 연관된 이미지를 일괄로 삭제
@@ -141,7 +192,31 @@ public class ImageService {
 		return (mainIndex < 0 || mainIndex >= listSize) ? 0 : mainIndex;
 	}
 
-	// 현재 페이지에 있는 상품의 이미지들을 맵으로 묶어 반환
+	// 현재 상품 페이지에 있는 상품의 이미지들을 맵으로 묶어 반환
+	@Transactional(readOnly = true)
+	public Map<Long, Image> getMainImagesForItems(Page<Item> pagedItems) {
+		// 현재 페이지에 존재하는 itemId 리스트
+		List<Long> itemIds = pagedItems.getContent().stream()
+			.map(Item::getId)
+			.distinct()
+			.collect(Collectors.toList());
+
+		if (itemIds.isEmpty()) {
+			return Collections.emptyMap();
+		}
+
+		// 해당 상품들의 대표 이미지 조회
+		List<Image> images = imageRepository.findMainImagesByItemIds(itemIds);
+
+		// 결과 리스트를 itemId를 키로 하는 Map으로 변환
+		return images.stream()
+			.collect(Collectors.toMap(
+				img -> img.getItem().getId(),
+				img -> img
+			));
+	}
+
+	// 현재 게시글 페이지에 있는 상품의 이미지들을 맵으로 묶어 반환
 	@Transactional(readOnly = true)
 	public Map<Long, Image> getMainImagesForPosts(Page<Post> pagedPosts) {
 		// 현재 페이지에 존재하는 itemId 리스트
@@ -154,7 +229,7 @@ public class ImageService {
 			return Collections.emptyMap();
 		}
 
-		// 해당 상품들의 이미지 조회
+		// 해당 게시글들의 대표 이미지 조회
 		List<Image> images = imageRepository.findMainImagesByItemIds(itemIds);
 
 		// 결과 리스트를 itemId를 키로 하는 Map으로 변환
@@ -164,4 +239,28 @@ public class ImageService {
 				img -> img
 			));
 	}
+
+	// 현재 새소식 페이지에 있는 상품의 이미지들을 맵으로 묶어 반환
+	@Transactional(readOnly = true)
+	public Map<Long, Image> getMainImagesForNewsfeeds(Page<Newsfeed> pagedNewsfeeds) {
+		// 현재 페이지에 존재하는 newsfeedId 리스트
+		List<Long> newsfeedIds = pagedNewsfeeds.getContent().stream()
+			.map(Newsfeed::getId)
+			.collect(Collectors.toList());
+
+		if (newsfeedIds.isEmpty()) {
+			return Collections.emptyMap();
+		}
+
+		// 해당 새소식의 대표 이미지 조회
+		List<Image> mainImages = imageRepository.findMainImagesByNewsfeedIds(newsfeedIds);
+
+		// 결과 리스트를 newsfeedId를 키로 하는 Map으로 변환
+		return mainImages.stream()
+			.collect(Collectors.toMap(
+				image -> image.getNewsfeed().getId(),
+				img -> img
+			));
+	}
+
 }
