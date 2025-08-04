@@ -3,6 +3,7 @@ package com.example.place.domain.item.service;
 import com.example.place.common.annotation.Loggable;
 import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.security.jwt.CustomPrincipal;
+import com.example.place.domain.Image.dto.ImageDto;
 import com.example.place.domain.Image.service.ImageService;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.item.dto.ItemsAndIsFindByUserTag;
@@ -12,8 +13,6 @@ import com.example.place.domain.item.dto.response.ItemGetAllResponse;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.item.repository.ItemRepository;
 
-import com.example.place.domain.post.dto.response.PostGetAllResponseDto;
-import com.example.place.domain.post.entity.Post;
 import com.example.place.domain.tag.service.TagService;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.entity.UserRole;
@@ -25,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
-import com.example.place.domain.vote.dto.response.VoteResponseDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -67,19 +65,21 @@ public class ItemService {
         itemRepository.save(item);
 
 		// 연관 이미지 저장
-		imageService.createImages(item, request.getImageUrls(), request.getMainIndex());
+		ImageDto imageDto = imageService.createImages(item, request.getImageUrls(), request.getMainIndex());
 
 		// 연관 태그 저장
 		tagService.saveTags(item, request.getItemTagNames());
 
-		return ItemResponse.from(item);
+		return ItemResponse.from(item, imageDto);
     }
 
 	@Loggable
 	@Transactional(readOnly = true)
 	public ItemResponse getItem(Long itemId) {
 		Item item = findByIdOrElseThrow(itemId);
-		return ItemResponse.from(item);
+
+		ImageDto imageDto = imageService.getItemImages(itemId);
+		return ItemResponse.from(item, imageDto);
 	}
 
 	@Loggable
@@ -140,9 +140,9 @@ public class ItemService {
 			|| (request.getImageUrls() != null && request.getMainIndex() == null)) {
 			throw new CustomException(ExceptionCode.INVALID_IMAGE_UPDATE_REQUEST);
 		}
-		if (request.getImageUrls() != null) {
-			imageService.updateImages(item, request.getImageUrls(), request.getMainIndex());
-		}
+		ImageDto imageDto = (request.getImageUrls() != null)
+			? imageService.updateImages(item, request.getImageUrls(), request.getMainIndex())
+			: imageService.getItemImages(itemId);
 
 		// 연관 태그 수정
 		if(request.getItemTagNames() != null) {
@@ -150,7 +150,7 @@ public class ItemService {
 			tagService.saveTags(item, request.getItemTagNames());
 		}
 
-		return ItemResponse.from(item);
+		return ItemResponse.from(item, imageDto);
 	}
 
 	@Transactional

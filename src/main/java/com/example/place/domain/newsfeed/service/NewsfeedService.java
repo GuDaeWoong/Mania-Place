@@ -4,6 +4,8 @@ import java.util.Map;
 
 import com.example.place.common.annotation.Loggable;
 import com.example.place.common.dto.PageResponseDto;
+import com.example.place.domain.Image.dto.ImageDto;
+import com.example.place.domain.Image.repository.ImageRepository;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.Image.service.ImageService;
 import com.example.place.domain.item.dto.response.ItemGetAllResponse;
@@ -46,16 +48,18 @@ public class NewsfeedService {
 		);
 		Newsfeed savedNewsfeed = newsfeedRepository.save(newsfeed);
 		// 이미지 저장
-		imageService.createImages(savedNewsfeed, request.getImageUrls(), request.getMainIndex());
+		ImageDto imageDto = imageService.createImages(savedNewsfeed, request.getImageUrls(), request.getMainIndex());
 
-		return NewsfeedResponse.from(savedNewsfeed);
+		return NewsfeedResponse.from(savedNewsfeed, imageDto);
 	}
 
 	@Loggable
 	@Transactional(readOnly = true)
 	public NewsfeedResponse getNewsfeed(Long newsfeedId) {
 		Newsfeed newsfeed = findByIdOrElseThrow(newsfeedId);
-		return NewsfeedResponse.from(newsfeed);
+
+		ImageDto imageDto = imageService.getNewsfeedImages(newsfeedId);
+		return NewsfeedResponse.from(newsfeed, imageDto);
 	}
 
 	@Loggable
@@ -105,11 +109,11 @@ public class NewsfeedService {
 			|| (request.getImageUrls() != null && request.getMainIndex() == null)) {
 			throw new CustomException(ExceptionCode.INVALID_IMAGE_UPDATE_REQUEST);
 		}
-		if (request.getImageUrls() != null) {
-			imageService.updateImages(newsfeed, request.getImageUrls(), request.getMainIndex());
-		}
+		ImageDto imageDto = (request.getImageUrls() != null)
+			? imageService.updateImages(newsfeed, request.getImageUrls(), request.getMainIndex())
+			: imageService.getNewsfeedImages(newsfeedId);
 
-		return NewsfeedResponse.from(newsfeed);
+		return NewsfeedResponse.from(newsfeed, imageDto);
 	}
 
 	@Loggable
