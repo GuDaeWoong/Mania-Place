@@ -13,6 +13,7 @@ import com.example.place.common.dto.ApiResponseDto;
 import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.newsfeedcomment.dto.request.NewsfeedCommentRequest;
 import com.example.place.domain.newsfeedcomment.dto.response.NewsfeedCommentResponse;
+import com.example.place.domain.newsfeedcomment.service.NewsfeedCommentService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,8 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/newsfeeds")
 public class NewsfeedCommentController {
 
-	private final NewsfeedCommnetService newsfeedCommnetService;
+	private final NewsfeedCommentService newsfeedCommentService;
+	;
 
 	@PostMapping("/{newsfeedId}/comments")
 	public ResponseEntity<ApiResponseDto<NewsfeedCommentResponse>> createNewsfeedComment(
@@ -30,7 +32,7 @@ public class NewsfeedCommentController {
 		@Valid @RequestBody NewsfeedCommentRequest request,
 		@AuthenticationPrincipal CustomPrincipal principal) {
 
-		NewsfeedCommentResponse response = newsfeedCommnetService.createNewsfeedComment(newsfeedId, request, principal);
+		NewsfeedCommentResponse response = newsfeedCommentService.createNewsfeedComment(newsfeedId, request, principal);
 		ApiResponseDto<NewsfeedCommentResponse> success = ApiResponseDto.of("댓글이 등록되었습니다.", response);
 		return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
