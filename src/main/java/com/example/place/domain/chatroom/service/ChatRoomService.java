@@ -31,9 +31,7 @@ public class ChatRoomService {
         if (buyerId.equals(seller.getId())) {
             throw new CustomException(ExceptionCode.FORBIDDEN_CHAT_WITH_SELLF);
         }
-        System.out.println("itemId: " + item.getId());
-        System.out.println("buyerId: " + buyer.getId());
-        System.out.println("sellerId: " + seller.getId());
+
 
         ChatRoom chatRoom = chatRoomRepository.findExistingChatRoom(item.getId(), seller.getId(), buyer.getId())
                 .orElseGet(() -> chatRoomRepository.save(ChatRoom.of(item, seller, buyer)));
