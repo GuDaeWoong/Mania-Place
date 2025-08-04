@@ -141,7 +141,31 @@ public class ImageService {
 		return (mainIndex < 0 || mainIndex >= listSize) ? 0 : mainIndex;
 	}
 
-	// 현재 페이지에 있는 상품의 이미지들을 맵으로 묶어 반환
+	// 현재 상품 페이지에 있는 상품의 이미지들을 맵으로 묶어 반환
+	@Transactional(readOnly = true)
+	public Map<Long, Image> getMainImagesForItems(Page<Item> pagedItems) {
+		// 현재 페이지에 존재하는 itemId 리스트
+		List<Long> itemIds = pagedItems.getContent().stream()
+			.map(item -> item.getId())
+			.distinct()
+			.collect(Collectors.toList());
+
+		if (itemIds.isEmpty()) {
+			return Collections.emptyMap();
+		}
+
+		// 해당 상품들의 이미지 조회
+		List<Image> images = imageRepository.findMainImagesByItemIds(itemIds);
+
+		// 결과 리스트를 itemId를 키로 하는 Map으로 변환
+		return images.stream()
+			.collect(Collectors.toMap(
+				img -> img.getItem().getId(),
+				img -> img
+			));
+	}
+
+	// 현재 게시글 페이지에 있는 상품의 이미지들을 맵으로 묶어 반환
 	@Transactional(readOnly = true)
 	public Map<Long, Image> getMainImagesForPosts(Page<Post> pagedPosts) {
 		// 현재 페이지에 존재하는 itemId 리스트

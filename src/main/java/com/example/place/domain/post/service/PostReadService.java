@@ -49,7 +49,6 @@ public class PostReadService {
 	}
 
 	// 전체 조회 빌더 (공통 로직 메서드)
-	@Loggable
 	@Transactional(readOnly = true)
 	protected PageResponseDto<PostGetAllResponseDto> buildGetAllPosts(Page<Post> pagedPosts, Long userId) {
 
