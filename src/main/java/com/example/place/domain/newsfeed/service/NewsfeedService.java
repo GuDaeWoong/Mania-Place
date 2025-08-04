@@ -147,5 +147,6 @@ public class NewsfeedService {
 
 		newsfeed.delete();
 	}
+
 }
 

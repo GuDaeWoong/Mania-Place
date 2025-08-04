@@ -2,6 +2,8 @@ package com.example.place.domain.newsfeed.controller;
 
 import com.example.place.common.dto.ApiResponseDto;
 import com.example.place.common.dto.PageResponseDto;
+import com.example.place.common.exception.enums.ExceptionCode;
+import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.newsfeed.dto.request.NewsfeedRequest;
 import com.example.place.domain.newsfeed.dto.response.NewsfeedListResponse;
@@ -31,6 +33,9 @@ public class NewsfeedController {
 		@Valid @RequestBody NewsfeedRequest request,
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
+		// Admin 권한 확인
+		checkAdminRole(principal);
+
 		NewsfeedResponse newsfeed = newsfeedService.createNewsfeed(principal.getId(), request);
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 등록이 완료되었습니다.", newsfeed));
 	}
@@ -60,6 +65,10 @@ public class NewsfeedController {
 		@RequestBody NewsfeedRequest request,
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
+
+		// Admin 권한 확인
+		checkAdminRole(principal);
+
 		NewsfeedResponse updateNewsfeed = newsfeedService.updateNewsfeed(newsfeedId, request, principal.getId());
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 수정이 완료되었습니다.", updateNewsfeed));
 	}
@@ -70,7 +79,23 @@ public class NewsfeedController {
 		@PathVariable Long newsfeedId,
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
+
+		// Admin 권한 확인
+		checkAdminRole(principal);
+
 		newsfeedService.softDeleteNewsfeed(newsfeedId, principal.getId());
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 삭제가 완료되었습니다.", null));
+	}
+
+	// Admin 권한 확인
+	private void checkAdminRole(CustomPrincipal principal) {
+		// authorities를 사용
+		boolean isAdmin = principal.getAuthorities().stream()
+			.anyMatch(auth -> "ROLE_ADMIN".equals(auth.getAuthority()) ||
+				"ADMIN".equals(auth.getAuthority()));
+
+		if (!isAdmin) {
+			throw new CustomException(ExceptionCode.FORBIDDEN_ADMIN_ACCESS);
+		}
 	}
 }
