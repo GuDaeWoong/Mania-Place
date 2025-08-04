@@ -1,19 +1,14 @@
 package com.example.place.domain.post.service;
 
 import java.util.List;
-import java.util.Map;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.place.common.annotation.Loggable;
-import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.Image.dto.ImageDto;
-import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.Image.service.ImageService;
 import com.example.place.domain.post.dto.response.PostResponseDto;
 import com.example.place.domain.user.entity.User;
@@ -46,7 +41,7 @@ public class PostService {
 		Post post = Post.of(user, item, request.getContent());
 		Post saved = postRepository.save(post);
 
-		ImageDto imageDto = imageService.getImages(saved.getItem().getId());
+		ImageDto imageDto = imageService.getItemImages(saved.getItem().getId());
 		return PostResponseDto.from(saved, imageDto);
 	}
 
@@ -56,7 +51,7 @@ public class PostService {
 	public PostResponseDto getPost(Long postId) {
 		Post post = findByIdOrElseThrow(postId);
 
-		ImageDto imageDto = imageService.getImages(post.getItem().getId());
+		ImageDto imageDto = imageService.getItemImages(post.getItem().getId());
 		return PostResponseDto.from(post, imageDto);
 	}
 
@@ -71,7 +66,7 @@ public class PostService {
 		}
 
 		post.update(request.getContent());
-		ImageDto imageDto = imageService.getImages(post.getItem().getId());
+		ImageDto imageDto = imageService.getItemImages(post.getItem().getId());
 		return PostResponseDto.from(post, imageDto);
 	}
 

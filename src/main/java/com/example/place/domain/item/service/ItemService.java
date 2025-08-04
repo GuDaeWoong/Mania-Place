@@ -13,8 +13,6 @@ import com.example.place.domain.item.dto.response.ItemGetAllResponse;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.item.repository.ItemRepository;
 
-import com.example.place.domain.post.dto.response.PostGetAllResponseDto;
-import com.example.place.domain.post.entity.Post;
 import com.example.place.domain.tag.service.TagService;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.entity.UserRole;
@@ -26,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
-import com.example.place.domain.vote.dto.response.VoteResponseDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -81,7 +78,7 @@ public class ItemService {
 	public ItemResponse getItem(Long itemId) {
 		Item item = findByIdOrElseThrow(itemId);
 
-		ImageDto imageDto = imageService.getImages(itemId);
+		ImageDto imageDto = imageService.getItemImages(itemId);
 		return ItemResponse.from(item, imageDto);
 	}
 
@@ -147,7 +144,7 @@ public class ItemService {
 		}
 		ImageDto imageDto = (request.getImageUrls() != null)
 			? imageService.updateImages(item, request.getImageUrls(), request.getMainIndex())
-			: imageService.getImages(itemId);
+			: imageService.getItemImages(itemId);
 
 		// 연관 태그 수정
 		if(request.getItemTagNames() != null) {

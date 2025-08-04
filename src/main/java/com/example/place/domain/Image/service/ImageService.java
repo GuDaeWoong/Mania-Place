@@ -39,7 +39,6 @@ public class ImageService {
 			Image image = Image.of(item, imageUrls.get(i), isMain);
 
 			imageRepository.save(image);
-
 			item.addImage(image); // 연관관계 양방향 설정
 		}
 
@@ -48,7 +47,7 @@ public class ImageService {
 
 	// newsfeed의 이미지 저장
 	@Transactional
-	public void createImages(Newsfeed newsfeed, List<String> imageUrls, int mainIndex) {
+	public ImageDto createImages(Newsfeed newsfeed, List<String> imageUrls, int mainIndex) {
 
 		int validatedMainIndex = validMainIndex(imageUrls.size(), mainIndex);
 
@@ -59,11 +58,29 @@ public class ImageService {
 			imageRepository.save(image);
 			newsfeed.addImage(image);
 		}
+
+		return ImageDto.of(imageUrls, validatedMainIndex);
 	}
 
 	@Transactional(readOnly = true)
-	public ImageDto getImages(Long itemId) {
+	public ImageDto getItemImages(Long itemId) {
 		List<Image> images = imageRepository.findByItemId(itemId);
+
+		List<String> imageUrls = new ArrayList<>();
+		int mainIndex = 0;
+		for (int i = 0; i < images.size(); i++) {
+			imageUrls.add(images.get(i).getImageUrl());
+			if (images.get(i).isMain()) {
+				mainIndex = i;
+			}
+		}
+
+		return ImageDto.of(imageUrls, mainIndex);
+	}
+
+	@Transactional(readOnly = true)
+	public ImageDto getNewsfeedImages(Long newsfeedId) {
+		List<Image> images = imageRepository.findByNewsfeedId(newsfeedId);
 
 		List<String> imageUrls = new ArrayList<>();
 		int mainIndex = 0;
@@ -80,26 +97,25 @@ public class ImageService {
 	// item의 이미지 수정
 	@Transactional
 	public ImageDto updateImages(Item item, List<String> newImageUrls, int mainIndex) {
-		return updateImagesCommon(item.getId(), null, item, null, newImageUrls, mainIndex);
+		return updateImagesCommon(item, null, newImageUrls, mainIndex);
 	}
 
 	// Newsfeed 이미지 수정
 	@Transactional
 	public ImageDto updateImages(Newsfeed newsfeed, List<String> newImageUrls, Integer mainIndex) {
 		int validMainIndex = (mainIndex != null) ? mainIndex : 0;
-		return updateImagesCommon(null, newsfeed.getId(), null, newsfeed, newImageUrls, validMainIndex);
+		return updateImagesCommon(null, newsfeed, newImageUrls, validMainIndex);
 	}
 
 	@Transactional
-	public ImageDto updateImagesCommon(Long itemId, Long newsfeedId, Item item, Newsfeed newsfeed,
-		List<String> newImageUrls, int mainIndex) {
+	public ImageDto updateImagesCommon(Item item, Newsfeed newsfeed, List<String> newImageUrls, int mainIndex) {
 		// 새롭게 전달받은 이미지
 		Set<String> newImageSet = new HashSet<>(newImageUrls);
 
 		// 현재 저장되어 있는 이미지
-		List<Image> existingImages = (itemId != null)
-			? imageRepository.findByItemId(itemId)
-			: imageRepository.findByNewsfeedId(newsfeedId);
+		List<Image> existingImages = (item != null)
+			? imageRepository.findByItemId(item.getId())
+			: imageRepository.findByNewsfeedId(newsfeed.getId());
 
 		Set<String> existingImageSet = existingImages.stream()
 			.map(Image::getImageUrl)
@@ -132,9 +148,9 @@ public class ImageService {
 		int validatedMainIndex = validMainIndex(newImageUrls.size(), mainIndex);
 		String mainImageUrl = newImageUrls.get(validatedMainIndex);
 		// Item/Newsfeed 구분해서 조회
-		List<Image> images = (itemId != null)
-			? imageRepository.findByItemId(itemId)
-			: imageRepository.findByNewsfeedId(newsfeedId);
+		List<Image> images = (item != null)
+			? imageRepository.findByItemId(item.getId())
+			: imageRepository.findByNewsfeedId(newsfeed.getId());
 
 		List<String> resultImageUrls = new ArrayList<>();
 		int resultMainIndex = 0;
