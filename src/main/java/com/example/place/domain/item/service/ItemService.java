@@ -113,14 +113,12 @@ public class ItemService {
 	@Transactional(readOnly = true)
 	protected PageResponseDto<ItemGetAllResponse> buildGetAllItems(Page<Item> pagedItems) {
 		// 해당 게시글 ID 목록에 대한 이미지 정보를 반환
-		Map<Long, Image> imagesMap = imageService.getMainImagesForItems(pagedItems);
+		Map<Long, Image> mainImagesMap = imageService.getMainImagesForItems(pagedItems);
 
 		// 조합
 		Page<ItemGetAllResponse> dtoPage = pagedItems.map(item -> {
-			Long itemId = item.getId();
-
 			// --메인이미지 조합
-			Image mainImage = imagesMap.getOrDefault(itemId, null);
+			Image mainImage = mainImagesMap.getOrDefault(item.getId(), null);
 
 			return ItemGetAllResponse.from(item, mainImage.getImageUrl());
 		});

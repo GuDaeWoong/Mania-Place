@@ -23,3 +23,5 @@ spring:
 jwt:
   secret:
     key: 11231324sdafdasdfasdfasd5646456asd5f4as6d5f4a56sdf423asd1f
+
+

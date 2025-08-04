@@ -16,9 +16,4 @@ import org.springframework.stereotype.Repository;
 public interface NewsfeedRepository extends JpaRepository<Newsfeed, Long> {
 
 	Page<Newsfeed> findByIsDeletedFalse(Pageable pageable);
-
-	// NewsfeedRepository에 추가
-	@Query("SELECT n FROM Newsfeed n LEFT JOIN FETCH n.images WHERE n.id = :id")
-	Optional<Newsfeed> findByIdWithImages(@Param("id") Long id);
-
 }
