@@ -2,6 +2,8 @@ package com.example.place.domain.newsfeedcomment.entity;
 
 import com.example.place.common.entity.SoftDeleteEntity;
 import com.example.place.domain.newsfeed.entity.Newsfeed;
+import com.example.place.domain.post.entity.Post;
+import com.example.place.domain.postcomment.entity.PostComment;
 import com.example.place.domain.user.entity.User;
 
 import jakarta.persistence.Entity;
@@ -42,5 +44,9 @@ public class NewsfeedComment extends SoftDeleteEntity {
 
 	public static NewsfeedComment of(User user, Newsfeed newsfeed, String content) {
 		return new NewsfeedComment(user, newsfeed, content);
+	}
+
+	public void updateContent(String content) {
+		this.content = content;
 	}
 }

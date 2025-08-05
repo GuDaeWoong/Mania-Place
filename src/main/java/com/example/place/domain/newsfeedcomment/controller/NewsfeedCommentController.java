@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,7 +55,21 @@ public class NewsfeedCommentController {
 	) {
 		PageResponseDto<NewsfeedCommentResponse> response = newsfeedCommentService.getAllCommentsByNewsfeeds(newsfeedId,
 			pageable);
-		ApiResponseDto<PageResponseDto> success = ApiResponseDto.of("댓글 목록 조회가 완료되었습니다.", response);
+		ApiResponseDto<PageResponseDto> success = ApiResponseDto.of("댓글 조회가 완료되었습니다.", response);
+		return ResponseEntity.status(HttpStatus.OK).body(success);
+	}
+
+	//댓글 수정
+	@PatchMapping("{newsfeedId}/comments/{commentId}")
+	public ResponseEntity<ApiResponseDto<NewsfeedCommentResponse>> updateNewsfeedComment(
+		@PathVariable Long newsfeedId,
+		@PathVariable Long commentId,
+		@Valid @RequestBody NewsfeedCommentRequest request,
+		@AuthenticationPrincipal CustomPrincipal principal
+	) {
+		NewsfeedCommentResponse response = newsfeedCommentService.updateNewsfeedComment(newsfeedId, commentId, request,
+			principal);
+		ApiResponseDto<NewsfeedCommentResponse> success = ApiResponseDto.of("댓글이 수정이 완료되었습니다.", response);
 		return ResponseEntity.status(HttpStatus.OK).body(success);
 	}
 }
