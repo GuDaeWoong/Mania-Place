@@ -13,6 +13,7 @@ import com.example.place.domain.item.dto.response.ItemGetAllResponse;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.item.repository.ItemRepository;
 
+import com.example.place.domain.keyword.service.SearchKeywordService;
 import com.example.place.domain.tag.service.TagService;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.entity.UserRole;
@@ -42,6 +43,7 @@ public class ItemService {
     private final TagService tagService;
     private final UserService userService;
 	private final ImageService imageService;
+	private final SearchKeywordService searchKeywordService;
 
 
     @Transactional
@@ -86,6 +88,8 @@ public class ItemService {
 	@Transactional(readOnly = true)
 	public PageResponseDto<ItemGetAllResponse> searchItems(String keyword, List<String> tags, Long userId,
 		Pageable pageable) {
+
+		searchKeywordService.addKeyword(keyword);
 
 		Page<Item> pagedItems = itemRepository.search(keyword, tags, userId, pageable);
 
