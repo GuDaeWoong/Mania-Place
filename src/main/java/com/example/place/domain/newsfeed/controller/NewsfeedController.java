@@ -20,30 +20,31 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/newsfeeds")
+@RequestMapping("/api")
 public class NewsfeedController {
 
 	private final NewsfeedService newsfeedService;
 
 	//새소식 생성
-	@PostMapping
+	@PostMapping("/admin/newsfeeds")
 	public ResponseEntity<ApiResponseDto<NewsfeedResponse>> createNewsfeed(
 		@Valid @RequestBody NewsfeedRequest request,
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
+
 		NewsfeedResponse newsfeed = newsfeedService.createNewsfeed(principal.getId(), request);
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 등록이 완료되었습니다.", newsfeed));
 	}
 
 	//단건 조회
-	@GetMapping("/{newsfeedId}")
+	@GetMapping("/newsfeeds/{newsfeedId}")
 	public ResponseEntity<ApiResponseDto<NewsfeedResponse>> getNewsfeed(@PathVariable Long newsfeedId) {
 		NewsfeedResponse newsfeed = newsfeedService.getNewsfeed(newsfeedId);
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 조회가 완료되었습니다.", newsfeed));
 	}
 
 	//전체 조회
-	@GetMapping
+	@GetMapping("/newsfeeds")
 	public ResponseEntity<ApiResponseDto<PageResponseDto<NewsfeedListResponse>>> getAllNewsfeeds(
 		@PageableDefault Pageable pageable
 	) {
@@ -54,22 +55,24 @@ public class NewsfeedController {
 	}
 
 	//새소식 수정
-	@PatchMapping("/{newsfeedId}")
+	@PatchMapping("/admin/newsfeeds/{newsfeedId}")
 	public ResponseEntity<ApiResponseDto<NewsfeedResponse>> updateNewsfeed(
 		@PathVariable Long newsfeedId,
 		@RequestBody NewsfeedRequest request,
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
+
 		NewsfeedResponse updateNewsfeed = newsfeedService.updateNewsfeed(newsfeedId, request, principal.getId());
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 수정이 완료되었습니다.", updateNewsfeed));
 	}
 
 	//새소식 삭제
-	@DeleteMapping("/{newsfeedId}")
+	@DeleteMapping("/admin/newsfeeds/{newsfeedId}")
 	public ResponseEntity<ApiResponseDto<Void>> softDeleteNewsfeed(
 		@PathVariable Long newsfeedId,
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
+
 		newsfeedService.softDeleteNewsfeed(newsfeedId, principal.getId());
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 삭제가 완료되었습니다.", null));
 	}
