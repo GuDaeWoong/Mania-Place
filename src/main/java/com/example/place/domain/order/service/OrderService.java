@@ -11,6 +11,7 @@ import com.example.place.common.annotation.Loggable;
 import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
+import com.example.place.domain.Image.service.ImageService;
 import com.example.place.domain.item.entity.Item;
 import com.example.place.domain.item.service.ItemService;
 import com.example.place.domain.item.service.StockService;
@@ -34,6 +35,7 @@ public class OrderService {
 	private final UserService userService;
 	private final ItemService itemService;
 	private final StockService stockService;
+	private final ImageService imageService;
 
 	@Loggable
 	@Transactional
@@ -71,7 +73,7 @@ public class OrderService {
 		stockService.decreaseStock(item.getId(),requestDto.getQuantity());
 
 		// 메인 이미지 추가
-		String mainImageUrl = itemService.getMainImageUrl(item.getId());
+		String mainImageUrl = imageService.getMainImageUrl(item.getId());
 
 		return CreateOrderResponseDto.from(order,mainImageUrl);
 	}
@@ -87,7 +89,7 @@ public class OrderService {
 		}
 
 		Item item = itemService.findByIdOrElseThrow(order.getItem().getId());
-		String mainImageUrl = itemService.getMainImageUrl(item.getId());
+		String mainImageUrl = imageService.getMainImageUrl(item.getId());
 
 		return SearchOrderResponseDto.from(order,mainImageUrl);
 	}
@@ -99,7 +101,7 @@ public class OrderService {
 
 		Page<SearchOrderResponseDto> dtoPage = orders.map(order -> {
 			Item item = order.getItem();
-			String mainImageUrl = itemService.getMainImageUrl(item.getId());
+			String mainImageUrl = imageService.getMainImageUrl(item.getId());
 
 			return SearchOrderResponseDto.from(order,mainImageUrl
 			);
@@ -123,7 +125,7 @@ public class OrderService {
 
 		order.updateStatus(OrderStatus.READY);
 
-		String mainImageUrl = itemService.getMainImageUrl(item.getId());
+		String mainImageUrl = imageService.getMainImageUrl(item.getId());
 
 		return UpdateOrderStatusResponseDto.from(order,mainImageUrl);
 	}
@@ -144,7 +146,7 @@ public class OrderService {
 		order.updateStatus(OrderStatus.COMPLETED);
 
 		Item item = order.getItem();
-		String mainImageUrl = itemService.getMainImageUrl(item.getId());
+		String mainImageUrl = imageService.getMainImageUrl(item.getId());
 
 		return UpdateOrderStatusResponseDto.from(order,mainImageUrl);
 	}
@@ -169,7 +171,7 @@ public class OrderService {
 		// 주문취소 인한 재고 증가
 		stockService.increaseStock(item.getId(),order.getQuantity());
 
-		String mainImageUrl = itemService.getMainImageUrl(item.getId());
+		String mainImageUrl = imageService.getMainImageUrl(item.getId());
 
 		return UpdateOrderStatusResponseDto.from(order,mainImageUrl);
 	}
