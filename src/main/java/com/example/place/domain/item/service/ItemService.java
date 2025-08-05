@@ -200,17 +200,6 @@ public class ItemService {
 		return item;
 	}
 
-	public String getMainImageUrl(Long itemId) {
-		Item item =  itemRepository.findById(itemId)
-			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
-
-		return item.getImages().stream()
-			.filter(Image::isMain)
-			.findFirst()
-			.map(Image::getImageUrl)
-			.orElse(null);
-	}
-
 	private List<LocalDateTime> setSalesTime(ItemRequest request) {
 
 		LocalDateTime salesStartAt = request.getSalesStartAt() != null

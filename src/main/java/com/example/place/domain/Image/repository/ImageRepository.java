@@ -1,6 +1,7 @@
 package com.example.place.domain.Image.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,6 +14,8 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
 
 	@Query("SELECT i FROM Image i WHERE i.item.id IN :itemIds AND i.isMain = true")
 	List<Image> findMainImagesByItemIds(@Param("itemIds") List<Long> itemIds);
+
+	Optional<Image> findByItemIdAndIsMainTrue(Long itemId);
 
 	List<Image> findByNewsfeedId(Long newsfeedId);
 

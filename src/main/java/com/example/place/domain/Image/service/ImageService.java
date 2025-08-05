@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.place.common.exception.enums.ExceptionCode;
+import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.Image.dto.ImageDto;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.Image.repository.ImageRepository;
@@ -192,6 +195,13 @@ public class ImageService {
 		return (mainIndex < 0 || mainIndex >= listSize) ? 0 : mainIndex;
 	}
 
+	public String getMainImageUrl(Long itemId) {
+
+		return imageRepository.findByItemIdAndIsMainTrue(itemId)
+			.map(Image::getImageUrl)
+			.orElse(null);
+	}
+
 	// 현재 상품 페이지에 있는 상품의 이미지들을 맵으로 묶어 반환
 	@Transactional(readOnly = true)
 	public Map<Long, Image> getMainImagesForItems(Page<Item> pagedItems) {
@@ -206,10 +216,10 @@ public class ImageService {
 		}
 
 		// 해당 상품들의 대표 이미지 조회
-		List<Image> images = imageRepository.findMainImagesByItemIds(itemIds);
+		List<Image> mainImages = imageRepository.findMainImagesByItemIds(itemIds);
 
 		// 결과 리스트를 itemId를 키로 하는 Map으로 변환
-		return images.stream()
+		return mainImages.stream()
 			.collect(Collectors.toMap(
 				img -> img.getItem().getId(),
 				img -> img
@@ -230,10 +240,10 @@ public class ImageService {
 		}
 
 		// 해당 게시글들의 대표 이미지 조회
-		List<Image> images = imageRepository.findMainImagesByItemIds(itemIds);
+		List<Image> mainImages = imageRepository.findMainImagesByItemIds(itemIds);
 
 		// 결과 리스트를 itemId를 키로 하는 Map으로 변환
-		return images.stream()
+		return mainImages.stream()
 			.collect(Collectors.toMap(
 				img -> img.getItem().getId(),
 				img -> img
