@@ -40,7 +40,7 @@ public enum ExceptionCode {
 	DELETED_USER(HttpStatus.FORBIDDEN, "탈퇴한 사용자 입니다."),
 	UNAUTHORIZED_STATUS_CHANGE(HttpStatus.FORBIDDEN, "본인 이외에는 상태값을 변경할 수 없습니다."),
 	NOT_SELLER(HttpStatus.FORBIDDEN, "구매자가 아닙니다."),
-	FORBIDDEN_ADMIN_ACCESS(HttpStatus.FORBIDDEN, "관리자가 아닙니다."),
+	FORBIDDEN_CHAT_WITH_SELLF(HttpStatus.FORBIDDEN, "본인의 상품에는 채팅방을 생성할 수 없습니다."),
 
 	// 404 Not Found
 	NOT_FOUND_USER(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."),
