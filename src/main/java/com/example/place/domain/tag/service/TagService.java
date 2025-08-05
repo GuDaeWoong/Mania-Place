@@ -1,6 +1,5 @@
 package com.example.place.domain.tag.service;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,6 +10,7 @@ import com.example.place.domain.itemtag.entity.ItemTag;
 import com.example.place.domain.tag.dto.request.TagRequest;
 import com.example.place.domain.tag.dto.response.TagResponse;
 import com.example.place.domain.tag.entity.Tag;
+import com.example.place.domain.tag.repository.TagJdbcRepository;
 import com.example.place.domain.tag.repository.TagRepository;
 import com.example.place.domain.tag.util.TagUtil;
 import com.example.place.domain.user.entity.User;
@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 public class TagService {
     private final TagRepository tagRepository;
     private final UserTagService userTagService;
+    private final TagJdbcRepository tagJdbcRepository;
 
     @Transactional
     public TagResponse createTag(TagRequest tagRequest) {
@@ -71,20 +72,6 @@ public class TagService {
         tagRepository.delete(tag);
     }
 
-    // // 유저 태그 저장 메서드
-    // public void saveTags(User user, Set<String> tagNames) {
-    //     Set<String> normalizedTags = new LinkedHashSet<>();
-    //
-    //     for (String tagName : tagNames) {
-    //         normalizedTags.add(TagUtil.normalizeTag(tagName));
-    //     }
-    //
-    //     for (String tagName : normalizedTags) {
-    //         Tag tag = findOrCreateTag(tagName);
-    //         user.addUserTag(UserTag.of(tag, user));
-    //     }
-    // }
-
     public void saveTags(User user, Set<String> tagNames) {
         // 태그 정제
         Set<String> normalizedTags = tagNames.stream()
@@ -102,18 +89,13 @@ public class TagService {
             .filter(name -> !existingTagNames.contains(name))
             .collect(Collectors.toSet());
 
-        // 새 태그들 배치 생성
-        List<Tag> newTags = newTagNames.stream()
-            .map(Tag::of)
-            .collect(Collectors.toList());
-
-        if (!newTags.isEmpty()) {
-            tagRepository.saveAll(newTags);  // 배치 INSERT
+        // 배치 INSERT IGNORE (1번의 쿼리)
+        if (!newTagNames.isEmpty()) {
+            tagJdbcRepository.batchInsertIgnoreTags(newTagNames);
         }
 
-        // 모든 태그 합치기
-        List<Tag> allTags = new ArrayList<>(existingTags);
-        allTags.addAll(newTags);
+        // 최종 조회
+        List<Tag> allTags = tagRepository.findByTagNameIn(normalizedTags);
 
         // UserTag 배치 생성
         List<Long> tagIds = allTags.stream()
