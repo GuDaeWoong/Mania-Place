@@ -1,8 +1,11 @@
 package com.example.place.domain.newsfeedcomment.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.newsfeed.entity.Newsfeed;
 import com.example.place.domain.newsfeed.service.NewsfeedService;
@@ -37,4 +40,17 @@ public class NewsfeedCommentService {
 		return NewsfeedCommentResponse.from(user, newsfeedComment);
 	}
 
+	//댓글 조회
+	@Transactional
+	public PageResponseDto<NewsfeedCommentResponse> getAllCommentsByNewsfeeds(Long newsfeedId, Pageable pageable
+	) {
+		Newsfeed newsfeed = newsfeedService.findByIdOrElseThrow(newsfeedId);
+
+		Page<NewsfeedComment> commentPage = newsfeedCommentRepository.findAllByNewsfeedAndIsDeletedFalse(newsfeed,
+			pageable);
+
+		Page<NewsfeedCommentResponse> responsePage = commentPage.map(
+			comment -> NewsfeedCommentResponse.from(comment.getUser(), comment));
+		return new PageResponseDto<>(responsePage);
+	}
 }
