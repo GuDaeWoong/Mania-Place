@@ -12,7 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,14 +20,13 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/newsfeeds")
+@RequestMapping("/api")
 public class NewsfeedController {
 
 	private final NewsfeedService newsfeedService;
 
 	//새소식 생성
-	@PostMapping
-	@PreAuthorize("hasRole('ADMIN')")
+	@PostMapping("/admin/newsfeeds")
 	public ResponseEntity<ApiResponseDto<NewsfeedResponse>> createNewsfeed(
 		@Valid @RequestBody NewsfeedRequest request,
 		@AuthenticationPrincipal CustomPrincipal principal
@@ -39,16 +37,14 @@ public class NewsfeedController {
 	}
 
 	//단건 조회
-	@GetMapping("/{newsfeedId}")
-	@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+	@GetMapping("/newsfeeds/{newsfeedId}")
 	public ResponseEntity<ApiResponseDto<NewsfeedResponse>> getNewsfeed(@PathVariable Long newsfeedId) {
 		NewsfeedResponse newsfeed = newsfeedService.getNewsfeed(newsfeedId);
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 조회가 완료되었습니다.", newsfeed));
 	}
 
 	//전체 조회
-	@GetMapping
-	@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+	@GetMapping("/newsfeeds")
 	public ResponseEntity<ApiResponseDto<PageResponseDto<NewsfeedListResponse>>> getAllNewsfeeds(
 		@PageableDefault Pageable pageable
 	) {
@@ -59,8 +55,7 @@ public class NewsfeedController {
 	}
 
 	//새소식 수정
-	@PatchMapping("/{newsfeedId}")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PatchMapping("/admin/newsfeeds/{newsfeedId}")
 	public ResponseEntity<ApiResponseDto<NewsfeedResponse>> updateNewsfeed(
 		@PathVariable Long newsfeedId,
 		@RequestBody NewsfeedRequest request,
@@ -72,8 +67,7 @@ public class NewsfeedController {
 	}
 
 	//새소식 삭제
-	@DeleteMapping("/{newsfeedId}")
-	@PreAuthorize("hasRole('ADMIN')")
+	@DeleteMapping("/admin/newsfeeds/{newsfeedId}")
 	public ResponseEntity<ApiResponseDto<Void>> softDeleteNewsfeed(
 		@PathVariable Long newsfeedId,
 		@AuthenticationPrincipal CustomPrincipal principal
