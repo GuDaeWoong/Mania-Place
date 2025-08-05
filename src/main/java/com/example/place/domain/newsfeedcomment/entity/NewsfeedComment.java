@@ -1,5 +1,6 @@
 package com.example.place.domain.newsfeedcomment.entity;
 
+import com.example.place.common.entity.SoftDeleteEntity;
 import com.example.place.domain.newsfeed.entity.Newsfeed;
 import com.example.place.domain.user.entity.User;
 
@@ -18,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "newsfeedcomments")
-public class NewsfeedComment {
+public class NewsfeedComment extends SoftDeleteEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
