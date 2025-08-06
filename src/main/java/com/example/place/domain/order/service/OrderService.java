@@ -42,7 +42,6 @@ public class OrderService {
 	public CreateOrderResponseDto createOrder(CreateOrderRequestDto requestDto,Long userId
 	) {
 		User user = userService.findByIdOrElseThrow(userId);
-
 		Item item = itemService.findByIdOrElseThrow(requestDto.getItemId());
 
 		// 상품 소프트딜리트 확인
@@ -50,13 +49,11 @@ public class OrderService {
 			throw new CustomException(ExceptionCode.NOT_FOUND_ITEM);
 		}
 
-		// 수량 유무 확인
-		if (item.getCount() < requestDto.getQuantity()) {
-			throw new CustomException(ExceptionCode.OUT_OF_STOCK);
-		}
-
 		// 판매 기간 유무 검증
 		item.validateSalesPeriod();
+
+		// 주문으로 인한 재고 차감
+		stockService.decreaseStock(item.getId(),requestDto.getQuantity());
 
 		Order order = new Order(user,
 			item,
@@ -68,9 +65,6 @@ public class OrderService {
 		);
 
 		orderRepository.save(order);
-
-		// 주문으로 인한 재고 차감
-		stockService.decreaseStock(item.getId(),requestDto.getQuantity());
 
 		// 메인 이미지 추가
 		String mainImageUrl = imageService.getMainImageUrl(item.getId());
@@ -191,5 +185,4 @@ public class OrderService {
 			order.clearItem();
 		}
 	}
-
 }

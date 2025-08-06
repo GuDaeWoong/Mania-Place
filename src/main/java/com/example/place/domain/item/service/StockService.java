@@ -6,10 +6,13 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.item.entity.Item;
+import com.example.place.domain.item.repository.ItemRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,10 +20,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class StockService {
 	@Lazy
-	private final ItemService itemService;
 	private final RedissonClient redissonClient;
+	private final ItemRepository itemRepository;
 
 	// 분산락 재고감소
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void decreaseStock(Long itemId, Long quantity) {
 		String lockKey = "Lock:" + itemId;
 		RLock lock = redissonClient.getLock(lockKey);
@@ -34,24 +38,27 @@ public class StockService {
 				throw new CustomException(ExceptionCode.STOCK_LOCK_FAILED);
 			}
 
-			Item item = itemService.findByIdOrElseThrow(itemId);
+			try {
+				Item item = itemRepository.findByIdWithLock(itemId)
+					.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
 
-			if (item.getCount() < quantity) {
-				throw new CustomException(ExceptionCode.OUT_OF_STOCK);
+				// 실제 제고감소
+				item.decreaseStock(quantity);
+
+			}finally {
+				if (lock.isHeldByCurrentThread()) {
+					lock.unlock();
+				}
 			}
-			// 실제 제고감소
-			item.decreaseStock(quantity);
+
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new CustomException(ExceptionCode.OPERATION_INTERRUPTED);
-		} finally {
-			if (lock.isHeldByCurrentThread()) {
-				lock.unlock();
-			}
 		}
 	}
 
 	// 분산락 재고증가
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void increaseStock(Long itemId, Long quantity) {
 		String lockKey = "Lock:" + itemId;
 		RLock lock = redissonClient.getLock(lockKey);
@@ -61,17 +68,21 @@ public class StockService {
 				throw new CustomException(ExceptionCode.STOCK_LOCK_FAILED);
 			}
 
-			Item item = itemService.findByIdOrElseThrow(itemId);
-			// 재고 증가
-			item.increaseStock(quantity);
+			try {
+				Item item = itemRepository.findByIdWithLock(itemId)
+					.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
+
+				item.increaseStock(quantity);
+
+			} finally {
+				if (lock.isHeldByCurrentThread()) {
+					lock.unlock();
+				}
+			}
 
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new CustomException(ExceptionCode.OPERATION_INTERRUPTED);
-		} finally {
-			if (lock.isHeldByCurrentThread()) {
-				lock.unlock();
-			}
 		}
 	}
 }
