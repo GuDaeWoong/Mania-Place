@@ -18,14 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.place.common.dto.ApiResponseDto;
 import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.security.jwt.CustomPrincipal;
-import com.example.place.domain.newsfeed.entity.Newsfeed;
 import com.example.place.domain.newsfeedcomment.dto.request.NewsfeedCommentRequest;
 import com.example.place.domain.newsfeedcomment.dto.response.NewsfeedCommentResponse;
-import com.example.place.domain.newsfeedcomment.entity.NewsfeedComment;
 import com.example.place.domain.newsfeedcomment.service.NewsfeedCommentService;
-import com.example.place.domain.post.entity.Post;
-import com.example.place.domain.postcomment.dto.response.PostCommentResponseDto;
-import com.example.place.domain.postcomment.entity.PostComment;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

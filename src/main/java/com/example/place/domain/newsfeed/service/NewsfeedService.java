@@ -5,10 +5,8 @@ import java.util.Map;
 import com.example.place.common.annotation.Loggable;
 import com.example.place.common.dto.PageResponseDto;
 import com.example.place.domain.Image.dto.ImageDto;
-import com.example.place.domain.Image.repository.ImageRepository;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.Image.service.ImageService;
-import com.example.place.domain.item.dto.response.ItemGetAllResponse;
 import com.example.place.domain.newsfeed.dto.request.NewsfeedRequest;
 import com.example.place.domain.newsfeed.dto.response.NewsfeedListResponse;
 import com.example.place.domain.newsfeed.dto.response.NewsfeedResponse;
@@ -67,7 +65,7 @@ public class NewsfeedService {
 	public PageResponseDto<NewsfeedListResponse> getAllNewsfeeds(Pageable pageable) {
 
 		// 새소식 전체 조회(소프트딜리트 빼고)
-		Page<Newsfeed> pagedNewsfeeds = newsfeedRepository.findByIsDeletedFalse(pageable);
+		Page<Newsfeed> pagedNewsfeeds = newsfeedRepository.findByIsDeletedFalseWithFetchJoin(pageable);
 
 		// 페이지에 들어갈 대표 이미지 일괄 조회
 		Map<Long, Image> mainImageMap = imageService.getMainImagesForNewsfeeds(pagedNewsfeeds);
