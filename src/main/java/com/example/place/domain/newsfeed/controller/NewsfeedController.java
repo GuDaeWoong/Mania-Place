@@ -9,6 +9,7 @@ import com.example.place.domain.newsfeed.dto.response.NewsfeedResponse;
 import com.example.place.domain.newsfeed.service.NewsfeedService;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +47,7 @@ public class NewsfeedController {
 	//전체 조회
 	@GetMapping("/newsfeeds")
 	public ResponseEntity<ApiResponseDto<PageResponseDto<NewsfeedListResponse>>> getAllNewsfeeds(
-		@PageableDefault Pageable pageable
+		@PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
 	) {
 		//리스트로 가져오기
 		PageResponseDto<NewsfeedListResponse> response =
