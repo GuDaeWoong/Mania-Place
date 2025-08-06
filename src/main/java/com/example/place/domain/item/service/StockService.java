@@ -24,7 +24,6 @@ public class StockService {
 	private final ItemRepository itemRepository;
 
 	// 분산락 재고감소
-	// @Transactional
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void decreaseStock(Long itemId, Long quantity) {
 		String lockKey = "Lock:" + itemId;
