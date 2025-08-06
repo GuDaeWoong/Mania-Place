@@ -1,19 +1,10 @@
 package com.example.place.domain.newsfeedcomment.service;
 
-import static com.example.place.domain.newsfeedcomment.entity.QNewsfeedComment.*;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import com.example.place.common.dto.ApiResponseDto;
 import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
@@ -27,7 +18,6 @@ import com.example.place.domain.newsfeedcomment.repository.NewsfeedCommentReposi
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.service.UserService;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Service
