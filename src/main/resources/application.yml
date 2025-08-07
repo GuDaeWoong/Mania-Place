@@ -20,8 +20,18 @@ spring:
         format_sql: true
         highlight_sql: true
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${EMAIL}
+    password: ${EMAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 jwt:
   secret:
-    key: 11231324sdafdasdfasdfasd5646456asd5f4as6d5f4a56sdf423asd1f
-
-
+    key: ${SECRET_KEY}
