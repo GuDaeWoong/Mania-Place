@@ -5,6 +5,14 @@ import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Configuration
 public class RedisConfig {
@@ -30,4 +38,34 @@ public class RedisConfig {
 
 		return Redisson.create(config);
 	}
+
+	@Bean
+	public RedisConnectionFactory redisConnectionFactory() {
+		return new LettuceConnectionFactory("localhost", 6379);
+	}
+
+	// redis 템플릿
+	@Bean
+	public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+		RedisTemplate<String, Object> template = new RedisTemplate<>();
+		template.setConnectionFactory(connectionFactory);
+
+		// ObjectMapper 설정 (LocalDateTime 등을 위한 JavaTimeModule 추가)
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new JavaTimeModule());
+
+		// key를 string 직렬화
+		template.setKeySerializer(new StringRedisSerializer());
+		template.setHashKeySerializer(new StringRedisSerializer());
+
+		// value를 json 직렬화
+		GenericJackson2JsonRedisSerializer jsonSerializer =
+			new GenericJackson2JsonRedisSerializer(objectMapper);
+		template.setValueSerializer(jsonSerializer);
+		template.setHashValueSerializer(jsonSerializer);
+
+		template.afterPropertiesSet();
+		return template;
+	}
+
 }

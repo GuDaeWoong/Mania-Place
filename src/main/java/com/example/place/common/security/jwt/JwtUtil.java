@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class JwtUtil {
 	private static final String BEARER_PREFIX = "Bearer ";
-	private static final Long TOKEN_TIME = 10 * 60 * 1000L;
+	private static final Long TOKEN_TIME = 60 * 60 * 1000L;
 	private static final Long REFRESH_TOKEN_TIME = 7 * 24 * 60 * 60 * 1000L;
 
 	@Value("${jwt.secret.key}")
@@ -81,10 +81,10 @@ public class JwtUtil {
 		Date date = new Date();
 
 		return Jwts.builder()
-				.setSubject(String.valueOf(userId))
-				.setExpiration(new Date(date.getTime() + REFRESH_TOKEN_TIME))
-				.setIssuedAt(date)
-				.signWith(key, signatureAlgorithm)
-				.compact();
+			.setSubject(String.valueOf(userId))
+			.setExpiration(new Date(date.getTime() + REFRESH_TOKEN_TIME))
+			.setIssuedAt(date)
+			.signWith(key, signatureAlgorithm)
+			.compact();
 	}
 }
