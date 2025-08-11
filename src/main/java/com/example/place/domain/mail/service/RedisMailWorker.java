@@ -48,7 +48,7 @@ public class RedisMailWorker implements InitializingBean, DisposableBean {
 						mailRequest != null ? mailRequest.toString() : "null"
 					);
 
-					if (mailRequest != null && mailRequest.getRetryCount() <= 3) {
+					if (mailRequest != null && mailRequest.getRetryCount() < 3) {
 						mailRequest.setRetryCount(mailRequest.getRetryCount() + 1);
 						try {
 							// 실패한 요청 다시 큐에 넣기
