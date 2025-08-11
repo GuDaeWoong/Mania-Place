@@ -33,6 +33,7 @@ public class NewsfeedService {
 	private final NewsfeedRepository newsfeedRepository;
 	private final UserService userService;
 	private final ImageService imageService;
+	private final NewsfeedCacheService cacheService;
 
 	@Loggable
 	@Transactional
@@ -48,22 +49,45 @@ public class NewsfeedService {
 		// 이미지 저장
 		ImageDto imageDto = imageService.createImages(savedNewsfeed, request.getImageUrls(), request.getMainIndex());
 
+		NewsfeedResponse response = NewsfeedResponse.from(savedNewsfeed, imageDto);
+
+		//캐시 무효화
+		cacheService.evictNewsfeedListCaches();
+
 		return NewsfeedResponse.from(savedNewsfeed, imageDto);
 	}
 
 	@Loggable
 	@Transactional(readOnly = true)
 	public NewsfeedResponse getNewsfeed(Long newsfeedId) {
-		Newsfeed newsfeed = findByIdOrElseThrow(newsfeedId);
+		// 캐시에서 먼저 조회
+		NewsfeedResponse cachedResponse = cacheService.getNewsfeed(newsfeedId);
+		if (cachedResponse != null) {
+			return cachedResponse;
+		}
 
+		//기존 로직(캐시에 없으니 DB에서 가져오기)
+		Newsfeed newsfeed = findByIdOrElseThrow(newsfeedId);
 		ImageDto imageDto = imageService.getNewsfeedImages(newsfeedId);
-		return NewsfeedResponse.from(newsfeed, imageDto);
+		NewsfeedResponse response = NewsfeedResponse.from(newsfeed, imageDto);
+
+		//조회 결과 캐시에 저장
+		cacheService.putNewsfeed(newsfeedId, response);
+
+		return response;
 	}
 
 	@Loggable
 	@Transactional(readOnly = true)
 	public PageResponseDto<NewsfeedListResponse> getAllNewsfeeds(Pageable pageable) {
 
+		//캐시에서 먼저 조회
+		PageResponseDto<NewsfeedListResponse> cachedResponse = cacheService.getNewsfeedList(pageable);
+		if (cachedResponse != null) {
+			return cachedResponse;
+		}
+
+		//기존 로직(캐시에 없으니 DB에서 가져오기)
 		// 새소식 전체 조회(소프트딜리트 빼고)
 		Page<Newsfeed> pagedNewsfeeds = newsfeedRepository.findByIsDeletedFalseWithFetchJoin(pageable);
 
@@ -78,7 +102,11 @@ public class NewsfeedService {
 			return NewsfeedListResponse.of(newsfeed, mainImage.getImageUrl());
 		});
 
-		return new PageResponseDto<>(dtoPage);
+		PageResponseDto<NewsfeedListResponse> response = new PageResponseDto<>(dtoPage);
+
+		cacheService.putNewsfeedList(pageable, response);
+
+		return response;
 	}
 
 	public Newsfeed findByIdOrElseThrow(Long id) {
@@ -111,7 +139,13 @@ public class NewsfeedService {
 			? imageService.updateImages(newsfeed, request.getImageUrls(), request.getMainIndex())
 			: imageService.getNewsfeedImages(newsfeedId);
 
-		return NewsfeedResponse.from(newsfeed, imageDto);
+		NewsfeedResponse response = NewsfeedResponse.from(newsfeed, imageDto);
+
+		// 수정 시 단건 조회 캐시, 전체 조회 캐시 무효화
+		cacheService.evictNewsfeed(newsfeedId);
+		cacheService.evictNewsfeedListCaches();
+
+		return response;
 	}
 
 	@Loggable
@@ -124,6 +158,10 @@ public class NewsfeedService {
 		}
 
 		newsfeed.delete();
+
+		// 삭제 시 단건 조회 캐시, 전체 조회 캐시 무효화
+		cacheService.evictNewsfeed(newsfeedId);
+		cacheService.evictNewsfeedListCaches();
 	}
 
 }
