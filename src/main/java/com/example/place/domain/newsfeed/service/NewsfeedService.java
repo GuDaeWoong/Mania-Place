@@ -1,6 +1,8 @@
 package com.example.place.domain.newsfeed.service;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.example.place.common.annotation.Loggable;
 import com.example.place.common.dto.PageResponseDto;
@@ -16,6 +18,7 @@ import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.service.UserService;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -94,15 +97,22 @@ public class NewsfeedService {
 		// 페이지에 들어갈 대표 이미지 일괄 조회
 		Map<Long, Image> mainImageMap = imageService.getMainImagesForNewsfeeds(pagedNewsfeeds);
 
-		// NewsfeedListResponse 에 적용
-		Page<NewsfeedListResponse> dtoPage = pagedNewsfeeds.map(newsfeed -> {
-			// --메인이미지 조합
-			Image mainImage = mainImageMap.getOrDefault(newsfeed.getId(), null);
+		// 직렬화 문제 해결을 위한 가변 리스트 변화 로직
+		List<NewsfeedListResponse> contentList = pagedNewsfeeds.getContent().stream().map(newsfeed -> {
+				// 메인이미지 조합
+				Image mainImage = mainImageMap.getOrDefault(newsfeed.getId(), null);
+				return NewsfeedListResponse.of(newsfeed, mainImage != null ? mainImage.getImageUrl() : null);
+			})
+			.collect(Collectors.toList()); // 가변 리스트 변환
 
-			return NewsfeedListResponse.of(newsfeed, mainImage.getImageUrl());
-		});
+		// 가변 리스트로 새로운 Page 객체 생성
+		Page<NewsfeedListResponse> newPage = new PageImpl<>(
+			contentList,
+			pageable,
+			pagedNewsfeeds.getTotalElements()
+		);
 
-		PageResponseDto<NewsfeedListResponse> response = new PageResponseDto<>(dtoPage);
+		PageResponseDto<NewsfeedListResponse> response = new PageResponseDto<>(newPage);
 
 		cacheService.putNewsfeedList(pageable, response);
 

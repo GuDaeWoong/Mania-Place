@@ -9,10 +9,13 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import com.example.place.common.dto.PageResponseDto;
+import com.example.place.domain.newsfeed.dto.response.NewsfeedListResponse;
+import com.example.place.domain.newsfeed.dto.response.NewsfeedResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Configuration
 public class RedisConfig {
@@ -45,27 +48,36 @@ public class RedisConfig {
 	}
 
 	// redis 템플릿
+
 	@Bean
-	public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
-		RedisTemplate<String, Object> template = new RedisTemplate<>();
-		template.setConnectionFactory(connectionFactory);
+	public RedisTemplate<String, NewsfeedResponse> newsfeedRedisTemplate(
+		RedisConnectionFactory cf, ObjectMapper objectMapper) {
 
-		// ObjectMapper 설정 (LocalDateTime 등을 위한 JavaTimeModule 추가)
-		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.registerModule(new JavaTimeModule());
+		RedisTemplate<String, NewsfeedResponse> t = new RedisTemplate<>();
+		t.setConnectionFactory(cf);
+		t.setKeySerializer(new StringRedisSerializer());
 
-		// key를 string 직렬화
-		template.setKeySerializer(new StringRedisSerializer());
-		template.setHashKeySerializer(new StringRedisSerializer());
-
-		// value를 json 직렬화
-		GenericJackson2JsonRedisSerializer jsonSerializer =
-			new GenericJackson2JsonRedisSerializer(objectMapper);
-		template.setValueSerializer(jsonSerializer);
-		template.setHashValueSerializer(jsonSerializer);
-
-		template.afterPropertiesSet();
-		return template;
+		// 단건은 구체 타입 직렬화로
+		Jackson2JsonRedisSerializer<NewsfeedResponse> vs =
+			new Jackson2JsonRedisSerializer<>(objectMapper, NewsfeedResponse.class);
+		t.setValueSerializer(vs);
+		t.afterPropertiesSet();
+		return t;
 	}
 
+	@Bean
+	public RedisTemplate<String, PageResponseDto<NewsfeedListResponse>> newsfeedListRedisTemplate(
+		RedisConnectionFactory cf, ObjectMapper objectMapper) {
+
+		RedisTemplate<String, PageResponseDto<NewsfeedListResponse>> t = new RedisTemplate<>();
+		t.setConnectionFactory(cf);
+		t.setKeySerializer(new StringRedisSerializer());
+
+		// 전체는 페이지 DTO를 받으니까 generic 직렬화로 타입정보 포함해야 안전하다
+		GenericJackson2JsonRedisSerializer vs = new GenericJackson2JsonRedisSerializer(objectMapper);
+		t.setValueSerializer(vs);
+
+		t.afterPropertiesSet();
+		return t;
+	}
 }

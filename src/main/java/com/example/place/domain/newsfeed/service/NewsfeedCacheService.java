@@ -20,15 +20,17 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class NewsfeedCacheService {
 
-	private final RedisTemplate<String, Object> redisTemplate;
+	//타입 전용 템플릿
+	private final RedisTemplate<String, NewsfeedResponse> newsfeedRedisTemplate;
+	private final RedisTemplate<String, PageResponseDto<NewsfeedListResponse>> newsfeedListRedisTemplate;
 
-	@Value("${cache.newsfeed.ttl:300}")
+	@Value("${cache.newsfeed.ttl:3600}")
 	private int newsfeedTtl;
 
-	@Value("${cache.newsfeed.list-ttl:60}")
+	@Value("${cache.newsfeed.list-ttl:600}")
 	private int listTtl;
 
-	// 캐시 키 생성 메서드들
+	// 캐시 키 생성 메서드
 	private static final String NEWSFEED_KEY_PREFIX = "newsfeed:";
 	private static final String NEWSFEED_LIST_KEY_PREFIX = "newsfeed:list:";
 	private static final String NEWSFEED_KEYS_PATTERN = "newsfeed:*";
@@ -44,17 +46,15 @@ public class NewsfeedCacheService {
 			":sort:" + pageable.getSort().toString().replaceAll("\\s+", "");
 	}
 
-	// 단건 뉴스피드 캐시 조회
+	// 단건 캐시 조회
 	public NewsfeedResponse getNewsfeed(Long newsfeedId) {
 		try {
 			String key = getNewsfeedKey(newsfeedId);
-			Object cached = redisTemplate.opsForValue().get(key);
-
-			if (cached instanceof NewsfeedResponse) {
+			NewsfeedResponse cached = newsfeedRedisTemplate.opsForValue().get(key);
+			if (cached != null) {
 				log.info("Cache HIT for newsfeed: {}", newsfeedId);
-				return (NewsfeedResponse)cached;
+				return cached;
 			}
-
 			log.info("Cache MISS for newsfeed: {}", newsfeedId);
 			return null;
 		} catch (Exception e) {
@@ -63,28 +63,28 @@ public class NewsfeedCacheService {
 		}
 	}
 
-	// 단건 뉴스피드 캐시 저장
+	// 단건 캐시 저장
 	public void putNewsfeed(Long newsfeedId, NewsfeedResponse newsfeedResponse) {
 		try {
 			String key = getNewsfeedKey(newsfeedId);
-			redisTemplate.opsForValue().set(key, newsfeedResponse, Duration.ofSeconds(newsfeedTtl));
+			newsfeedRedisTemplate.opsForValue().set(key, newsfeedResponse, Duration.ofSeconds(newsfeedTtl));
 			log.info("Cached newsfeed: {}", newsfeedId);
 		} catch (Exception e) {
 			log.error("Error caching newsfeed: {}", newsfeedId, e);
 		}
 	}
 
-	// 뉴스피드 목록 캐시 조회
+	// 전체 목록 캐시 조회
 	@SuppressWarnings("unchecked")
 	public PageResponseDto<NewsfeedListResponse> getNewsfeedList(Pageable pageable) {
 		try {
 			String key = getNewsfeedListKey(pageable);
-			Object cached = redisTemplate.opsForValue().get(key);
+			PageResponseDto<NewsfeedListResponse> cached = newsfeedListRedisTemplate.opsForValue().get(key);
 
-			if (cached instanceof PageResponseDto) {
+			if (cached != null) {
 				log.info("Cache HIT for newsfeed list: page={}, size={}",
 					pageable.getPageNumber(), pageable.getPageSize());
-				return (PageResponseDto<NewsfeedListResponse>)cached;
+				return cached;
 			}
 
 			log.info("Cache MISS for newsfeed list: page={}, size={}",
@@ -100,7 +100,7 @@ public class NewsfeedCacheService {
 	public void putNewsfeedList(Pageable pageable, PageResponseDto<NewsfeedListResponse> response) {
 		try {
 			String key = getNewsfeedListKey(pageable);
-			redisTemplate.opsForValue().set(key, response, Duration.ofSeconds(listTtl));
+			newsfeedListRedisTemplate.opsForValue().set(key, response, Duration.ofSeconds(listTtl));
 			log.info("Cached newsfeed list: page={}, size={}",
 				pageable.getPageNumber(), pageable.getPageSize());
 		} catch (Exception e) {
@@ -112,7 +112,7 @@ public class NewsfeedCacheService {
 	public void evictNewsfeed(Long newsfeedId) {
 		try {
 			String key = getNewsfeedKey(newsfeedId);
-			redisTemplate.delete(key);
+			newsfeedRedisTemplate.delete(key);
 			log.info("Evicted newsfeed cache: {}", newsfeedId);
 		} catch (Exception e) {
 			log.error("Error evicting newsfeed cache: {}", newsfeedId, e);
@@ -122,9 +122,9 @@ public class NewsfeedCacheService {
 	// 모든 뉴스피드 관련 캐시 삭제 (생성, 수정, 삭제 시)
 	public void evictAllNewsfeedCaches() {
 		try {
-			Set<String> keys = redisTemplate.keys(NEWSFEED_KEYS_PATTERN);
+			Set<String> keys = newsfeedRedisTemplate.keys(NEWSFEED_KEYS_PATTERN);
 			if (keys != null && !keys.isEmpty()) {
-				redisTemplate.delete(keys);
+				newsfeedRedisTemplate.delete(keys);
 				log.info("Evicted {} newsfeed cache keys", keys.size());
 			}
 		} catch (Exception e) {
@@ -135,9 +135,9 @@ public class NewsfeedCacheService {
 	// 목록 캐시만 삭제 (새 게시물 생성 시)
 	public void evictNewsfeedListCaches() {
 		try {
-			Set<String> keys = redisTemplate.keys(NEWSFEED_LIST_KEY_PREFIX + "*");
+			Set<String> keys = newsfeedRedisTemplate.keys(NEWSFEED_LIST_KEY_PREFIX + "*");
 			if (keys != null && !keys.isEmpty()) {
-				redisTemplate.delete(keys);
+				newsfeedRedisTemplate.delete(keys);
 				log.info("Evicted {} newsfeed list cache keys", keys.size());
 			}
 		} catch (Exception e) {
