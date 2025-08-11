@@ -42,7 +42,7 @@ public class NewsfeedService {
 
 	@Loggable
 	@Transactional
-	@CacheEvict(value = "ListCache", allEntries = true)
+	@CacheEvict(value = "listCache", allEntries = true)
 	public NewsfeedResponse createNewsfeed(Long userId, NewsfeedRequest request) {
 		User user = userService.findByIdOrElseThrow(userId);
 
