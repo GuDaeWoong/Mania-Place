@@ -60,7 +60,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/login", "/api/accounts").permitAll()
-                        .requestMatchers("/ws/chat", "/sub", "/pub").permitAll()
+                        .requestMatchers("/ws/chat/**", "/sub/**", "/pub/**").permitAll()
                         .requestMatchers("/error", "/api/refresh").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/**").hasAnyRole("USER", "ADMIN")
