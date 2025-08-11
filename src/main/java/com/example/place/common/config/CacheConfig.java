@@ -22,24 +22,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.github.benmanes.caffeine.cache.Caffeine;
 
 @Configuration
 @EnableCaching
 public class CacheConfig {
-
-	// @Bean
-	// public CacheManager cacheManager() {
-	// 	CaffeineCacheManager cacheManager = new CaffeineCacheManager("newsfeeds");
-	//
-	// 	cacheManager.setCaffeine(
-	// 		Caffeine.newBuilder()
-	// 			.expireAfterWrite(60, TimeUnit.MINUTES)  // 캐시 만료 시간 예: 10분
-	// 			.maximumSize(1000)                             // 최대 1000개 엔트리 저장
-	// 	);
-	//
-	// 	return cacheManager;
-	// }
 
 	@Bean
 	public RedisCacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
