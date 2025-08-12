@@ -39,11 +39,7 @@ public class KeywordRankingController {
 		@Max(value = 50, message = "조회할 개수는 50개 이하여야 합니다")
 		int limit) {
 
-		log.info("급상승 검색어 조회 요청 - limit: {}", limit);
-
 		List<KeywordRankingDto> trendingKeywords = searchKeywordService.getTopKeywordsLast24Hours(limit);
-
-		log.info("급상승 검색어 조회 완료 - 결과: {}개", trendingKeywords.size());
 
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(ApiResponseDto.of("급상승 검색어 조회가 완료되었습니다", trendingKeywords));
