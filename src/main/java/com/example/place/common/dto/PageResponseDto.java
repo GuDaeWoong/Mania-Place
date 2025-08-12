@@ -30,7 +30,7 @@ public class PageResponseDto<T> {
 	}
 
 	@JsonCreator
-	public PageResponseDto(
+	private PageResponseDto(
 		@JsonProperty("content") List<T> content,
 		@JsonProperty("page") int page,
 		@JsonProperty("totalPages") int totalPages) {
