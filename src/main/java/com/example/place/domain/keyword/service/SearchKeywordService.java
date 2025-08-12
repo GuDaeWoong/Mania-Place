@@ -23,28 +23,14 @@ public class SearchKeywordService {
 
 	private final RedisTemplate<String, String> redisTemplate;
 	private static final String KEYWORD_ZSET = "keyword_rankings";
-
 	private static final DateTimeFormatter KEY_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH");
 
 	private String getCurrentHourKey() {
 		return KEYWORD_ZSET + ":" + LocalDateTime.now().format(KEY_FORMATTER);
 	}
 
-	private List<String> getLast24HourKeys() {
-		List<String> keys = new ArrayList<>();
-		LocalDateTime now = LocalDateTime.now();
-
-		for (int i = 0; i < 24; i++) {
-			LocalDateTime targetHour = now.minusHours(i);
-			String key = KEYWORD_ZSET + ":" + targetHour.format(KEY_FORMATTER);
-			keys.add(key);
-		}
-
-		return keys;
-	}
-
 	/**
-	 * 키워드 추가 (현재 시간대별 키에 점수 1 증가)
+	 * 키워드 추가
 	 */
 	@Transactional
 	public void addKeyword(String keyword) {
@@ -63,7 +49,6 @@ public class SearchKeywordService {
 		try {
 			String redisKey = getCurrentHourKey();
 			redisTemplate.opsForZSet().incrementScore(redisKey, normalizedKeyword, 1);
-			// TTL 24시간 설정
 			redisTemplate.expire(redisKey, Duration.ofHours(24));
 			log.info("Redis 시간별 ZSet 점수 증가: {}, 키: {}", normalizedKeyword, redisKey);
 		} catch (Exception e) {
@@ -72,51 +57,59 @@ public class SearchKeywordService {
 	}
 
 	/**
-	 * 24시간 급상승 키워드 조회 (시간별 키 24개 합산)
+	 * 24시간 키워드 조회
+	 * 지금 점수 - 24시간 전 점수 = 실제 24시간 검색량
 	 */
 	@Loggable
 	@Transactional(readOnly = true)
 	public List<KeywordRankingDto> getTopKeywordsLast24Hours(int limit) {
 		try {
-			// 최근 24시간 동안 Redis에 저장된 키워드 점수 키 리스트 생성
-			// 예: "keyword_rankings:2025-08-12-19" 같은 키가 24개 만들어짐
-			List<String> last24HourKeys = getLast24HourKeys();
+			LocalDateTime now = LocalDateTime.now();
 
-			// 키워드별 누적 점수를 저장할 맵 생성
-			// key: 키워드 문자열, value: 점수 (검색 횟수)
-			Map<String, Double> scoreMap = new HashMap<>();
+			// 지금 시간 키
+			String nowKey = KEYWORD_ZSET + ":" + now.format(KEY_FORMATTER);
 
-			// 24시간 각각의 키를 순회하며
-			for (String key : last24HourKeys) {
-				// 해당 시간대 키워드 목록을 모두 가져옴
-				Set<String> keywords = redisTemplate.opsForZSet().range(key, 0, -1);
-				if (keywords == null || keywords.isEmpty()) {
-					// 키워드가 없으면 다음 시간대로 넘어감
-					continue;
-				}
+			// 24시간 전 키
+			String ago24Key = KEYWORD_ZSET + ":" + now.minusHours(24).format(KEY_FORMATTER);
 
-				// 각 키워드에 대해
-				for (String keyword : keywords) {
-					// 해당 키워드의 점수를 가져옴
-					Double score = redisTemplate.opsForZSet().score(key, keyword);
-					if (score != null) {
-						// 이미 있던 점수에 이번 시간대 점수를 더해서 누적
-						scoreMap.put(keyword, scoreMap.getOrDefault(keyword, 0.0) + score);
-					}
+			// 지금 시간과 24시간 전 모든 키워드 가져오기
+			Set<String> nowKeywords = redisTemplate.opsForZSet().range(nowKey, 0, -1);
+			Set<String> ago24Keywords = redisTemplate.opsForZSet().range(ago24Key, 0, -1);
+
+			// 모든 키워드 합치기
+			Set<String> allKeywords = new HashSet<>();
+			if (nowKeywords != null) allKeywords.addAll(nowKeywords);
+			if (ago24Keywords != null) allKeywords.addAll(ago24Keywords);
+
+			Map<String, Double> result = new HashMap<>();
+
+			for (String keyword : allKeywords) {
+				// 현재 시간 키에서 해당 키워드 점수 조회 (null이면 0.0)
+				Double nowScoreObj = redisTemplate.opsForZSet().score(nowKey, keyword);
+				double nowScore = (nowScoreObj != null) ? nowScoreObj : 0.0;
+
+				// 24시간 전 키에서 해당 키워드 점수 조회 (null이면 0.0)
+				Double ago24ScoreObj = redisTemplate.opsForZSet().score(ago24Key, keyword);
+				double ago24Score = (ago24ScoreObj != null) ? ago24ScoreObj : 0.0;
+
+				// 현재 점수 - 24시간 전 점수 = 실제 24시간 동안 증가한 점수 계산
+				double real24HourCount = nowScore - ago24Score;
+
+				// 증가한 점수가 0보다 클 때만 결과 맵에 저장
+				if (real24HourCount > 0) {
+					result.put(keyword, real24HourCount);
 				}
 			}
 
-			// 점수 내림차순으로 정렬한 후, 상위 limit개를 선택
-			// 선택한 키워드와 점수를 KeywordRankingDto 객체로 만들어 리스트 반환
-			return scoreMap.entrySet().stream()
+			// 점수 높은 순으로 정렬해서 리턴
+			return result.entrySet().stream()
 				.sorted(Map.Entry.<String, Double>comparingByValue().reversed())
 				.limit(limit)
 				.map(entry -> new KeywordRankingDto(entry.getKey(), entry.getValue().longValue()))
 				.collect(Collectors.toList());
 
 		} catch (Exception e) {
-			// 오류가 발생하면 로그에 남기고 빈 리스트 반환 (서비스가 멈추지 않도록 함)
-			log.error("24시간 인기 키워드 조회 중 오류 발생", e);
+			log.error("24시간 키워드 조회 실패", e);
 			return Collections.emptyList();
 		}
 	}
