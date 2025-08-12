@@ -1,5 +1,6 @@
 package com.example.place.common.security.jwt;
 
+import java.security.Principal;
 import java.util.Collection;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -8,7 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import lombok.Getter;
 
 @Getter
-public class CustomPrincipal implements UserDetails {
+public class CustomPrincipal implements UserDetails, Principal {
 
 	private final Long id;
 	private final String name;

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket STOMP Tester</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        input, textarea { width: 100%; margin-bottom: 10px; padding: 8px; }
+        button { padding: 10px 20px; }
+        .section { margin-bottom: 30px; }
+        #receivedMessages, #sentMessages { background: #f4f4f4; padding: 10px; height: 200px; overflow-y: scroll; }
+        #particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999;
+            pointer-events: none;
+        }
+
+    </style>
+</head>
+<body>
+<div id="particles"></div>
+
+<h2> ㅠㅠ html webSocket, stomp 테스트</h2>
+
+<div class="section">
+    <label> WebSocket 연결 URL</label>
+    <input type="text" id="wsUrl" value="http://localhost:8080/ws/chat">
+
+    <label> 연결용 JWT 토큰</label>
+    <input type="text" id="connectToken" placeholder="Bearer 토큰 입력">
+
+    <button onclick="connect()">Connect</button>
+    <p id="connectStatus"> 연결되지 않음</p>
+</div>
+
+<div class="section">
+    <label> 구독 URL</label>
+    <input type="text" id="subscribeUrl" value="/sub/chatroom/1">
+    <button onclick="subscribe()">Subscribe</button>
+</div>
+
+<div class="section">
+    <label> 발행 URL</label>
+    <input type="text" id="publishUrl" value="/pub/chatroom/1">
+
+    <label> 발행용 JWT 토큰</label>
+    <input type="text" id="sendToken" placeholder="Bearer 토큰 입력">
+
+    <label> 발행할 메시지 (JSON 형식)</label>
+    <textarea id="publishMessage" rows="4">{ "content": "" }</textarea>
+
+    <button onclick="sendMessage()">Send Message</button>
+</div>
+
+<div class="section">
+    <h3> 수신된 메시지</h3>
+    <div id="receivedMessages"></div>
+</div>
+
+<div class="section">
+    <h3> 발행한 메시지</h3>
+    <div id="sentMessages"></div>
+</div>
+
+<script>
+    let stompClient = null;
+
+    function triggerParticles() {
+        tsParticles.load("particles", {
+            fullScreen: { enable: false },
+            particles: {
+                number: { value: 0 },
+                shape: { type: "circle" },
+                size: { value: { min: 2, max: 6 } },
+                move: {
+                    enable: true,
+                    speed: { min: 10, max: 30 },
+                    direction: "top",
+                    outModes: { default: "destroy" }
+                },
+                opacity: { value: 1 },
+                color: { value: ["#ff0000", "#ffff00", "#00ff00", "#00ffff", "#ff00ff"] }
+            },
+            emitters: {
+                direction: "top",
+                rate: { quantity: 50, delay: 0 },
+                size: { width: 0, height: 0 },
+                position: { x: 50, y: 100 },
+                life: { duration: 0.2, count: 1 }
+            }
+        });
+    }
+
+    function connect() {
+        const wsUrl = document.getElementById("wsUrl").value;
+        const token = document.getElementById("connectToken").value;
+        const socket = new SockJS(wsUrl);
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect(
+            { Authorization: token },
+            function (frame) {
+                document.getElementById("connectStatus").innerText = " 연결: " + frame;
+                console.log("Connected:", frame);
+            },
+            function (error) {
+                document.getElementById("connectStatus").innerText = " 연결 실패: " + error;
+                console.error("Connection failed:", error);
+            }
+        );
+    }
+
+    function subscribe() {
+        const subscribeUrl = document.getElementById("subscribeUrl").value;
+        stompClient.subscribe(subscribeUrl, function (message) {
+            const msg = message.body;
+            const div = document.getElementById("receivedMessages");
+            div.innerHTML += "<p>" + msg + "</p>";
+        });
+    }
+
+    function sendMessage() {
+        const publishUrl = document.getElementById("publishUrl").value;
+        const message = document.getElementById("publishMessage").value;
+        const token = document.getElementById("sendToken").value;
+
+        stompClient.send(publishUrl, { Authorization: token }, message);
+
+        const sentDiv = document.getElementById("sentMessages");
+        sentDiv.innerHTML += "<p>" + message + "</p>";
+
+        triggerParticles();
+    }
+</script>
+</body>
+</html>
