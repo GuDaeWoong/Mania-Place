@@ -7,8 +7,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.example.place.common.annotation.Loggable;
 import com.example.place.domain.keyword.service.dto.KeywordRankingDto;
@@ -32,7 +32,6 @@ public class SearchKeywordService {
 	/**
 	 * 키워드 추가
 	 */
-	@Transactional
 	public void addKeyword(String keyword) {
 		if (keyword == null || keyword.trim().isEmpty()) {
 			log.warn("빈 키워드 무시됨");
@@ -40,7 +39,6 @@ public class SearchKeywordService {
 		}
 
 		String normalizedKeyword = keyword.toLowerCase().trim();
-
 		if (normalizedKeyword.length() > 100) {
 			log.warn("키워드 길이 초과: {}", normalizedKeyword.substring(0, 20) + "...");
 			return;
@@ -48,8 +46,16 @@ public class SearchKeywordService {
 
 		try {
 			String redisKey = getCurrentHourKey();
+
+			// 점수 증가
 			redisTemplate.opsForZSet().incrementScore(redisKey, normalizedKeyword, 1);
-			redisTemplate.expire(redisKey, Duration.ofHours(24));
+
+			// TTL이 없거나 (-1)일 때만 설정 (27시간)
+			Long ttl = redisTemplate.getExpire(redisKey);
+			if (ttl == null || ttl < 0) {
+				redisTemplate.expire(redisKey, Duration.ofHours(27));
+			}
+
 			log.info("Redis 시간별 ZSet 점수 증가: {}, 키: {}", normalizedKeyword, redisKey);
 		} catch (Exception e) {
 			log.error("Redis 키워드 점수 증가 실패: {}", normalizedKeyword, e);
@@ -61,51 +67,48 @@ public class SearchKeywordService {
 	 * 지금 점수 - 24시간 전 점수 = 실제 24시간 검색량
 	 */
 	@Loggable
-	@Transactional(readOnly = true)
 	public List<KeywordRankingDto> getTopKeywordsLast24Hours(int limit) {
+
 		try {
 			LocalDateTime now = LocalDateTime.now();
-
-			// 지금 시간 키
 			String nowKey = KEYWORD_ZSET + ":" + now.format(KEY_FORMATTER);
-
-			// 24시간 전 키
 			String ago24Key = KEYWORD_ZSET + ":" + now.minusHours(24).format(KEY_FORMATTER);
 
-			// 지금 시간과 24시간 전 모든 키워드 가져오기
-			Set<String> nowKeywords = redisTemplate.opsForZSet().range(nowKey, 0, -1);
-			Set<String> ago24Keywords = redisTemplate.opsForZSet().range(ago24Key, 0, -1);
+			// 현재 시간 키워드 + 점수
+			Set<ZSetOperations.TypedTuple<String>> nowTuples =
+				redisTemplate.opsForZSet().rangeWithScores(nowKey, 0, -1);
 
-			// 모든 키워드 합치기
-			Set<String> allKeywords = new HashSet<>();
-			if (nowKeywords != null) allKeywords.addAll(nowKeywords);
-			if (ago24Keywords != null) allKeywords.addAll(ago24Keywords);
+			// 24시간 전 키워드 + 점수
+			Set<ZSetOperations.TypedTuple<String>> agoTuples =
+				redisTemplate.opsForZSet().rangeWithScores(ago24Key, 0, -1);
 
-			Map<String, Double> result = new HashMap<>();
-
-			for (String keyword : allKeywords) {
-				// 현재 시간 키에서 해당 키워드 점수 조회 (null이면 0.0)
-				Double nowScoreObj = redisTemplate.opsForZSet().score(nowKey, keyword);
-				double nowScore = (nowScoreObj != null) ? nowScoreObj : 0.0;
-
-				// 24시간 전 키에서 해당 키워드 점수 조회 (null이면 0.0)
-				Double ago24ScoreObj = redisTemplate.opsForZSet().score(ago24Key, keyword);
-				double ago24Score = (ago24ScoreObj != null) ? ago24ScoreObj : 0.0;
-
-				// 현재 점수 - 24시간 전 점수 = 실제 24시간 동안 증가한 점수 계산
-				double real24HourCount = nowScore - ago24Score;
-
-				// 증가한 점수가 0보다 클 때만 결과 맵에 저장
-				if (real24HourCount > 0) {
-					result.put(keyword, real24HourCount);
+			// 현재 점수 맵
+			Map<String, Double> scoreMap = new HashMap<>();
+			if (nowTuples != null) {
+				for (ZSetOperations.TypedTuple<String> t : nowTuples) {
+					if (t.getValue() != null && t.getScore() != null) {
+						scoreMap.put(t.getValue(), t.getScore());
+					}
 				}
 			}
 
-			// 점수 높은 순으로 정렬해서 리턴
-			return result.entrySet().stream()
+			// 24시간 전 점수 차감
+			if (agoTuples != null) {
+				for (ZSetOperations.TypedTuple<String> t : agoTuples) {
+					if (t.getValue() != null && t.getScore() != null) {
+						scoreMap.merge(t.getValue(), -t.getScore(), Double::sum);
+					}
+				}
+			}
+
+			// 증가분이 0 이하인 항목 제거
+			scoreMap.entrySet().removeIf(e -> e.getValue() == null || e.getValue() <= 0.0);
+
+			// 정렬 후 DTO 변환
+			return scoreMap.entrySet().stream()
 				.sorted(Map.Entry.<String, Double>comparingByValue().reversed())
 				.limit(limit)
-				.map(entry -> new KeywordRankingDto(entry.getKey(), entry.getValue().longValue()))
+				.map(e -> new KeywordRankingDto(e.getKey(), e.getValue().longValue()))
 				.collect(Collectors.toList());
 
 		} catch (Exception e) {
