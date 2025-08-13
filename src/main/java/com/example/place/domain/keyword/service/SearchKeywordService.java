@@ -63,7 +63,7 @@ public class SearchKeywordService {
 	}
 
 	/**
-	 * 24시간 키워드 조회
+	 * 24시간 실시간 급상승 검색어 조회
 	 * 지금 점수 - 24시간 전 점수 = 실제 24시간 검색량 증가분 계산
 	 */
 	@Loggable
