@@ -29,7 +29,7 @@ public class KeywordRankingController {
 	private final SearchKeywordService searchKeywordService;
 
 	/**
-	 * 급상승 검색어 조회 (24시간 증가량 기준)
+	 * 인기 검색어 조회
 	 * GET /api/keywords/trending?limit=10
 	 */
 	@GetMapping("/trending")
@@ -42,6 +42,6 @@ public class KeywordRankingController {
 		List<KeywordRankingDto> trendingKeywords = searchKeywordService.getTopKeywordsLast24Hours(limit);
 
 		return ResponseEntity.status(HttpStatus.OK)
-			.body(ApiResponseDto.of("급상승 검색어 조회가 완료되었습니다", trendingKeywords));
+			.body(ApiResponseDto.of("인기 검색어 조회가 완료되었습니다", trendingKeywords));
 	}
 }

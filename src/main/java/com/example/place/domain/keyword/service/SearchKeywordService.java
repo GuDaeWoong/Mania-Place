@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
@@ -63,58 +62,102 @@ public class SearchKeywordService {
 	}
 
 	/**
-	 * 24시간 실시간 급상승 검색어 조회
-	 * 지금 점수 - 24시간 전 점수 = 실제 24시간 검색량 증가분 계산
+	 * 인기 검색어 조회
+	 *
 	 */
 	@Loggable
 	public List<KeywordRankingDto> getTopKeywordsLast24Hours(int limit) {
 		try {
-			LocalDateTime now = LocalDateTime.now();
-			String nowKey = KEYWORD_ZSET + ":" + now.format(KEY_FORMATTER);
-			String ago24Key = KEYWORD_ZSET + ":" + now.minusHours(24).format(KEY_FORMATTER);
+			// 1. 24시간 전부터 지금까지의 키들 만들기
+			List<String> keys = make24HourKeys();
 
-			// 현재 시간의 키워드와 점수 조회
-			Set<ZSetOperations.TypedTuple<String>> nowTuples =
-				redisTemplate.opsForZSet().rangeWithScores(nowKey, 0, -1);
+			// 2. 모든 키워드 점수 합치기
+			Map<String, Double> scores = addUpAllScores(keys);
 
-			// 24시간 전의 키워드와 점수 조회
-			Set<ZSetOperations.TypedTuple<String>> agoTuples =
-				redisTemplate.opsForZSet().rangeWithScores(ago24Key, 0, -1);
-
-			Map<String, Double> scoreMap = new HashMap<>();
-
-			// 현재 점수들을 맵에 저장
-			if (nowTuples != null) {
-				for (ZSetOperations.TypedTuple<String> tuple : nowTuples) {
-					if (tuple != null && tuple.getValue() != null && tuple.getScore() != null) {
-						scoreMap.put(tuple.getValue(), tuple.getScore());
-					}
-				}
-			}
-
-			// 24시간 전 점수 차감 (현재 점수에서 과거 점수를 뺌)
-			if (agoTuples != null) {
-				for (ZSetOperations.TypedTuple<String> tuple : agoTuples) {
-					if (tuple != null && tuple.getValue() != null && tuple.getScore() != null) {
-						// 이미 존재하는 값에서 24시간 전 점수를 빼기
-						scoreMap.merge(tuple.getValue(), -tuple.getScore(), Double::sum);
-					}
-				}
-			}
-
-			// 점수 0 이하이거나 null인 키워드는 제거
-			scoreMap.entrySet().removeIf(entry -> entry.getValue() == null || entry.getValue() <= 0.0);
-
-			// 점수 내림차순 정렬 후 limit 개수만큼 DTO 변환
-			return scoreMap.entrySet().stream()
-				.sorted(Map.Entry.<String, Double>comparingByValue().reversed())
-				.limit(limit)
-				.map(entry -> new KeywordRankingDto(entry.getKey(), entry.getValue().longValue()))
-				.collect(Collectors.toList());
+			// 3. 점수 높은 순으로 정렬해서 반환
+			return getTopRanked(scores, limit);
 
 		} catch (Exception e) {
-			log.error("24시간 키워드 조회 실패", e);
+			log.error("검색어 조회 실패", e);
 			return Collections.emptyList();
 		}
+	}
+
+	// 24시간치 Redis 키 만들기
+	private List<String> make24HourKeys() {
+		List<String> keys = new ArrayList<>();
+		LocalDateTime now = LocalDateTime.now();
+
+		// 23시간 전부터 지금까지
+		for (int i = 23; i >= 0; i--) {
+			LocalDateTime time = now.minusHours(i);
+			String key = KEYWORD_ZSET + ":" + time.format(KEY_FORMATTER);
+			keys.add(key);
+		}
+
+		return keys;
+	}
+
+	// 모든 키워드 점수 합치기
+	private Map<String, Double> addUpAllScores(List<String> keys) {
+		Map<String, Double> totalScores = new HashMap<>();
+
+		for (String key : keys) {
+			// 키가 Redis에 있는지 확인
+			if (!redisTemplate.hasKey(key)) {
+				continue;
+			}
+
+			// 해당 키의 모든 키워드와 점수 가져오기
+			Set<ZSetOperations.TypedTuple<String>> data =
+				redisTemplate.opsForZSet().rangeWithScores(key, 0, -1);
+
+			if (data == null) {
+				continue;
+			}
+
+			// 각 키워드 점수를 합계에 더하기
+			for (ZSetOperations.TypedTuple<String> item : data) {
+				if (item != null && item.getValue() != null && item.getScore() != null) {
+					String keyword = item.getValue();
+					Double score = item.getScore();
+
+					// 이미 있으면 더하고, 없으면 새로 추가
+					if (totalScores.containsKey(keyword)) {
+						totalScores.put(keyword, totalScores.get(keyword) + score);
+					} else {
+						totalScores.put(keyword, score);
+					}
+				}
+			}
+		}
+
+		return totalScores;
+	}
+
+	// 점수 높은 순으로 상위 N개 뽑기
+	private List<KeywordRankingDto> getTopRanked(Map<String, Double> scores, int limit) {
+		List<KeywordRankingDto> result = new ArrayList<>();
+
+		// 점수가 0보다 큰 것들만 리스트로 만들기
+		List<Map.Entry<String, Double>> list = new ArrayList<>();
+		for (Map.Entry<String, Double> entry : scores.entrySet()) {
+			if (entry.getValue() > 0) {
+				list.add(entry);
+			}
+		}
+
+		// 점수 높은 순으로 정렬
+		list.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
+
+		// 상위 N개만 DTO로 만들어서 반환
+		for (int i = 0; i < Math.min(list.size(), limit); i++) {
+			Map.Entry<String, Double> entry = list.get(i);
+			String keyword = entry.getKey();
+			Long score = entry.getValue().longValue();
+			result.add(new KeywordRankingDto(keyword, score));
+		}
+
+		return result;
 	}
 }
