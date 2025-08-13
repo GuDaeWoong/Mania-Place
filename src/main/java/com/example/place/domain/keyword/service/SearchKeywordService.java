@@ -53,7 +53,7 @@ public class SearchKeywordService {
 			// TTL이 없거나 (-1)일 때만 설정 (27시간)
 			Long ttl = redisTemplate.getExpire(redisKey);
 			if (ttl == null || ttl < 0) {
-				redisTemplate.expire(redisKey, Duration.ofHours(27));
+				redisTemplate.expire(redisKey, Duration.ofHours(25));
 			}
 
 			log.info("Redis 시간별 ZSet 점수 증가: {}, 키: {}", normalizedKeyword, redisKey);
@@ -64,51 +64,52 @@ public class SearchKeywordService {
 
 	/**
 	 * 24시간 키워드 조회
-	 * 지금 점수 - 24시간 전 점수 = 실제 24시간 검색량
+	 * 지금 점수 - 24시간 전 점수 = 실제 24시간 검색량 증가분 계산
 	 */
 	@Loggable
 	public List<KeywordRankingDto> getTopKeywordsLast24Hours(int limit) {
-
 		try {
 			LocalDateTime now = LocalDateTime.now();
 			String nowKey = KEYWORD_ZSET + ":" + now.format(KEY_FORMATTER);
 			String ago24Key = KEYWORD_ZSET + ":" + now.minusHours(24).format(KEY_FORMATTER);
 
-			// 현재 시간 키워드 + 점수
+			// 현재 시간의 키워드와 점수 조회
 			Set<ZSetOperations.TypedTuple<String>> nowTuples =
 				redisTemplate.opsForZSet().rangeWithScores(nowKey, 0, -1);
 
-			// 24시간 전 키워드 + 점수
+			// 24시간 전의 키워드와 점수 조회
 			Set<ZSetOperations.TypedTuple<String>> agoTuples =
 				redisTemplate.opsForZSet().rangeWithScores(ago24Key, 0, -1);
 
-			// 현재 점수 맵
 			Map<String, Double> scoreMap = new HashMap<>();
+
+			// 현재 점수들을 맵에 저장
 			if (nowTuples != null) {
-				for (ZSetOperations.TypedTuple<String> t : nowTuples) {
-					if (t.getValue() != null && t.getScore() != null) {
-						scoreMap.put(t.getValue(), t.getScore());
+				for (ZSetOperations.TypedTuple<String> tuple : nowTuples) {
+					if (tuple != null && tuple.getValue() != null && tuple.getScore() != null) {
+						scoreMap.put(tuple.getValue(), tuple.getScore());
 					}
 				}
 			}
 
-			// 24시간 전 점수 차감
+			// 24시간 전 점수 차감 (현재 점수에서 과거 점수를 뺌)
 			if (agoTuples != null) {
-				for (ZSetOperations.TypedTuple<String> t : agoTuples) {
-					if (t.getValue() != null && t.getScore() != null) {
-						scoreMap.merge(t.getValue(), -t.getScore(), Double::sum);
+				for (ZSetOperations.TypedTuple<String> tuple : agoTuples) {
+					if (tuple != null && tuple.getValue() != null && tuple.getScore() != null) {
+						// 이미 존재하는 값에서 24시간 전 점수를 빼기
+						scoreMap.merge(tuple.getValue(), -tuple.getScore(), Double::sum);
 					}
 				}
 			}
 
-			// 증가분이 0 이하인 항목 제거
-			scoreMap.entrySet().removeIf(e -> e.getValue() == null || e.getValue() <= 0.0);
+			// 점수 0 이하이거나 null인 키워드는 제거
+			scoreMap.entrySet().removeIf(entry -> entry.getValue() == null || entry.getValue() <= 0.0);
 
-			// 정렬 후 DTO 변환
+			// 점수 내림차순 정렬 후 limit 개수만큼 DTO 변환
 			return scoreMap.entrySet().stream()
 				.sorted(Map.Entry.<String, Double>comparingByValue().reversed())
 				.limit(limit)
-				.map(e -> new KeywordRankingDto(e.getKey(), e.getValue().longValue()))
+				.map(entry -> new KeywordRankingDto(entry.getKey(), entry.getValue().longValue()))
 				.collect(Collectors.toList());
 
 		} catch (Exception e) {
