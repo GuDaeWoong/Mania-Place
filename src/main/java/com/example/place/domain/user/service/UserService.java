@@ -61,11 +61,9 @@ public class UserService {
 			userRole
 		);
 
-		User savedUser = userRepository.save(user);
+		tagService.saveTags(user, userRegisterRequest.getUserTagNames());
 
-		tagService.saveTags(savedUser, userRegisterRequest.getTags());
-
-		return new UserRegisterResponse(savedUser.getEmail());
+		return new UserRegisterResponse(user.getEmail());
 	}
 
 	// 어드민 검색용
