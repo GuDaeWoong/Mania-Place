@@ -1,12 +1,12 @@
 package com.example.place.domain.keyword.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
@@ -91,50 +91,69 @@ public class SearchKeywordService {
 		}
 	}
 
-	// limit : 최대 페이지 개수
+	/**
+	 * 최근 24시간 동안 검색량이 많은 키워드 상위 N개 조회 (중간 스냅샷 포함)
+	 *
+	 * @param limit 상위 N개 키워드 개수
+	 * @return 검색량 기준 내림차순 정렬된 키워드 랭킹 리스트
+	 */
 	@Transactional(readOnly = true)
 	public List<KeywordRankingDto> getTopKeywordsLast24Hours(int limit) {
 		LocalDateTime now = LocalDateTime.now();
-		// LocalDateTime before24h = now.minusHours(24);
-		// 테스트용 2분
-		LocalDateTime before24h = now.minusMinutes(2);
+		LocalDateTime from = now.minusHours(24); // 24시간 전 시점
 
 		try {
-			List<KeywordSnapshot> currentSnapshots = searchKeywordSnapshotRepository.findLatestSnapshotsBefore(now);
-			List<KeywordSnapshot> pastSnapshots = searchKeywordSnapshotRepository.findLatestSnapshotsBefore(before24h);
+			// 1. 24시간 범위 내 모든 스냅샷 조회
+			List<KeywordSnapshot> snapshots = searchKeywordSnapshotRepository.findSnapshotsBetween(from, now);
 
-			if (currentSnapshots.isEmpty()) {
-				log.warn("현재 스냅샷이 없음 - 실시간 데이터로 대체");
-				return getTopKeywords(limit); // 실시간 데이터로 대체
+			// 2. 스냅샷 없으면 실시간 누적 데이터 사용
+			if (snapshots.isEmpty()) {
+				log.warn("24시간 스냅샷 없음 - 실시간 누적 데이터로 대체");
+				return getTopKeywords(limit);
 			}
 
-			Map<String, Long> currentMap = currentSnapshots.stream()
-				.collect(Collectors.toMap(KeywordSnapshot::getKeyword, KeywordSnapshot::getCount));
+			// 3. 키워드별 스냅샷 그룹화
+			Map<String, List<KeywordSnapshot>> keywordGroupMap = snapshots.stream()
+				.collect(Collectors.groupingBy(KeywordSnapshot::getKeyword));
 
-			Map<String, Long> pastMap = pastSnapshots.stream()
-				.collect(Collectors.toMap(KeywordSnapshot::getKeyword, KeywordSnapshot::getCount));
+			List<KeywordRankingDto> ranking = new ArrayList<>();
 
-			Set<String> allKeywords = new HashSet<>();
-			allKeywords.addAll(currentMap.keySet());
-			allKeywords.addAll(pastMap.keySet());
+			// 4. 키워드별 24시간 검색량 계산
+			for (Map.Entry<String, List<KeywordSnapshot>> entry : keywordGroupMap.entrySet()) {
+				String keyword = entry.getKey();
+				List<KeywordSnapshot> keywordSnapshots = entry.getValue();
 
-			return allKeywords.stream()
-				.map(keyword -> {
-					long currentCount = currentMap.getOrDefault(keyword, 0L);
-					long pastCount = pastMap.getOrDefault(keyword, 0L);
-					long diff = currentCount - pastCount;
-					return new KeywordRankingDto(keyword, diff);
-				})
-				.filter(dto -> dto.getCount() > 0) // 증가량이 0 이하인 키워드 제외 (변동 없는 키워드 제거)
-				.sorted((a, b) -> Long.compare(b.getCount(), a.getCount())) // 내림차순
-				.limit(limit) // 최대 랭킹 수
+				// 시간순 정렬
+				keywordSnapshots.sort(Comparator.comparing(KeywordSnapshot::getSnapshotTime));
+
+				// 증가량 합산
+				long totalIncrease = 0;
+				KeywordSnapshot prev = null;
+				for (KeywordSnapshot curr : keywordSnapshots) {
+					if (prev != null) {
+						totalIncrease += curr.getCount() - prev.getCount();
+					}
+					prev = curr;
+				}
+
+				// 0보다 큰 키워드만 랭킹에 포함
+				if (totalIncrease > 0) {
+					ranking.add(new KeywordRankingDto(keyword, totalIncrease));
+				}
+			}
+
+			// 5. 내림차순 정렬 후 상위 N개 반환
+			return ranking.stream()
+				.sorted((a, b) -> Long.compare(b.getCount(), a.getCount()))
+				.limit(limit)
 				.collect(Collectors.toList());
 
 		} catch (Exception e) {
-			log.error("급상승 키워드 조회 실패", e);
+			log.error("24시간 급상승 키워드 조회 오류", e);
 			return Collections.emptyList();
 		}
 	}
+
 
 	// 스냅샷이 없을때
 	@Transactional(readOnly = true)
