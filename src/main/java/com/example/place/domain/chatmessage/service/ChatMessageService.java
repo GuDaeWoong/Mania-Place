@@ -1,9 +1,7 @@
 package com.example.place.domain.chatmessage.service;
 
-import com.example.place.common.security.jwt.CustomPrincipal;
-import com.example.place.domain.chatmessage.dto.request.ChatMessageRequest;
 import com.example.place.domain.chatmessage.entity.ChatMessage;
-import com.example.place.domain.chatmessage.entity.MessageQueue;
+import com.example.place.domain.chatmessage.dto.request.MessageQueue;
 import com.example.place.domain.chatmessage.repository.ChatMessageRepository;
 import com.example.place.domain.chatroom.entity.ChatRoom;
 import com.example.place.domain.chatroom.service.ChatRoomService;
@@ -12,12 +10,9 @@ import com.example.place.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.messaging.simp.user.SimpUser;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

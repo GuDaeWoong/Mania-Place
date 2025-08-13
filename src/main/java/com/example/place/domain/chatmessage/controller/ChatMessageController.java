@@ -4,7 +4,7 @@ import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.chatmessage.dto.request.ChatMessageRequest;
-import com.example.place.domain.chatmessage.entity.MessageQueue;
+import com.example.place.domain.chatmessage.dto.request.MessageQueue;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

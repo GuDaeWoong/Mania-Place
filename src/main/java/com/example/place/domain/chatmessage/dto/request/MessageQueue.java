@@ -1,4 +1,4 @@
-package com.example.place.domain.chatmessage.entity;
+package com.example.place.domain.chatmessage.dto.request;
 
 import lombok.AccessLevel;
 import lombok.Getter;
