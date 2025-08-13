@@ -50,7 +50,7 @@ public class SearchKeywordService {
 			// 점수 증가
 			redisTemplate.opsForZSet().incrementScore(redisKey, normalizedKeyword, 1);
 
-			// TTL이 없거나 (-1)일 때만 설정 (27시간)
+			// TTL이 없거나 (-1)일 때만 설정 (25시간)
 			Long ttl = redisTemplate.getExpire(redisKey);
 			if (ttl == null || ttl < 0) {
 				redisTemplate.expire(redisKey, Duration.ofHours(25));
