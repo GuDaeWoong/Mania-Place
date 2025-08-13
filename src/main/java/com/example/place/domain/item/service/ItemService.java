@@ -19,8 +19,11 @@ import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.entity.UserRole;
 import com.example.place.domain.user.service.UserService;
 
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.example.place.common.exception.enums.ExceptionCode;
@@ -30,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.SQLTransientException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +49,11 @@ public class ItemService {
 	private final ImageService imageService;
 	private final SearchKeywordService searchKeywordService;
 
-
+	@Retryable(
+		retryFor = { CannotAcquireLockException.class, SQLTransientException.class, IllegalStateException.class },
+		maxAttempts = 3,
+		backoff = @Backoff(delay = 200) // ms
+	)
     @Transactional
 	@Loggable
     public ItemResponse createItem(Long userId, ItemRequest request) {
@@ -182,7 +190,7 @@ public class ItemService {
 	/**
 	 * 채팅을위해 상품의 판매자 조회
 	 * @param itemId
-	 * @return
+	 * @return User
 	 */
 	public User getSeller(Long itemId) {
 		Item item = findByIdOrElseThrow(itemId);
