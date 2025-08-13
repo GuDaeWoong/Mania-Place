@@ -1,0 +1,84 @@
+PATCH localhost:8080/api/items/1
+
+####
+PATCH localhost:8080/api/items/1
+Content-Type: application/json
+Authorization: {{accessToken}}
+
+{
+  "itemTagNames": ["진격거"]
+}
+###
+GET localhost:8080/api/items/10
+Content-Type: application/json
+Authorization: {{accessToken}}
+
+###
+GET localhost:8080/api/items/search?itemDescription=원피스
+Content-Type: application/json
+Authorization: {{accessToken}}
+
+###
+DELETE localhost:8080/api/items/6
+Content-Type: application/json
+Authorization: {{accessToken}}
+
+{
+  "price": 3000000
+}
+
+###
+POST localhost:8080/api/items
+Content-Type: application/json
+Authorization: {{accessToken}}
+
+{
+
+  "itemName": "상디 피규어",
+  "itemDescription": "사최간 ",
+  "price": 300,
+  "count": 30,
+  "imageUrls": ["image1.jpg","image2.jpg"],
+  "mainIndex": 3,
+  "itemTagNames": ["피규어","인기상품"]
+}
+### 유저생성
+POST localhost:8080/api/accounts
+Content-Type: application/json
+
+{
+  "name": "독고희준",
+  "nickname": "독고희준",
+  "email": "130@gmail.com",
+  "password": "123@gmail.Com",
+  "tags": ["black", "피규어"]
+}
+
+### 로그인
+POST localhost:8080/api/login
+Content-Type: application/json
+
+{
+  "email": "131@gmail.com",
+  "password": "123@gmail.Com"
+}
+> {%
+    client.global.set("accessToken", response.body.data.accessToken);
+%}
+###
+POST localhost:8080/api/chatroom
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "itemId": 2
+}
+###
+
+GET localhost:8080/api/chatroom/1
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+
+###
+
