@@ -61,6 +61,7 @@ public class UserService {
 			userRole
 		);
 
+		userRepository.save(user);
 		tagService.saveTags(user, userRegisterRequest.getUserTagNames());
 
 		return new UserRegisterResponse(user.getEmail());
