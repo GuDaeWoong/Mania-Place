@@ -1,8 +1,12 @@
 package com.example.place.domain.user.service;
 
 import java.util.List;
+import java.sql.SQLTransientException;
 import java.util.Optional;
 
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +35,11 @@ public class UserService {
 	private final TagService tagService;
 
 	@Loggable
+	@Retryable(
+		retryFor = {CannotAcquireLockException.class, SQLTransientException.class, IllegalStateException.class},
+		maxAttempts = 5, // 기본값
+		backoff = @Backoff(delay = 200) // ms 단위
+	)
 	@Transactional
 	public UserRegisterResponse register(UserRegisterRequest userRegisterRequest, UserRole userRole) {
 		// 이메일 중복 검증
@@ -53,11 +62,10 @@ public class UserService {
 			userRole
 		);
 
-		User savedUser = userRepository.save(user);
+		userRepository.save(user);
+		tagService.saveTags(user, userRegisterRequest.getUserTagNames());
 
-		tagService.saveTags(savedUser, userRegisterRequest.getTags());
-
-		return new UserRegisterResponse(savedUser.getEmail());
+		return new UserRegisterResponse(user.getEmail());
 	}
 
 	// 어드민 검색용
@@ -110,12 +118,12 @@ public class UserService {
 		}
 
 		// 이전 비밀번호와 새 비밀번호가 동일한지 확인
-		if(userPasswordRequest.getNewPassword().equals(userPasswordRequest.getOldPassword())){
+		if (userPasswordRequest.getNewPassword().equals(userPasswordRequest.getOldPassword())) {
 			throw new CustomException(ExceptionCode.DUPLICATE_NEW_PASSWORD);
 		}
 
 		// 비밀번호 확인 일치 여부
-		if(!userPasswordRequest.getNewPassword().equals(userPasswordRequest.getNewPasswordCheck())) {
+		if (!userPasswordRequest.getNewPassword().equals(userPasswordRequest.getNewPasswordCheck())) {
 			throw new CustomException(ExceptionCode.PASSWORD_CONFIRM_MISMATCH);
 		}
 
@@ -147,7 +155,7 @@ public class UserService {
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
 
 		// 탈퇴한 사용자인지 확인
-		if(user.isDeleted()) {
+		if (user.isDeleted()) {
 			throw new CustomException(ExceptionCode.DELETED_USER);
 		}
 

@@ -4,7 +4,11 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 public class PageResponseDto<T> {
@@ -23,5 +27,15 @@ public class PageResponseDto<T> {
 		this.content = page.getContent();
 		this.page = page.getNumber();
 		this.totalPages = page.getTotalPages();
+	}
+
+	@JsonCreator
+	private PageResponseDto(
+		@JsonProperty("content") List<T> content,
+		@JsonProperty("page") int page,
+		@JsonProperty("totalPages") int totalPages) {
+		this.content = content;
+		this.page = page;
+		this.totalPages = totalPages;
 	}
 }

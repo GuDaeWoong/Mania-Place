@@ -1,6 +1,8 @@
 package com.example.place.domain.newsfeed.service;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.example.place.common.annotation.Loggable;
 import com.example.place.common.dto.PageResponseDto;
@@ -16,7 +18,11 @@ import com.example.place.domain.newsfeed.repository.NewsfeedRepository;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.service.UserService;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +44,7 @@ public class NewsfeedService {
 
 	@Loggable
 	@Transactional
+	@CacheEvict(value = "listCache", allEntries = true)
 	public NewsfeedResponse createNewsfeed(Long userId, NewsfeedRequest request) {
 		User user = userService.findByIdOrElseThrow(userId);
 
@@ -58,6 +65,10 @@ public class NewsfeedService {
 
 	@Loggable
 	@Transactional(readOnly = true)
+	@Cacheable(
+		value = "singleCache",
+		key = "#newsfeedId"
+	)
 	public NewsfeedResponse getNewsfeed(Long newsfeedId) {
 		Newsfeed newsfeed = findByIdOrElseThrow(newsfeedId);
 
@@ -67,6 +78,10 @@ public class NewsfeedService {
 
 	@Loggable
 	@Transactional(readOnly = true)
+	@Cacheable(
+		value = "listCache",
+		key = "#pageable.pageNumber + '-' + #pageable.pageSize + '-' + #pageable.sort.toString()"
+	)
 	public PageResponseDto<NewsfeedListResponse> getAllNewsfeeds(Pageable pageable) {
 
 		// 새소식 전체 조회(소프트딜리트 빼고)
@@ -76,14 +91,15 @@ public class NewsfeedService {
 		Map<Long, Image> mainImageMap = imageService.getMainImagesForNewsfeeds(pagedNewsfeeds);
 
 		// NewsfeedListResponse 에 적용
-		Page<NewsfeedListResponse> dtoPage = pagedNewsfeeds.map(newsfeed -> {
-			// --메인이미지 조합
-			Image mainImage = mainImageMap.getOrDefault(newsfeed.getId(), null);
+		List<NewsfeedListResponse> contentList = pagedNewsfeeds.stream().map(newsfeed -> {
+				Image mainImage = mainImageMap.getOrDefault(newsfeed.getId(), null);
+				return NewsfeedListResponse.of(newsfeed, mainImage != null ? mainImage.getImageUrl() : null);
+			})
+			.collect(Collectors.toList()); // 가변 리스트로 변환
 
-			return NewsfeedListResponse.of(newsfeed, mainImage.getImageUrl());
-		});
-
-		return new PageResponseDto<>(dtoPage);
+		return new PageResponseDto<>(
+			new PageImpl<>(contentList, pageable, pagedNewsfeeds.getTotalElements())
+		);
 	}
 
 	public Newsfeed findByIdOrElseThrow(Long id) {
@@ -99,6 +115,10 @@ public class NewsfeedService {
 
 	// 새소식 수정
 	@Transactional
+	@Caching(evict = {
+		@CacheEvict(value = "listCache", allEntries = true),     // 전체 목록 캐시 삭제
+		@CacheEvict(value = "singleCache", key = "#newsfeedId")   // 단건 캐시 특정 키 삭제
+	})
 	public NewsfeedResponse updateNewsfeed(Long newsfeedId, NewsfeedRequest request, Long userId) {
 		Newsfeed newsfeed = findByIdOrElseThrow(newsfeedId);
 
@@ -119,8 +139,13 @@ public class NewsfeedService {
 		return NewsfeedResponse.from(newsfeed, imageDto);
 	}
 
+	// 새소식 삭제
 	@Loggable
 	@Transactional
+	@Caching(evict = {
+		@CacheEvict(value = "listCache", allEntries = true),     // 전체 목록 캐시 삭제
+		@CacheEvict(value = "singleCache", key = "#newsfeedId")   // 단건 캐시 특정 키 삭제
+	})
 	public void softDeleteNewsfeed(Long newsfeedId, Long userId) {
 		Newsfeed newsfeed = findByIdOrElseThrow(newsfeedId);
 
