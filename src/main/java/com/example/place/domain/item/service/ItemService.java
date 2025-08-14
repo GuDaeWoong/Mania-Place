@@ -51,7 +51,7 @@ public class ItemService {
 
 	@Retryable(
 		retryFor = { CannotAcquireLockException.class, SQLTransientException.class, IllegalStateException.class },
-		maxAttempts = 3,
+		maxAttempts = 5,
 		backoff = @Backoff(delay = 200) // ms
 	)
     @Transactional

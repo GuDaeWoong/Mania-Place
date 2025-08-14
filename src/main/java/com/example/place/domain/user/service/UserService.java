@@ -36,7 +36,7 @@ public class UserService {
 	@Loggable
 	@Retryable(
 		retryFor = {CannotAcquireLockException.class, SQLTransientException.class, IllegalStateException.class},
-		maxAttempts = 3, // 기본값
+		maxAttempts = 5, // 기본값
 		backoff = @Backoff(delay = 200) // ms 단위
 	)
 	@Transactional
