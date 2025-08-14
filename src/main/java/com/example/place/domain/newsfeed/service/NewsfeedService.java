@@ -9,6 +9,7 @@ import com.example.place.common.dto.PageResponseDto;
 import com.example.place.domain.Image.dto.ImageDto;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.Image.service.ImageService;
+import com.example.place.domain.mail.service.MailRequestService;
 import com.example.place.domain.newsfeed.dto.request.NewsfeedRequest;
 import com.example.place.domain.newsfeed.dto.response.NewsfeedListResponse;
 import com.example.place.domain.newsfeed.dto.response.NewsfeedResponse;
@@ -39,6 +40,7 @@ public class NewsfeedService {
 	private final NewsfeedRepository newsfeedRepository;
 	private final UserService userService;
 	private final ImageService imageService;
+	private final MailRequestService mailRequestService;
 
 	@Loggable
 	@Transactional
@@ -54,6 +56,9 @@ public class NewsfeedService {
 		Newsfeed savedNewsfeed = newsfeedRepository.save(newsfeed);
 		// 이미지 저장
 		ImageDto imageDto = imageService.createImages(savedNewsfeed, request.getImageUrls(), request.getMainIndex());
+
+		// 새소식 메일
+		mailRequestService.enqueueNewsfeedEmailToAllUsers(request.getTitle());
 
 		return NewsfeedResponse.from(savedNewsfeed, imageDto);
 	}

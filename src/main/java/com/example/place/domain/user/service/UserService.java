@@ -1,5 +1,6 @@
 package com.example.place.domain.user.service;
 
+import java.util.List;
 import java.sql.SQLTransientException;
 import java.util.Optional;
 
@@ -170,5 +171,9 @@ public class UserService {
 		}
 
 		return Optional.of(user);
+	}
+
+	public List<User> findUserByIsDeletedFalse() {
+		return userRepository.findByIsDeletedFalseAndRole(UserRole.USER);
 	}
 }
