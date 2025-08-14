@@ -62,19 +62,19 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
 		if (keyword != null) {
 			BooleanExpression keywordCondition = item.itemName.likeIgnoreCase("%" + keyword + "%")
 				.or(item.itemDescription.likeIgnoreCase("%" + keyword + "%"));
-			whereCondition = whereCondition == null ? keywordCondition : whereCondition.and(keywordCondition);
+			whereCondition = keywordCondition;
 		}
 
 		// 태그를 전달 받았다면 해당 태그가 존재하는 상품을 조회
 		if (tags != null && !tags.isEmpty()) {
 			BooleanExpression tagCondition = tag.tagName.in(tags);
-			whereCondition = whereCondition == null ? tagCondition : whereCondition.and(tagCondition);
+			whereCondition = (whereCondition == null) ? tagCondition : whereCondition.or(tagCondition);
 		}
 
 		// 유저 id를 전달 받았다면 해당 판매자가 해당 id와 일치하는 상품을 조회
 		if (userId != null) {
 			BooleanExpression userCondition = item.user.id.eq(userId);
-			whereCondition = whereCondition == null ? userCondition : whereCondition.and(userCondition);
+			whereCondition = (whereCondition == null) ? userCondition : whereCondition.and(userCondition);
 		}
 
 		return buildPagedItem(whereCondition, pageable);
