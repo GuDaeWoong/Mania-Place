@@ -2,7 +2,7 @@ name: CI/CD Deploy
 
 on:
   push:
-    branches: [ sprint_1 ]
+    branches: [ main ]
 
 jobs:
   build:
