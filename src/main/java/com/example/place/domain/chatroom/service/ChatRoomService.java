@@ -41,7 +41,7 @@ public class ChatRoomService {
                 item.getItemName(),
                 buyer.getNickname(),
                 seller.getNickname(),
-                "ws://localhost:8080/ws/chat",
+                "http://localhost:8080/ws/chat",
                 "/sub/chatroom/" + roomId,
                 "/pub/chatroom/" + roomId
         );
