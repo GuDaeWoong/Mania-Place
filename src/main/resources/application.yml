@@ -72,6 +72,3 @@ rabbitmq:
   port: 5672
   username: guest # docker-compose.yml에 설정한 user와 동일
   password: guest # docker-compose.yml에 설정한 pass와 동일
-
-
-
