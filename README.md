@@ -332,8 +332,12 @@
 | **Tools** | IntelliJ IDEA |
 | **Collaboration** | GitHub, Notion, Slack, ERD cloud, draw.io |
 
+---
 
 ## 💡 의사결정 및 기능 구현
+
+
+
 ## ⚡ 성능 개선
 ## 🚨 트러블 슈팅
 ## 📅 일정
