@@ -60,9 +60,9 @@ management:
       show-components: always
   health:
     redis:
-      enabled: false
-#    defaults:
-#      enabled: true
+      enabled: true
+    defaults:
+      enabled: true
 
 jwt:
   secret:
