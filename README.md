@@ -336,10 +336,92 @@
 
 ## 💡 의사결정 및 기능 구현
 
+- [💡 JWT&Spring Security](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2542dc3ef5148048b568f3ed64348ccd)
 
+- [💡 Query DSL을 통한 상품 검색](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2542dc3ef514804ab31cea9466834883)
+
+- [💡 상품 검색과 이미지 조회 로직 분리](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2542dc3ef514804ab31cea9466834883)
+
+- [💡 검색어 랭킹 기능 Redis (Zset) 도입](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2542dc3ef51480de882dfd02e62aeffc)
+
+- [💡 상품 주문 동시성 제어](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2532dc3ef5148082880bf5aa36bbd576) 
+
+- [💡 아마존 SES를 이용한 메일 알람 기능 구현](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2542dc3ef514800b920dd4f9f43d1a25) 
+
+- [💡 실시간채팅 도입](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2542dc3ef514805bbb29f2c32546a6fc)
+
+- [💡 rabbitMQ 도입](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2532dc3ef5148039ac32f46fe7191708)
+
+- [💡 Pinpoint APM 도입](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2542dc3ef51480b3ba41c63e1b0f4941)
+
+---
 
 ## ⚡ 성능 개선
+
+- [⚡ 인기 검색어 랭킹](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2532dc3ef5148060a259f2725a3702fc)
+
+- [⚡ 캐싱을 이용하여 새소식 조회를 더욱 빠르게!](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2532dc3ef5148095965ac33c8bc36536)
+
+- [⚡ 재고 관리 동시성 이슈 해결](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2532dc3ef5148097af2ff6da3e4576a8)
+
+---
+
 ## 🚨 트러블 슈팅
+
+- [‼ 커넥션풀 고갈 현상](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2532dc3ef51480ff88cdfd92f9610d90)
+
+- [‼ 태그 저장 동시성 문제](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2542dc3ef5148025bebbf303f9137a64)
+
+- [‼ Redis 직렬화 문제](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2542dc3ef514803caf10f01060a81727)
+
+- [‼ 분산 락 구현 시 트랜잭션 전파 이슈](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2542dc3ef51480238d45fbcb0c6e1033)
+
+---
+
 ## 📅 일정
+
+| 구분         | 기간                  | 활동                     | 비고                          |
+|--------------|-----------------------|--------------------------|-------------------------------|
+| 기획         | 2025.07.16 ~ 07.20    | 아이디어 회의 및 S.A 작성 | S.A 피드백                   |
+| MVP          | 2025.07.21 ~ 07.28    | 최소 기능 개발            | MVP 시연                      |
+| 스프린트 1차 | 2025.07.29 ~ 08.05    | 추가 기능 개발            | 스프린트 회고 후 배포         |
+| 스프린트 2차 | 2025.08.06 ~ 08.14    | 고도화                   | 스프린트 회고 후 배포 & 5분 브리핑 |
+| 발표 준비    | 2025.08.16 ~ 08.24    | 브로셔 및 발표자료 제작    | 최종 프로젝트 제출             |
+
+
+---
+
 ## ☕ KPT회고
+
+- **Keep**
+    - 작업 진행 상황을 꼼꼼히 공유하여 팀 전체의 이해를 높임
+    - 모든 팀원이 성실하게 코드 리뷰에 참여함
+    - 회의 시 모두가 마이크를 켜고 참여했으며,
+    불필요한 시간을 줄이기 위해 회의 시간을 20분으로 제한함
+    - 신규 기능 도입 시 가이드라인을 문서화하여 공유함
+    - 항상 서로를 존중하며 트러블 없이 프로젝트를 성공적으로 완수함
+    - 새로운 기술이나 새로운 기능 구현에 있어 사용자 관점에서  깊이 있는 고민을 하고 
+    문제 해결 방안을 찾아 적용한 것
+
+- **Problem**
+    - 초기 깃 컨벤션 설정이 다소 미흡하여 일관성 유지에 어려움이 있었음
+    - 프로젝트 릴리즈 버전 관리에 대한 이해도 부족
+    - 주기적 서류 업데이트 체계 미흡으로, 후에 문서 버전 관리 강화의 필요성을 느낌
+    - 테스트 코드 보강 필요
+ 
+- **Try**
+    - 단순 캘린더 형태에 그치지 않고, 업무별 세부 일정을 조직적으로 관리
+    - 릴리즈 버전 규칙(SemVer 등)을 학습하고 실제 배포 과정에 적용하여 일관된 버전 관리 정착
+    - 문서 버전 관리를 코드와 동일하게 Git/협업 툴 기반으로 운영하여 최신화 체계 강화
+    - 적극적인 신규 기능 도입 확대
+
+---
+
 ## 🧑‍💻 팀원 소개
+
+- [구대웅(리더)](https://teamsparta.notion.site/2532dc3ef51480118514d61161f883e5?source=copy_link)
+- [최경진(부리더)](https://teamsparta.notion.site/2532dc3ef51480a38d82ce8342289c52?source=copy_link)
+- [우새빛](https://teamsparta.notion.site/2532dc3ef5148051b4ded565a65ac9ef?source=copy_link)
+- [윤희준](https://teamsparta.notion.site/2532dc3ef5148032bfdff594362df57f?source=copy_link)
+- [이호준](https://teamsparta.notion.site/2532dc3ef51480e59f57c872122e2523?source=copy_link)
+- [이효선](https://teamsparta.notion.site/2532dc3ef51480a4b3a4d9d49687ebbf?source=copy_link)
