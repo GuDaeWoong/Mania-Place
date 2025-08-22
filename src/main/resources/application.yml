@@ -6,16 +6,17 @@ spring:
     name: Mania-Place
 
   datasource:
-    url: jdbc:mysql://localhost:3307/mania_place
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
-  # Redis 설정 추가
+  # Redis 설정
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      username: ${REDIS_USERNAME} # Redis 6.x 이상 사용자
       password: ${REDIS_PASSWORD}
       timeout: 5000ms
       lettuce:
@@ -24,15 +25,22 @@ spring:
           max-idle: 8
           min-idle: 0
 
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT:5671}   # amqps 기본 포트
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+    virtual-host: ${RABBITMQ_VHOST:/}   # AmazonMQ는 기본 "/" 사용
+    ssl:
+      enabled: true   # amqps는 SSL 필수
+
   jpa:
-    #    hibernate.ddl-auto: create
     hibernate.ddl-auto: update
     show-sql: true
     properties:
       hibernate:
         format_sql: true
         highlight_sql: true
-
 
   mail:
     host: email-smtp.ap-northeast-2.amazonaws.com
@@ -45,7 +53,7 @@ spring:
           auth: true
           starttls:
             enable: true
-            
+
 email: ${EMAIL}
 
 # Actuator 설정
@@ -67,8 +75,3 @@ jwt:
   secret:
     key: ${SECRET_KEY}
 
-rabbitmq:
-  host: localhost
-  port: 5672
-  username: guest # docker-compose.yml에 설정한 user와 동일
-  password: guest # docker-compose.yml에 설정한 pass와 동일
