@@ -368,13 +368,13 @@
 
 ## 🚨 트러블 슈팅
 
-- [‼ 커넥션풀 고갈 현상](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2532dc3ef51480ff88cdfd92f9610d90)
+- [🚨 커넥션풀 고갈 현상](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2532dc3ef51480ff88cdfd92f9610d90)
 
-- [‼ 태그 저장 동시성 문제](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2542dc3ef5148025bebbf303f9137a64)
+- [🚨 태그 저장 동시성 문제](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2542dc3ef5148025bebbf303f9137a64)
 
-- [‼ Redis 직렬화 문제](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2542dc3ef514803caf10f01060a81727)
+- [🚨 Redis 직렬화 문제](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2542dc3ef514803caf10f01060a81727)
 
-- [‼ 분산 락 구현 시 트랜잭션 전파 이슈](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2542dc3ef51480238d45fbcb0c6e1033)
+- [🚨 분산 락 구현 시 트랜잭션 전파 이슈](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2542dc3ef51480238d45fbcb0c6e1033)
 
 ---
 
