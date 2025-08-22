@@ -3,13 +3,13 @@
 ### ·•· 마니아 층을 위한 중고거래 플랫폼 ·•·
 
 ## 🗂️ 목차
-[👀 서비스 개요](#-서비스-개요) | [🗝️ 핵심 기능](#-핵심-기능) | [🖇️ 시스템 아키텍처](#-시스템-아키텍처)
+| [👀 서비스 개요](#-서비스-개요) | [🗝️ 핵심 기능](#핵심-기능) | [🖇️ 시스템 아키텍처](#시스템-아키텍처) |
 
-[📐 설계 문서](#-설계-문서) | [🛠️ 기술 스택](#-기술-스택) | [🌊 서비스 플로우](#-서비스-플로우)
+| [📐 설계 문서](#-설계-문서) | [🛠️ 기술 스택](#기술-스택) | [🌊 서비스 플로우](#-서비스-플로우) |
 
-[💡 의사결정 및 기능 구현](#-의사결정-및-기능-구현) | [⚡ 성능 개선](#-성능-개선) | [🚨 트러블 슈팅](#-트러블-슈팅)
+| [💡 의사결정 및 기능 구현](#-의사결정-및-기능-구현) | [⚡ 성능 개선](#-성능-개선) | [🚨 트러블 슈팅](#-트러블-슈팅) |
 
-[📅 일정](#-일정) | [☕ KPT회고](#-KPT회고) | [🧑‍💻 팀원 소개](#-팀원-소개)
+| [📅 일정](#-일정) | [☕ KPT회고](#-kpt회고) | [🧑‍💻 팀원 소개](#-팀원-소개) |
 
 
 ## 👀 서비스 개요
@@ -58,7 +58,7 @@
 
 ---
 
-## 🗝️ 핵심 기능
+## <h2 id="핵심-기능">🗝️ 핵심 기능</h2>
 
 **거래자 간 채팅 시스템**
 
@@ -162,4 +162,180 @@
 
 ---
 
+## <h2 id="시스템-아키텍처">🖇️ 시스템 아키텍처</h2>
 
+### Cloud Architecture
+<img width="1592" height="942" alt="image" src="https://github.com/user-attachments/assets/c3c7f9bb-7431-43a2-bb53-fbde8983b690" />
+
+### CI/CD Pipeline
+<img width="1696" height="718" alt="image" src="https://github.com/user-attachments/assets/8d366f45-59c0-42f2-ad2c-8bd94642ba38" />
+
+---
+
+## 📐 설계 문서
+
+### ERD
+<img width="2019" height="1071" alt="image" src="https://github.com/user-attachments/assets/acbe8ab1-de3f-47e3-b125-176b4ac542ef" />
+
+### 와이어프레임
+<img width="2048" height="1041" alt="image" src="https://github.com/user-attachments/assets/a377ae7f-d3aa-4bfd-9909-1942c743d9d7" />
+
+### API 명세서
+
+#### 유저
+| Method | 기능 | URL | 설명 |
+|--------|------|----------|------|
+| POST   | 회원가입 | `/api/accounts` | 새로운 사용자 계정을 생성합니다. |
+| POST   | 어드민 회원가입 | `/api/admin/accounts` | 새로운 어드민 계정을 생성합니다. |
+| GET    | 회원조회 | `/api/accounts/{id}` | 회원 정보를 조회합니다. |
+| GET    | 마이페이지 조회 | `/api/accounts/me` | 마이페이지를 조회합니다. |
+| PATCH  | 회원 비밀번호 변경 | `/api/accounts/me/password` | 회원 비밀번호를 변경합니다. |
+| PATCH  | 회원정보 수정 | `/api/accounts/me` | 회원 정보를 수정합니다. |
+| DELETE | 회원탈퇴 | `/api/accounts/me` | 사용자 계정을 삭제합니다. |
+| POST   | 로그인 | `/api/login` | 이메일과 비밀번호로 로그인, 성공 시 AccessToken 반환 |
+| POST   | 로그아웃 | `/api/logout` | AccessToken을 무효화하여 세션 종료 |
+| POST   | AccessToken 재발급 | `/api/refresh` | RefreshToken으로 AccessToken 재발급 |
+
+---
+
+#### 상품
+| Method | 기능 | URL | 설명 |
+|--------|------|----------|------|
+| POST   | 상품 등록 | `/api/items` | 상품을 생성합니다. |
+| GET    | 상품 단건 조회 | `/api/items/{itemId}` | 상품을 단건 조회합니다. |
+| GET    | 상품 필터 조회 | `/api/items/serarch` | 상품을 필터링하여 조회합니다. |
+| GET    | 유저별 상품 조회 | `/api/items/serarch/interest` | 관심 태그 기반 상품 조회 |
+| PATCH  | 상품 수정 | `/api/items/{itemId}` | 상품을 수정합니다. |
+| DELETE | 상품 삭제 | `/api/items/{itemId}` | 상품을 삭제합니다. |
+
+---
+
+#### 태그
+| Method | 기능 | URL | 설명 |
+|--------|------|----------|------|
+| POST   | 태그 등록 | `/api/admin/tags` | 태그를 등록합니다. |
+| GET    | 태그 조회 | `/api/admin/tags/{tagId}` | 태그를 조회합니다. |
+| PATCH  | 태그 이름 수정 | `/api/admin/tags/{tagId}` | 태그를 수정합니다. |
+| DELETE | 태그 삭제 | `/api/admin/tags/{tagId}` | 태그를 삭제합니다. |
+
+---
+
+#### 상품 댓글
+| Method | 기능 | URL | 설명 |
+|--------|------|----------|------|
+| POST   | 댓글 생성 | `/api/item/{itemId}/comments` | 특정 상품글의 댓글 생성 |
+| GET    | 댓글 조회 | `/api/item/{itemId}/comments` | 특정 상품글의 댓글 조회 |
+| PATCH  | 댓글 수정 | `/api/item/{itemId}/comments/{commentId}` | 댓글을 수정합니다. |
+| DELETE | 댓글 삭제 | `/api/item/{itemId}/comments/{commentId}` | 댓글을 삭제합니다. |
+
+---
+
+#### 살까말까
+| Method | 기능 | URL | 설명 |
+|--------|------|----------|------|
+| POST   | 살까말까 생성 | `/api/posts` | 살까말까 게시물 생성 |
+| GET    | 살까말까 단건 조회 | `/api/posts/{postId}` | 살까말까 단건 조회 |
+| GET    | 살까말까 전체 조회 | `/api/posts` | 살까말까 전체 조회 |
+| GET    | 내가 쓴 살까말까 조회 | `/api/posts/me` | 마이페이지 내 살까말까 조회 |
+| PATCH  | 살까말까 수정 | `/api/posts/{postId}` | 살까말까 게시물 수정 |
+| DELETE | 살까말까 삭제 | `/api/posts/{postId}` | 살까말까 게시물 삭제 |
+
+---
+
+#### 살까말까 댓글
+| Method | 기능 | URL | 설명 |
+|--------|------|----------|------|
+| POST   | 댓글 생성 | `/api/post/{postId}/comments` | 살까말까 댓글 생성 |
+| GET    | 댓글 조회 | `/api/post/{postId}/comments` | 살까말까 댓글 조회 |
+| PATCH  | 댓글 수정 | `/api/post/{postId}/comments/{commentId}` | 살까말까 댓글 수정 |
+| DELETE | 댓글 삭제 | `/api/post/{postId}/comments/{commentId}` | 살까말까 댓글 삭제 |
+
+---
+
+#### 살까말까 좋아요 / 싫어요
+| Method | 기능 | URL | 설명 |
+|--------|------|----------|------|
+| POST   | 좋아요/싫어요 등록 | `/api/posts/{postId}/vote` | 살까말까 좋아요/싫어요 등록 |
+| DELETE | 좋아요/싫어요 취소 | `/api/posts/{postId}/vote` | 살까말까 좋아요/싫어요 취소 |
+
+---
+
+#### 오더
+| Method | 기능 | URL | 설명 |
+|--------|------|-----|------|
+| POST   | 오더 등록 | `/api/orders` | 결제를 신청합니다. |
+| GET    | 오더 단건 조회(나의 것만) | `/api/orders/my/{orderId}` | 나의 결제 단건을 조회합니다. |
+| GET    | 내가 구매한 오더 전체 조회 | `/api/orders/me` | 나의 결제 내역 전체를 조회합니다. |
+| POST   | 오더 수정 (주문 완료 → 배송중) | `/api/user/orders/{orderId}/status/ready` | 주문 완료에서 배송중으로 상태 변경 |
+| POST   | 오더 수정 (배송중 → 거래 완료) | `/api/user/orders/{orderId}/status/completed` | 배송중에서 거래 완료로 상태 변경 |
+| POST   | 주문 취소 (주문 완료 → 주문 취소) | `/api/user/orders/{orderId}/status/canceled` | 주문 완료에서 주문 취소로 상태 변경 |
+
+---
+
+#### 새소식
+| Method | 기능 | URL | 설명 |
+|--------|------|-----|------|
+| POST   | 새소식 생성 | `/api/admin/newsfeeds` | 새소식 게시글 생성 |
+| GET    | 새소식 단건 조회 | `/api/newsfeeds/{newsfeedId}` | 새소식 단건 조회 |
+| GET    | 새소식 전체 조회 | `/api/newsfeeds` | 새소식 전체 조회 |
+| PATCH  | 새소식 수정 | `/api/admin/newsfeeds/{newsfeedId}` | 새소식 게시글 수정 |
+| DELETE | 새소식 삭제 | `/api/admin/newsfeeds/{newsfeedId}` | 새소식 게시글 삭제 |
+
+---
+
+#### 새소식 댓글
+| Method | 기능 | URL | 설명 |
+|--------|------|-----|------|
+| POST   | 댓글 생성 | `/api/newsfeeds/{newsfeedId}/comments` | 새소식 댓글 작성 |
+| GET    | 댓글 조회 | `/api/newsfeeds/{newsfeedId}/comments` | 새소식 댓글 조회 |
+| PATCH  | 댓글 수정 | `/api/newsfeeds/{newsfeedId}/comments/{commentId}` | 새소식 댓글 수정 |
+| DELETE | 댓글 삭제 | `/api/newsfeeds/{newsfeedsId}/comments/{commentId}` | 새소식 댓글 삭제 |
+
+---
+
+#### 채팅방
+| Method | 기능 | URL | 설명 |
+|--------|------|-----|------|
+| POST   | 채팅방 생성 | `/api/chatroom` | 대화를 위한 채팅방 생성 |
+
+---
+
+#### 키워드 랭킹
+| Method | 기능 | URL | 설명 |
+|--------|------|-----|------|
+| GET    | 키워드 랭킹 조회 | `/api/keywords/ranking` | 키워드 랭킹 조회 |
+
+---
+
+#### 채팅
+| Method | 기능 | URL | 설명 |
+|--------|------|-----|------|
+| CONNECT   | 웹소켓 연결 | `ws://localhost:8080/ws/chat` | 웹소켓에 연결합니다. |
+| SUBSCRIBE | 채팅방 구독 | `/sub/chatroom/2` | 채팅방을 구독합니다. |
+| SEND      | 채팅 전송 | `/pub/chatroom/2` | 채팅 메시지를 발행합니다. |
+
+
+## 🌊 서비스 플로우
+<img width="1995" height="1002" alt="image" src="https://github.com/user-attachments/assets/ee7ffc90-208b-4f39-87c2-2f1b896031a1" />
+
+
+## <h2 id="기술-스택">🛠️ 기술 스택</h2>
+
+| 구분 | 사용 기술 |
+|------|------------|
+| **Back-end** | Java 17, Spring Framework, Spring Boot, Spring Data JPA, Spring Security, JWT, Query DSL, Websocket, STOMP, Jackson |
+| **Productivity Tools** | Lombok, Gradle |
+| **Database** | MySQL, Redis |
+| **Infra & CI/CD** | Docker, RabbitMQ, Amazon EC2, Amazon SES, GitHub Actions |
+| **Test** | Postman, JMeter |
+| **Monitoring** | PinPoint |
+| **Tools** | IntelliJ IDEA |
+| **Collaboration** | GitHub, Notion, Slack, ERD cloud, draw.io |
+
+
+## 💡 의사결정 및 기능 구현
+## ⚡ 성능 개선
+## 🚨 트러블 슈팅
+## 📅 일정
+## ☕ KPT회고
+## 🧑‍💻 팀원 소개
