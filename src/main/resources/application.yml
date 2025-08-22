@@ -18,6 +18,8 @@ spring:
       port: ${REDIS_PORT}
       username: ${REDIS_USERNAME} # Redis 6.x 이상 사용자
       password: ${REDIS_PASSWORD}
+      ssl:
+        enabled: true
       timeout: 5000ms
       lettuce:
         pool:
