@@ -18,7 +18,7 @@ spring:
       port: ${REDIS_PORT}
       username: ${REDIS_USERNAME} # Redis 6.x 이상 사용자
       password: ${REDIS_PASSWORD}
-      timeout: 5000ms
+      timeout: 15000ms
       lettuce:
         pool:
           max-active: 8
@@ -52,7 +52,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,redis
+        include: health
       base-path: /actuator
   endpoint:
     health:
@@ -60,9 +60,9 @@ management:
       show-components: always
   health:
     redis:
-      enabled: true
-    defaults:
-      enabled: true
+      enabled: false
+#    defaults:
+#      enabled: true
 
 jwt:
   secret:
