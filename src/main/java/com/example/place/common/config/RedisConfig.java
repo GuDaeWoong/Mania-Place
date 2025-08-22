@@ -1,10 +1,18 @@
 package com.example.place.common.config;
 
+import java.time.Duration;
+
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+
 @Configuration
 public class RedisConfig {
 	@Bean
@@ -34,6 +42,46 @@ public class RedisConfig {
 			// 연결 재시도 간의 대기시간 1.5초
 			.setRetryInterval(1500);
 		return Redisson.create(config);
+	}
+
+	@Bean
+	public LettuceConnectionFactory redisConnectionFactory() {
+		// 환경변수에서 동일한 정보 가져오기
+		String host = System.getenv("REDIS_HOST");
+		String port = System.getenv("REDIS_PORT");
+		String username = System.getenv("REDIS_USERNAME");
+		String password = System.getenv("REDIS_PASSWORD");
+
+		// SSL/TLS 설정
+		RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration();
+		redisConfig.setHostName(host);
+		redisConfig.setPort(Integer.parseInt(port));
+		redisConfig.setUsername(username);
+		redisConfig.setPassword(password);
+
+		// Lettuce SSL 설정
+		LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+			.useSsl()
+			.and()
+			.commandTimeout(Duration.ofSeconds(3))
+			.build();
+
+		return new LettuceConnectionFactory(redisConfig, clientConfig);
+	}
+
+	@Bean
+	public RedisTemplate<String, String> redisTemplate(LettuceConnectionFactory connectionFactory) {
+		RedisTemplate<String, String> template = new RedisTemplate<>();
+		template.setConnectionFactory(connectionFactory);
+
+		// String 직렬화 설정
+		template.setKeySerializer(new StringRedisSerializer());
+		template.setValueSerializer(new StringRedisSerializer());
+		template.setHashKeySerializer(new StringRedisSerializer());
+		template.setHashValueSerializer(new StringRedisSerializer());
+
+		template.afterPropertiesSet();
+		return template;
 	}
 }
 
