@@ -7,7 +7,7 @@
 
 | [📐 설계 문서](#-설계-문서) | [🛠️ 기술 스택](#기술-스택) | [🌊 서비스 플로우](#-서비스-플로우) |
 
-| [💡 의사결정 및 기능 구현](#-의사결정-및-기능-구현) | [⚡ 성능 개선](#-성능-개선) | [🚨 트러블 슈팅](#-트러블-슈팅) |
+| [💡 의사결정 및 기능 구현](#-의사결정-및-기능-구현) | [⚡️ 성능 개선](#-성능-개선) | [🚨 트러블 슈팅](#-트러블-슈팅) |
 
 | [📅 일정](#-일정) | [☕ KPT회고](#-kpt회고) | [🧑‍💻 팀원 소개](#-팀원-소개) |
 
@@ -356,13 +356,13 @@
 
 ---
 
-## ⚡ 성능 개선
+## ⚡️ 성능 개선
 
-- [⚡ 인기 검색어 랭킹](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2532dc3ef5148060a259f2725a3702fc)
+- [⚡️ 인기 검색어 랭킹](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2532dc3ef5148060a259f2725a3702fc)
 
-- [⚡ 캐싱을 이용하여 새소식 조회를 더욱 빠르게!](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2532dc3ef5148095965ac33c8bc36536)
+- [⚡️ 캐싱을 이용하여 새소식 조회를 더욱 빠르게!](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2532dc3ef5148095965ac33c8bc36536)
 
-- [⚡ 재고 관리 동시성 이슈 해결](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2532dc3ef5148097af2ff6da3e4576a8)
+- [⚡️ 재고 관리 동시성 이슈 해결](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2532dc3ef5148097af2ff6da3e4576a8)
 
 ---
 
