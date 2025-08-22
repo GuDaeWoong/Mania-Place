@@ -314,14 +314,25 @@
 | SUBSCRIBE | 채팅방 구독 | `/sub/chatroom/2` | 채팅방을 구독합니다. |
 | SEND      | 채팅 전송 | `/pub/chatroom/2` | 채팅 메시지를 발행합니다. |
 
----
+
+## 🌊 서비스 플로우
+<img width="1995" height="1002" alt="image" src="https://github.com/user-attachments/assets/ee7ffc90-208b-4f39-87c2-2f1b896031a1" />
 
 
 ## <h2 id="기술-스택">🛠️ 기술 스택</h2>
 
+| 구분 | 사용 기술 |
+|------|------------|
+| **Back-end** | Java 17, Spring Framework, Spring Boot, Spring Data JPA, Spring Security, JWT, Query DSL, Websocket, STOMP, Jackson |
+| **Productivity Tools** | Lombok, Gradle |
+| **Database** | MySQL, Redis |
+| **Infra & CI/CD** | Docker, RabbitMQ, Amazon EC2, Amazon SES, GitHub Actions |
+| **Test** | Postman, JMeter |
+| **Monitoring** | PinPoint |
+| **Tools** | IntelliJ IDEA |
+| **Collaboration** | GitHub, Notion, Slack, ERD cloud, draw.io |
 
 
-## 🌊 서비스 플로우
 ## 💡 의사결정 및 기능 구현
 ## ⚡ 성능 개선
 ## 🚨 트러블 슈팅
