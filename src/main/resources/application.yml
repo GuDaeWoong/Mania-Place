@@ -52,7 +52,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: health,info,redis
       base-path: /actuator
   endpoint:
     health:
