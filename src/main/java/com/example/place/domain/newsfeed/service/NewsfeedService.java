@@ -44,7 +44,7 @@ public class NewsfeedService {
 	private final UserService userService;
 	private final ImageService imageService;
 	private final MailRequestService mailRequestService;
-	private final RedisTemplate<String, Object> redisTemplate;
+	private final RedisTemplate<String, String> redisTemplate;
 
 	// listCache 전체 삭제
 	public void evictListCache() {
