@@ -25,6 +25,15 @@ spring:
           max-idle: 8
           min-idle: 0
 
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT:5671}   # amqps 기본 포트
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+    virtual-host: ${RABBITMQ_VHOST:/}   # AmazonMQ는 기본 "/" 사용
+    ssl:
+      enabled: true   # amqps는 SSL 필수
+
   jpa:
     hibernate.ddl-auto: update
     show-sql: true
@@ -66,8 +75,3 @@ jwt:
   secret:
     key: ${SECRET_KEY}
 
-rabbitmq:
-  host: localhost
-  port: 5672
-  username: guest
-  password: guest
