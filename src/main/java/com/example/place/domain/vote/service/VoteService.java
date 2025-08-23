@@ -22,7 +22,6 @@ import com.example.place.domain.vote.entity.Vote;
 import com.example.place.domain.vote.entity.VoteType;
 import com.example.place.domain.vote.repository.VoteRepository;
 
-
 import lombok.RequiredArgsConstructor;
 
 @Service

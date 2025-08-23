@@ -387,10 +387,10 @@ class ImageServiceTest {
 	@Test
 	void 게시글_빈페이지_대표이미지_맵_조회_성공() {
 		// given
-		Page<Item> pagedPosts = new PageImpl<>(List.of());
+		Page<Post> pagedPosts = new PageImpl<>(List.of());
 
 		// when
-		Map<Long, Image> result = imageService.getMainImagesForItems(pagedPosts);
+		Map<Long, Image> result = imageService.getMainImagesForPosts(pagedPosts);
 
 		// then
 		assertThat(result).isEmpty();
