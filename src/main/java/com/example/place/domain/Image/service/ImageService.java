@@ -171,21 +171,6 @@ public class ImageService {
 		return ImageDto.of(resultImageUrls, resultMainIndex);
 	}
 
-	// 특정 itemId와 연관된 이미지를 일괄로 삭제
-	@Transactional
-	public void deleteImageByItemId(Long itemId) {
-		// 연관 이미지들 삭제
-		List<Image> images = imageRepository.findByItemId(itemId);
-		imageRepository.deleteAll(images);
-	}
-
-	//특정 NewsfeedId와 연관된 이미지를 일괄로 삭제
-	@Transactional
-	public void deleteImageByNewsfeedId(Long newsfeedId) {
-		List<Image> images = imageRepository.findByNewsfeedId(newsfeedId);
-		imageRepository.deleteAll(images);
-	}
-
 	// 대표 이미지 인덱스 검증
 	private int validMainIndex(int listSize, int mainIndex) {
 
