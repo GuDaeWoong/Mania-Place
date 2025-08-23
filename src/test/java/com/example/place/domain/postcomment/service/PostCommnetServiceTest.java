@@ -23,7 +23,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.item.entity.Item;
-import com.example.place.domain.order.entity.Order;
 import com.example.place.domain.post.entity.Post;
 import com.example.place.domain.post.service.PostService;
 import com.example.place.domain.postcomment.dto.request.PostCommentRequestDto;

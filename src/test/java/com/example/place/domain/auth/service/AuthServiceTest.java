@@ -1,4 +1,4 @@
-package com.example.place.domain.auth;
+package com.example.place.domain.auth.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -20,8 +20,6 @@ import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.common.security.jwt.JwtUtil;
 import com.example.place.domain.auth.controller.dto.LoginRequestDto;
 import com.example.place.domain.auth.controller.dto.LoginResponseDto;
-import com.example.place.domain.auth.service.AuthService;
-import com.example.place.domain.auth.service.JwtBlacklistService;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.entity.UserRole;
 import com.example.place.domain.user.service.UserService;
