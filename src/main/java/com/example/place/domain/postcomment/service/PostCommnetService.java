@@ -78,19 +78,6 @@ public class PostCommnetService {
 		return new PageResponseDto<>(responsePage);
 	}
 
-	@Transactional
-	public void deletePostComment(Long postId, Long commentId, Long userId) {
-
-		postService.findByIdOrElseThrow(postId);
-
-		PostComment comment = postCommentRepository.findById(commentId)
-			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_COMMENT));
-
-		if (!comment.getUser().getId().equals(userId)) {
-			throw new CustomException(ExceptionCode.FORBIDDEN_COMMENT_ACCESS);
-		}
-		postCommentRepository.delete(comment);
-	}
 
 	@Loggable
 	@Transactional
