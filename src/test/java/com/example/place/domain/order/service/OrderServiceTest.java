@@ -1,6 +1,7 @@
 package com.example.place.domain.order.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDateTime;
@@ -154,6 +155,7 @@ public class OrderServiceTest {
 
 		// then
 		assertThat(responseDto).isNotNull();
+		assertThat(responseDto.getContent()).hasSize(2);
 	}
 
 	@Test
