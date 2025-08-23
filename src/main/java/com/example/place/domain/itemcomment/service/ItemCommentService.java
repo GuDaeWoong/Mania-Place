@@ -94,27 +94,6 @@ public class ItemCommentService {
 	// 상품 댓글 삭제
 	@Loggable
 	@Transactional
-	public void deleteItemComment(Long itemId, Long itemCommentId, CustomPrincipal principal) {
-		// 삭제할 댓글 조회
-		ItemComment comment = findByIdOrElseThrow(itemCommentId);
-
-		// 유효한 경로인지 확인(해당 itemCommentId의 대상 itemId가 일치하는지 확인)
-		if (comment.getItem().getId() != itemId) {
-			throw new CustomException(ExceptionCode.INVALID_PATH);
-		}
-
-		// 본인이 쓴 댓글인지 확인
-		if (comment.getUser().getId() != principal.getId()) {
-			throw new CustomException(ExceptionCode.FORBIDDEN_COMMENT_DELETE);
-		}
-
-		// 댓글 삭제
-		itemCommentRepository.deleteById(itemCommentId);
-	}
-
-	// 상품 댓글 삭제
-	@Loggable
-	@Transactional
 	public void softDeleteItemComment(Long itemId, Long itemCommentId, CustomPrincipal principal) {
 		// 삭제할 댓글 조회
 		ItemComment comment = findByIdOrElseThrow(itemCommentId);

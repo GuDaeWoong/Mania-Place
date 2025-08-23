@@ -1,4 +1,4 @@
-package com.example.place.domain.itemcomment;
+package com.example.place.domain.itemcomment.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -15,7 +15,6 @@ import com.example.place.domain.itemcomment.dto.request.ItemCommentRequest;
 import com.example.place.domain.itemcomment.dto.response.ItemCommentResponse;
 import com.example.place.domain.itemcomment.entity.ItemComment;
 import com.example.place.domain.itemcomment.repository.ItemCommentRepository;
-import com.example.place.domain.itemcomment.service.ItemCommentService;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.entity.UserRole;
 import com.example.place.domain.user.service.UserService;
@@ -203,18 +202,6 @@ class ItemCommentServiceTest {
 	@DisplayName("댓글 삭제 테스트")
 	class DeleteComment {
 		@Test
-		@DisplayName("성공 - Hard Delete")
-		void shouldHardDeleteComment_whenAuthorDeletes() {
-			mockFindComment(testComment);
-
-			// 하드 삭제 호출
-			itemCommentService.deleteItemComment(testItem.getId(), testComment.getId(), testPrincipal);
-
-			// DB 삭제 메서드 호출 검증
-			verify(itemCommentRepository).deleteById(testComment.getId());
-		}
-
-		@Test
 		@DisplayName("성공 - Soft Delete")
 		void shouldSoftDeleteComment_whenAuthorDeletes() {
 			mockFindComment(testComment);
@@ -236,18 +223,6 @@ class ItemCommentServiceTest {
 
 			assertCustomException(
 				() -> itemCommentService.softDeleteItemComment(testItem.getId(), testComment.getId(), anotherPrincipal),
-				ExceptionCode.FORBIDDEN_COMMENT_DELETE);
-		}
-
-		@Test
-		@DisplayName("실패 - 작성자가 아님 (Hard Delete)")
-		void shouldThrowException_whenNonAuthorTriesHardDelete() {
-			CustomPrincipal anotherPrincipal = new CustomPrincipal(99L, "anotherUser", "anotherUser",
-				"another@example.com", Collections.emptyList());
-			mockFindComment(testComment);
-
-			assertCustomException(
-				() -> itemCommentService.deleteItemComment(testItem.getId(), testComment.getId(), anotherPrincipal),
 				ExceptionCode.FORBIDDEN_COMMENT_DELETE);
 		}
 	}

@@ -263,32 +263,6 @@ class ImageServiceTest {
 	}
 
 	@Test
-	void 상품_이미지_삭제_성공() {
-		// given
-		List<Image> images = List.of(Image.of(TEST_ITEM, "img1.jpg", true));
-		when(imageRepository.findByItemId(TEST_ITEM.getId())).thenReturn(images);
-
-		// when
-		imageService.deleteImageByItemId(TEST_ITEM.getId());
-
-		// then
-		verify(imageRepository).deleteAll(images);
-	}
-
-	@Test
-	void 새소식_이미지_삭제_성공() {
-		// given
-		List<Image> images = List.of(Image.of(TEST_NEWSFEED, "img1.jpg", true));
-		when(imageRepository.findByNewsfeedId(TEST_NEWSFEED.getId())).thenReturn(images);
-
-		// when
-		imageService.deleteImageByNewsfeedId(TEST_NEWSFEED.getId());
-
-		// then
-		verify(imageRepository).deleteAll(images);
-	}
-
-	@Test
 	void 이미지_저장_대표인덱스_음수_기본값적용_성공() {
 		// when
 		imageService.createImages(TEST_ITEM, List.of("img1.jpg", "img2.jpg"), -1);
