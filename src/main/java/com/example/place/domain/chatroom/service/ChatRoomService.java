@@ -41,7 +41,7 @@ public class ChatRoomService {
                 item.getItemName(),
                 buyer.getNickname(),
                 seller.getNickname(),
-                "http://localhost:8080/ws/chat",
+                "http://3.35.134.31:8080/ws/chat",
                 "/sub/chatroom/" + roomId,
                 "/pub/chatroom/" + roomId
         );
@@ -52,7 +52,4 @@ public class ChatRoomService {
         return chatRoomRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_CHATROOM));
     }
-
-
-
 }
