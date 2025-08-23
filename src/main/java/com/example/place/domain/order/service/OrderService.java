@@ -1,7 +1,5 @@
 package com.example.place.domain.order.service;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -170,19 +168,4 @@ public class OrderService {
 		return UpdateOrderStatusResponseDto.from(order,mainImageUrl);
 	}
 
-	@Transactional
-	public void removeItemReferenceFromOrders(Long itemId) {
-		// 삭제 전 해당 상품의 진행 중인 주문이 없는 확인
-		boolean hasActiveOrders = orderRepository.existsByItemIdAndStatusIn(itemId,
-			List.of(OrderStatus.ORDERED, OrderStatus.READY));
-		if (hasActiveOrders) {
-			throw new CustomException(ExceptionCode.ITEM_HAS_ACTIVE_ORDERS);
-		}
-
-		// 주문 테이블의 상품 외래키 삭제
-		List<Order> orders = orderRepository.findByItemId(itemId);
-		for (Order order : orders) {
-			order.clearItem();
-		}
-	}
 }
