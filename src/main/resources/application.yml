@@ -35,6 +35,7 @@ spring:
     virtual-host: ${RABBITMQ_VHOST:/}   # AmazonMQ는 기본 "/" 사용
     ssl:
       enabled: true   # amqps는 SSL 필수
+      algorithm: TLSv1.2
 
   jpa:
     hibernate.ddl-auto: update
