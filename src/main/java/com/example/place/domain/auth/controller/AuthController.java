@@ -4,6 +4,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -36,10 +37,12 @@ public class AuthController {
 
 		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", loginResponse.getRefreshToken())
 			.httpOnly(true)
-			.secure(true)
+			// .secure(true)
+			.secure(false)
 			.path("/")
 			.maxAge(7 * 24 * 60 * 60)
-			.sameSite("Strict")
+			// .sameSite("Strict")
+			.sameSite("Lax")
 			.build();
 
 		response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
