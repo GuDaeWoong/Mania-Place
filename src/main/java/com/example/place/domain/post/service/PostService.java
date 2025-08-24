@@ -71,24 +71,6 @@ public class PostService {
 	}
 
 	//살까말까 삭제
-	@Transactional
-	public void deletePost(Long postId, Long userId) {
-		Post post = findByIdOrElseThrow(postId);
-
-		if (!post.getUser().getId().equals(userId)) {
-			throw new CustomException(ExceptionCode.FORBIDDEN_POST_DELETE);
-		}
-
-		postRepository.delete(post);
-	}
-
-	public Post findByIdOrElseThrow(Long id) {
-		return postRepository.findByIdAndIsDeletedFalse(id)
-			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_POST));
-	}
-
-
-
 	@Loggable
 	@Transactional
 	public void softDeletePost(Long postId, Long userId) {
@@ -107,5 +89,11 @@ public class PostService {
 		for (Post post : posts) {
 			post.delete();
 		}
+	}
+
+	@Transactional
+	public Post findByIdOrElseThrow(Long id) {
+		return postRepository.findByIdAndIsDeletedFalse(id)
+			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_POST));
 	}
 }
