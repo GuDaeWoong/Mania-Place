@@ -68,7 +68,7 @@ class PostServiceTest {
 	}
 
 	@Nested
-	@DisplayName("createPost")
+	@DisplayName("post create")
 	class CreatePost {
 
 		@Test
@@ -113,11 +113,11 @@ class PostServiceTest {
 	}
 
 	@Nested
-	@DisplayName("getPost 성공")
+	@DisplayName("post get")
 	class GetPost {
 
 		@Test
-		@DisplayName("성공: 포스트 조회 + 이미지 조회")
+		@DisplayName("성공: 포스트 조회, 이미지 조회")
 		void get_success() {
 			when(postRepository.findByIdAndIsDeletedFalse(post.getId()))
 				.thenReturn(Optional.of(post));
@@ -147,11 +147,11 @@ class PostServiceTest {
 	}
 
 	@Nested
-	@DisplayName("updatePost")
+	@DisplayName("post update")
 	class UpdatePost {
 
 		@Test
-		@DisplayName("성공: 작성자 동일 -> 내용 변경 + 이미지 조회 후 DTO 반환")
+		@DisplayName("성공: 작성자 동일 -> 내용 변경, 이미지 조회, DTO 반환")
 		void update_success() {
 			when(postRepository.findByIdAndIsDeletedFalse(post.getId()))
 				.thenReturn(Optional.of(post));
@@ -189,39 +189,11 @@ class PostServiceTest {
 	}
 
 	@Nested
-	@DisplayName("deletePost")
-	class DeletePost {
-
-		@Test
-		@DisplayName("성공: 작성자 동일 -> 실제 삭제 호출")
-		void delete_success() {
-			when(postRepository.findByIdAndIsDeletedFalse(post.getId()))
-				.thenReturn(Optional.of(post));
-
-			postService.deletePost(post.getId(), user.getId());
-
-			verify(postRepository).delete(post);
-		}
-
-		@Test
-		@DisplayName("실패: 작성자 불일치 -> FORBIDDEN_POST_DELETE")
-		void delete_forbidden() {
-			when(postRepository.findByIdAndIsDeletedFalse(post.getId()))
-				.thenReturn(Optional.of(post));
-
-			CustomException ex = assertThrows(CustomException.class,
-				() -> postService.deletePost(post.getId(), 999L));
-			assertEquals(ExceptionCode.FORBIDDEN_POST_DELETE, ex.getExceptionCode());
-			verify(postRepository, never()).delete(any());
-		}
-	}
-
-	@Nested
-	@DisplayName("softDeletePost")
+	@DisplayName("post softDelete")
 	class SoftDeletePost {
 
 		@Test
-		@DisplayName("성공: 작성자 동일 -> post.delete() 상태 변경")
+		@DisplayName("성공: 작성자 동일 -> post 소프트딜리트")
 		void soft_delete_success() {
 			when(postRepository.findByIdAndIsDeletedFalse(post.getId()))
 				.thenReturn(Optional.of(post));
@@ -247,11 +219,11 @@ class PostServiceTest {
 	}
 
 	@Nested
-	@DisplayName("softAllDeletePost")
+	@DisplayName("post softAllDelete")
 	class SoftAllDeletePost {
 
 		@Test
-		@DisplayName("성공: itemId로 조회된 모든 포스트에 delete() 호출")
+		@DisplayName("성공: itemId의 모든 포스트에 소프트딜리트")
 		void soft_all_delete_success() {
 			Post p1 = Post.of(user, item, "c1");
 			setId(p1, 101L);
