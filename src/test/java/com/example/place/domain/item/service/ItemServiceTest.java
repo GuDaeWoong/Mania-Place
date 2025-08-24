@@ -1,7 +1,6 @@
 package com.example.place.domain.item.service;
 
-import com.example.place.common.exception.enums.ExceptionCode;
-import com.example.place.common.exception.exceptionclass.CustomException;
+
 import com.example.place.domain.Image.dto.ImageDto;
 import com.example.place.domain.Image.service.ImageService;
 import com.example.place.domain.item.dto.request.ItemRequest;
@@ -22,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDateTime;
@@ -30,6 +30,7 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+
 import static org.mockito.Mockito.*;
 
 
@@ -54,8 +55,8 @@ class ItemServiceTest {
     private ItemRequest itemRequest;
     private ImageDto imageDto;
     private Item testItem;
-    private Long userId = 1L;
-    private Long itemId = 1L;
+    private final Long userId = 1L;
+    private final Long itemId = 1L;
 
     @BeforeEach
     void setUp() {
@@ -68,8 +69,6 @@ class ItemServiceTest {
                 "image",
                 UserRole.USER
         );
-        testUser = Mockito.spy(testUser);
-        doReturn(1L).when(testUser).getId();
 
         itemRequest = ItemRequest.builder()
                 .itemName("테스트 상품")
@@ -93,8 +92,6 @@ class ItemServiceTest {
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(10)
         );
-        testItem = Mockito.spy(testItem);
-        doReturn(1L).when(testItem).getId();
     }
 
     @Test
@@ -140,48 +137,45 @@ class ItemServiceTest {
                 .itemName("수정된 아이템 이름")
                 .imageUrls(List.of("xxx", "ccc"))
                 .mainIndex(1).build();
-        given(itemRepository.findById(anyLong())).willReturn(Optional.of(testItem));
+        // 이 테스트에만 필요한 spy 객체 생성
+        Item spyItem = Mockito.spy(testItem);
+        User spyUser = Mockito.spy(testUser);
+
+        // spy 객체에 대한 행동 정의
+        doReturn(1L).when(spyItem).getId();
+        doReturn(spyUser).when(spyItem).getUser();
+        doReturn(1L).when(spyUser).getId();
+
+
+        // itemRepository의 findById 메서드가 호출될 때 spyItem 반환하도록 설정
+        given(itemRepository.findById(anyLong())).willReturn(Optional.of(spyItem));
         given(imageService.updateImages(any(Item.class), anyList(), anyInt()))
                 .willReturn(updateImageDto);
+
         //when
-        ItemResponse response = itemService.updateItem(itemId, updateRequest, userId);
+        ItemResponse response = itemService.updateItem(spyItem.getId(), updateRequest, spyUser.getId());
         //then
         assertThat(response.getItemName()).isEqualTo("수정된 아이템 이름");
         assertThat(response.getMainIndex()).isEqualTo(1);
         assertThat(response.getImageUrls()).isEqualTo(List.of("updateUrl1, updateUrl2"));
     }
-
     @Test
-    @DisplayName("아이템 softDelte")
-    void softDeleteItme() {
+    @DisplayName("소프트 딜리트 성공")
+    void softDelete() {
         //given
-        given(itemRepository.findById(anyLong())).willReturn(Optional.of(testItem));
+        Item spyItem = Mockito.spy(testItem);
+        User spyUser = Mockito.spy(testUser);
+
+        doReturn(userId).when(spyUser).getId();
+        doReturn(spyUser).when(spyItem).getUser();
+        given(itemRepository.findById(anyLong())).willReturn(Optional.of(spyItem));
 
         //when
         itemService.softDeleteItem(itemId, userId);
 
         //then
-        verify(testItem, times(1)).delete();
-        verify(itemRepository, times(2)).findById(anyLong());
-    }
-//    @Test
-//    @DisplayName("아이템 논리적 삭제 테스트 : 권한 없음")
-//    void softDeleteItemForbidden() {
-//        // given
-//        // 다른 사용자의 ID를 준비
-//        Long anotherUserId = 2L;
-//
-//        // findByIdOrElseThrow가 호출되면 testItem을 반환하도록 설정
-//        given(itemRepository.findById(anyLong())).willReturn(Optional.of(testItem));
-//
-//        // when & then
-//        // CustomException이 발생하는지 검증
-//        assertThatThrownBy(() -> itemService.softDeleteItem(itemId, anotherUserId))
-//                .isInstanceOf(CustomException.class)
-//                .hasMessage(ExceptionCode.FORBIDDEN_ITEM_DELETE.getMessage());
-//
-//        // delete() 메서드가 호출되지 않았는지 검증
-//        verify(testItem, times(0)).delete();
-//    }
+        verify(spyItem, times(1)).delete();
 
+        verify(itemRepository, never()).deleteById(anyLong());
+    }
 }
