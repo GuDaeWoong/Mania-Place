@@ -113,11 +113,12 @@ class VoteServiceTest {
 		when(voteRepository.findByUserAndPostAndVoteType(any(), any(), any()))
 			.thenReturn(Optional.of(Vote.of(TEST_USER, TEST_POST, VoteType.LIKE)));
 
-		// when & then
+		// when
 		CustomException exception = assertThrows(CustomException.class, () ->
 			voteService.createVote(TEST_POST.getId(), request, TEST_USER.getId())
 		);
 
+		// then
 		assertEquals(ExceptionCode.ALREADY_VOTED, exception.getExceptionCode());
 	}
 
@@ -161,10 +162,11 @@ class VoteServiceTest {
 		when(postService.findByIdOrElseThrow(anyLong())).thenReturn(TEST_POST);
 		when(voteRepository.findByUserAndPostAndVoteType(any(), any(), any())).thenReturn(Optional.empty());
 
-		// when & then
+		// when
 		CustomException exception = assertThrows(CustomException.class, () ->
 			voteService.deleteVote(TEST_POST.getId(), request, TEST_USER.getId()));
 
+		// then
 		assertEquals(ExceptionCode.NOT_FOUND_VOTE, exception.getExceptionCode());
 	}
 
