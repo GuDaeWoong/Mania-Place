@@ -94,9 +94,8 @@ public class SearchKeywordService {
 		return keys;
 	}
 
-	/**
-	 * Redis ZUNIONSTORE 활용: 여러 키를 합산 후 상위 N개 조회
-	 */
+	// 기존 getTopRankedKeywords 메서드 주석 처리
+	/*
 	private List<KeywordRankingDto> getTopRankedKeywords(List<String> keys, int limit) {
 		if (keys.isEmpty()) {
 			return Collections.emptyList();
@@ -119,16 +118,151 @@ public class SearchKeywordService {
 			redisTemplate.delete(tempKey);
 		}
 	}
+	*/
 
 	/**
-	 * ZSet 합산 처리
+	 * Redis ZUNIONSTORE 활용: 여러 키를 합산 후 상위 N개 조회 (안전한 버전)
 	 */
+	private List<KeywordRankingDto> getTopRankedKeywords(List<String> keys, int limit) {
+		if (keys.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		// 실제 존재하는 키만 필터링
+		Set<String> existingKeys = redisTemplate.keys(KEYWORD_ZSET + ":*");
+		List<String> validKeys = keys.stream()
+			.filter(existingKeys::contains)
+			.collect(Collectors.toList());
+
+		log.info("요청된 키 개수: {}, 실제 존재하는 키 개수: {}", keys.size(), validKeys.size());
+
+		if (validKeys.isEmpty()) {
+			log.info("유효한 키가 없어 빈 결과 반환");
+			return Collections.emptyList();
+		}
+
+		// 키가 1개인 경우 union 없이 직접 조회
+		if (validKeys.size() == 1) {
+			String singleKey = validKeys.get(0);
+			Set<ZSetOperations.TypedTuple<String>> topEntries =
+				redisTemplate.opsForZSet().reverseRangeWithScores(singleKey, 0, limit - 1);
+			log.info("단일 키 직접 조회 결과: {} 개", topEntries != null ? topEntries.size() : 0);
+			return convertToRankingList(topEntries);
+		}
+
+		// 여러 키인 경우 ZUNIONSTORE 사용
+		String tempKey = "temp:ranking:" + UUID.randomUUID();
+
+		try {
+			// 각 키의 데이터 존재 여부 재확인
+			List<String> nonEmptyKeys = new ArrayList<>();
+			for (String key : validKeys) {
+				Long count = redisTemplate.opsForZSet().count(key, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+				if (count != null && count > 0) {
+					nonEmptyKeys.add(key);
+				}
+			}
+
+			log.info("데이터가 있는 키 개수: {}", nonEmptyKeys.size());
+
+			if (nonEmptyKeys.isEmpty()) {
+				return Collections.emptyList();
+			}
+
+			if (nonEmptyKeys.size() == 1) {
+				// 결국 키가 1개만 남으면 직접 조회
+				Set<ZSetOperations.TypedTuple<String>> topEntries =
+					redisTemplate.opsForZSet().reverseRangeWithScores(nonEmptyKeys.get(0), 0, limit - 1);
+				return convertToRankingList(topEntries);
+			}
+
+			// ZUNIONSTORE 실행
+			log.info("ZUNIONSTORE 실행 - 키 개수: {}", nonEmptyKeys.size());
+			unionZSets(nonEmptyKeys, tempKey);
+
+			// 상위 N개 점수 높은 순으로 조회
+			Set<ZSetOperations.TypedTuple<String>> topEntries =
+				redisTemplate.opsForZSet().reverseRangeWithScores(tempKey, 0, limit - 1);
+
+			log.info("ZUNIONSTORE 결과: {} 개", topEntries != null ? topEntries.size() : 0);
+			return convertToRankingList(topEntries);
+
+		} catch (Exception e) {
+			log.error("ZUNIONSTORE 실행 실패, 개별 키 조회로 대체", e);
+
+			// ZUNIONSTORE 실패 시 대체 로직: 각 키에서 개별 조회 후 수동 합산
+			return getTopKeywordsManually(validKeys, limit);
+
+		} finally {
+			// 임시 키 삭제
+			try {
+				redisTemplate.delete(tempKey);
+			} catch (Exception e) {
+				log.warn("임시 키 삭제 실패: {}", tempKey);
+			}
+		}
+	}
+
+	/**
+	 * ZUNIONSTORE 실패 시 대체 방법: 수동 합산
+	 */
+	private List<KeywordRankingDto> getTopKeywordsManually(List<String> keys, int limit) {
+		log.info("수동 합산 방식으로 키워드 랭킹 조회");
+
+		Map<String, Long> keywordScores = new HashMap<>();
+
+		for (String key : keys) {
+			try {
+				// 각 키에서 모든 데이터 조회
+				Set<ZSetOperations.TypedTuple<String>> keyData =
+					redisTemplate.opsForZSet().rangeWithScores(key, 0, -1);
+
+				if (keyData != null) {
+					for (ZSetOperations.TypedTuple<String> tuple : keyData) {
+						if (tuple.getValue() != null && tuple.getScore() != null) {
+							keywordScores.merge(tuple.getValue(),
+								tuple.getScore().longValue(),
+								Long::sum);
+						}
+					}
+				}
+			} catch (Exception e) {
+				log.warn("키 {} 조회 실패", key, e);
+			}
+		}
+
+		// 점수순으로 정렬 후 상위 N개 반환
+		return keywordScores.entrySet().stream()
+			.sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+			.limit(limit)
+			.map(entry -> new KeywordRankingDto(entry.getKey(), entry.getValue()))
+			.collect(Collectors.toList());
+	}
+
+	// 기존 unionZSets 메서드 주석 처리
+	/*
 	private void unionZSets(List<String> keys, String tempKey) {
 		if (keys.size() == 1) {
 			// 키가 1개면 union할 필요 없이 복사
 			redisTemplate.opsForZSet().unionAndStore(keys.get(0), Collections.emptySet(), tempKey);
 		} else {
 			redisTemplate.opsForZSet().unionAndStore(keys.get(0), keys.subList(1, keys.size()), tempKey);
+		}
+	}
+	*/
+
+	/**
+	 * ZSet 합산 처리 (안전한 버전)
+	 */
+	private void unionZSets(List<String> keys, String tempKey) {
+		if (keys.size() == 1) {
+			// 키가 1개면 복사
+			redisTemplate.opsForZSet().unionAndStore(keys.get(0), Collections.emptySet(), tempKey);
+		} else {
+			// 여러 키 합산
+			String firstKey = keys.get(0);
+			Collection<String> otherKeys = keys.subList(1, keys.size());
+			redisTemplate.opsForZSet().unionAndStore(firstKey, otherKeys, tempKey);
 		}
 	}
 
