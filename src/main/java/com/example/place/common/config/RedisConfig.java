@@ -1,5 +1,6 @@
 package com.example.place.common.config;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 import org.redisson.Redisson;
@@ -64,11 +65,18 @@ public class RedisConfig {
 		RedisTemplate<String, String> template = new RedisTemplate<>();
 		template.setConnectionFactory(connectionFactory);
 
+		// UTF-8 인코딩을 명시적으로 처리하는 StringRedisSerializer 사용
+		StringRedisSerializer stringSerializer = new StringRedisSerializer(StandardCharsets.UTF_8);
+
+
 		// String 직렬화 설정
 		template.setKeySerializer(new StringRedisSerializer());
 		template.setValueSerializer(new StringRedisSerializer());
 		template.setHashKeySerializer(new StringRedisSerializer());
 		template.setHashValueSerializer(new StringRedisSerializer());
+
+		// 기본 Serializer도 설정
+		template.setDefaultSerializer(stringSerializer);
 
 		template.afterPropertiesSet();
 		return template;
