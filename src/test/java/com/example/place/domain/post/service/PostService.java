@@ -44,7 +44,6 @@ class PostServiceTest {
 	@InjectMocks
 	private PostService postService;
 
-	// ---- Fixtures ----
 	private User user;
 	private Item item;
 	private Post post;
@@ -56,7 +55,6 @@ class PostServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		// 필요에 맞게 실제 정적 팩토리/생성자 사용
 		user = User.of("u", "nick", "u@u.com", "P@ssw0rd!", null, /*UserRole*/ null);
 		item = Item.of(user, "item", "desc", 100.0, 1L, false, null, null);
 		post = Post.of(user, item, "content");
@@ -83,7 +81,7 @@ class PostServiceTest {
 			when(itemService.findByIdOrElseThrow(item.getId())).thenReturn(item);
 			when(postRepository.save(any(Post.class))).thenAnswer(inv -> {
 				Post p = inv.getArgument(0);
-				// save 후 id가 부여되는 상황 흉내
+				// save 후 id가 부여
 				setId(p, 100L);
 				return p;
 			});
@@ -200,7 +198,6 @@ class PostServiceTest {
 
 			postService.softDeletePost(post.getId(), user.getId());
 
-			// 엔티티 상태 필드가 isDeleted 같은 것이라면 값 검증
 			Boolean isDeleted = (Boolean)ReflectionTestUtils.getField(post, "isDeleted");
 			assertTrue(isDeleted != null && isDeleted);
 			verify(postRepository, never()).delete(any());
