@@ -1,6 +1,5 @@
 package com.example.place.domain.order.service;
 
-import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.BDDMockito.*;
 
