@@ -191,8 +191,6 @@
 
 ### 디렉토리
 
-## 📂 프로젝트 구조
-
 ```plaintext
 📦 Mania-Place
 ├── 📂 common                  # 공통 모듈, 전체 프로젝트에서 재사용되는 코드
@@ -329,6 +327,8 @@
         ├── 📂 repository
         └── 📂 service
 ```
+
+---
 
 ## 🌊 서비스 플로우
 <img width="1995" height="1002" alt="image" src="https://github.com/user-attachments/assets/ee7ffc90-208b-4f39-87c2-2f1b896031a1" />
