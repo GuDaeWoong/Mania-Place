@@ -1,10 +1,13 @@
 package com.example.place.domain.newsfeedcomment.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.place.common.annotation.Loggable;
 import com.example.place.common.dto.PageResponseDto;
 import com.example.place.common.exception.enums.ExceptionCode;
 import com.example.place.common.exception.exceptionclass.CustomException;
@@ -29,6 +32,7 @@ public class NewsfeedCommentService {
 	private final NewsfeedCommentRepository newsfeedCommentRepository;
 
 	//댓글 생성
+	@Loggable
 	@Transactional
 	public NewsfeedCommentResponse createNewsfeedComment(Long newsfeedId, NewsfeedCommentRequest request,
 		CustomPrincipal principal) {
@@ -43,6 +47,7 @@ public class NewsfeedCommentService {
 	}
 
 	//댓글 조회
+	@Loggable
 	@Transactional
 	public PageResponseDto<NewsfeedCommentResponse> getAllCommentsByNewsfeeds(Long newsfeedId, Pageable pageable
 	) {
@@ -57,6 +62,7 @@ public class NewsfeedCommentService {
 	}
 
 	//댓글 수정
+	@Loggable
 	@Transactional
 	public NewsfeedCommentResponse updateNewsfeedComment(Long newsfeedId, Long commentId,
 		NewsfeedCommentRequest request, CustomPrincipal principal) {
@@ -69,11 +75,36 @@ public class NewsfeedCommentService {
 			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_COMMENT));
 
 		if (!newsfeedComment.getUser().getId().equals(user.getId())) {
-			throw new CustomException(ExceptionCode.FORBIDDEN_POST_ACCESS);
+			throw new CustomException(ExceptionCode.FORBIDDEN_NEWSFEED_ACCESS);
 		}
 
 		newsfeedComment.updateContent(request.getContent());
 
 		return NewsfeedCommentResponse.from(user, newsfeedComment);
+	}
+
+	//댓글 삭제
+	@Loggable
+	@Transactional
+	public void softDeleteNewsfeedComment(Long newsfeedId, Long commentId, Long userId) {
+
+		newsfeedService.findByIdOrElseThrow(newsfeedId);
+
+		NewsfeedComment comment = newsfeedCommentRepository.findByIdAndIsDeletedFalse(commentId)
+			.orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_COMMENT));
+
+		if (!comment.getUser().getId().equals(userId)) {
+			throw new CustomException(ExceptionCode.FORBIDDEN_COMMENT_ACCESS);
+		}
+		comment.delete();
+	}
+
+	@Transactional
+	public void softDeleteAllNewsfeedComment(Long newsfeedId) {
+		List<NewsfeedComment> comments = newsfeedCommentRepository.findByNewsfeedIdAndIsDeletedFalse(newsfeedId);
+
+		for (NewsfeedComment comment : comments) {
+			comment.delete();
+		}
 	}
 }

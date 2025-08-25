@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/health")
 public class HealthSummaryController {
 
-	@Autowired
-	private DatabaseHealthIndicator databaseHealth;
+	// @Autowired
+	// private DatabaseHealthIndicator databaseHealth;
 
-	@Autowired
-	private RedisHealthIndicator redisHealth;
+	// @Autowired
+	// private RedisHealthIndicator redisHealth;
 
 	@Autowired
 	private ServerHealthIndicator serverHealth;
@@ -24,21 +24,23 @@ public class HealthSummaryController {
 	@GetMapping("/simple")
 	public ResponseEntity<String> getSimpleStatus() {
 		try {
-			Health dbStatus = databaseHealth.health();
-			Health redisStatus = redisHealth.health();
+			// Health dbStatus = databaseHealth.health();
+			// Health redisStatus = redisHealth.health();
 			Health serverStatus = serverHealth.health();
 
 			boolean allHealthy =
-				"UP".equals(dbStatus.getStatus().getCode()) &&
-				"UP".equals(redisStatus.getStatus().getCode()) &&
+				// "UP".equals(dbStatus.getStatus().getCode()) &&
+				// "UP".equals(redisStatus.getStatus().getCode()) &&
 				"UP".equals(serverStatus.getStatus().getCode());
 
 			if (allHealthy) {
-				return ResponseEntity.ok("Mania-Place is healthy - DB:UP, Redis:UP, Server:UP");
+				// return ResponseEntity.ok("Mania-Place is healthy - DB:UP, Redis:UP, Server:UP");
+				return ResponseEntity.ok("Mania-Place is healthy Server:UP");
 			} else {
-				String message = String.format("Mania-Place has issues - DB:%s, Redis:%s, Server:%s",
-					dbStatus.getStatus().getCode(),
-					redisStatus.getStatus().getCode(),
+				// String message = String.format("Mania-Place has issues - DB:%s, Redis:%s, Server:%s",
+				String message = String.format("Mania-Place has issues - Server:%s",
+					// dbStatus.getStatus().getCode(),
+					// redisStatus.getStatus().getCode(),
 					serverStatus.getStatus().getCode());
 
 				return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(message);

@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
@@ -52,7 +53,9 @@ public class CacheConfig {
 		cacheConfigs.put("singleCache", defaultConfig.entryTtl(Duration.ofHours(1)));  // 단건 조회 캐시 - TTL 1시간
 		cacheConfigs.put("listCache", defaultConfig.entryTtl(Duration.ofMinutes(10))); // 전체 조회 캐시 - TTL 10분
 
-		return RedisCacheManager.builder(redisConnectionFactory)
+		RedisCacheWriter cacheWriter = RedisCacheWriter.nonLockingRedisCacheWriter(redisConnectionFactory);
+
+		return RedisCacheManager.builder(cacheWriter)
 			.cacheDefaults(defaultConfig)                  // 기본 설정
 			.withInitialCacheConfigurations(cacheConfigs) // 캐시별 커스텀 설정
 			.build();

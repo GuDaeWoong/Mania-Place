@@ -20,10 +20,12 @@ import com.example.place.domain.user.service.UserService;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 
 import com.example.place.common.exception.enums.ExceptionCode;
@@ -41,10 +43,24 @@ public class NewsfeedService {
 	private final UserService userService;
 	private final ImageService imageService;
 	private final MailRequestService mailRequestService;
+	private final RedisTemplate<String, String> redisTemplate;
+
+	// listCache 전체 삭제
+	public void evictListCache() {
+		ScanOptions options = ScanOptions.scanOptions().match("listCache::*").count(1000).build();
+		try (Cursor<byte[]> cursor = redisTemplate.getConnectionFactory()
+			.getConnection()
+			.scan(options)) {
+			while (cursor.hasNext()) {
+				redisTemplate.delete(new String(cursor.next()));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	@Loggable
 	@Transactional
-	@CacheEvict(value = "listCache", allEntries = true)
 	public NewsfeedResponse createNewsfeed(Long userId, NewsfeedRequest request) {
 		User user = userService.findByIdOrElseThrow(userId);
 
@@ -59,6 +75,9 @@ public class NewsfeedService {
 
 		// 새소식 메일
 		mailRequestService.enqueueNewsfeedEmailToAllUsers(request.getTitle());
+
+		// 캐시 전체 삭제
+		evictListCache();
 
 		return NewsfeedResponse.from(savedNewsfeed, imageDto);
 	}
@@ -115,10 +134,7 @@ public class NewsfeedService {
 
 	// 새소식 수정
 	@Transactional
-	@Caching(evict = {
-		@CacheEvict(value = "listCache", allEntries = true),     // 전체 목록 캐시 삭제
-		@CacheEvict(value = "singleCache", key = "#newsfeedId")   // 단건 캐시 특정 키 삭제
-	})
+	@CacheEvict(value = "singleCache", key = "#newsfeedId")   // 단건 캐시 특정 키 삭제
 	public NewsfeedResponse updateNewsfeed(Long newsfeedId, NewsfeedRequest request, Long userId) {
 		Newsfeed newsfeed = findByIdOrElseThrow(newsfeedId);
 
@@ -136,16 +152,16 @@ public class NewsfeedService {
 			? imageService.updateImages(newsfeed, request.getImageUrls(), request.getMainIndex())
 			: imageService.getNewsfeedImages(newsfeedId);
 
+		// 캐시 전체 삭제
+		evictListCache();
+
 		return NewsfeedResponse.from(newsfeed, imageDto);
 	}
 
 	// 새소식 삭제
 	@Loggable
 	@Transactional
-	@Caching(evict = {
-		@CacheEvict(value = "listCache", allEntries = true),     // 전체 목록 캐시 삭제
-		@CacheEvict(value = "singleCache", key = "#newsfeedId")   // 단건 캐시 특정 키 삭제
-	})
+	@CacheEvict(value = "singleCache", key = "#newsfeedId")   // 단건 캐시 특정 키 삭제
 	public void softDeleteNewsfeed(Long newsfeedId, Long userId) {
 		Newsfeed newsfeed = findByIdOrElseThrow(newsfeedId);
 
@@ -153,8 +169,10 @@ public class NewsfeedService {
 			throw new CustomException(ExceptionCode.FORBIDDEN_NEWSFEED_DELETE);
 		}
 
+		// 캐시 전체 삭제
+		evictListCache();
+
 		newsfeed.delete();
 	}
 
 }
-

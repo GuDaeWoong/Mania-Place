@@ -7,10 +7,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-@Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class ItemRequest {
 
     @NotBlank(message = "상품 이름은 필수입니다")

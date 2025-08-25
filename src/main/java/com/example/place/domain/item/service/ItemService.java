@@ -165,13 +165,22 @@ public class ItemService {
 		return ItemResponse.from(item, imageDto);
 	}
 
+	@Transactional
+	public void deleteItem(Long itemId, Long userId) {
+
+		if(!findByIdOrElseThrow(itemId).getUser().getId().equals(userId)) {
+			throw new CustomException(ExceptionCode.FORBIDDEN_ITEM_DELETE);
+		}
+
+		itemRepository.deleteById(itemId);
+	}
 
 	@Loggable
 	@Transactional
 	public void softDeleteItem(Long itemId, Long userId) {
 		Item item = findByIdOrElseThrow(itemId);
 
-		if (!item.getUser().getId().equals(userId)) {
+		if (!findByIdOrElseThrow(itemId).getUser().getId().equals(userId)) {
 			throw new CustomException(ExceptionCode.FORBIDDEN_ITEM_DELETE);
 		}
 
