@@ -170,10 +170,11 @@
 ## <h2 id="시스템-아키텍처">🖇️ 시스템 아키텍처</h2>
 
 ### Cloud Architecture
-<img width="1592" height="942" alt="image" src="https://github.com/user-attachments/assets/c3c7f9bb-7431-43a2-bb53-fbde8983b690" />
+<img width="1530" height="1182" alt="image" src="https://github.com/user-attachments/assets/bca68c3c-515a-4bad-a557-8f7cd7840bf2" />
 
 ### CI/CD Pipeline
-<img width="1696" height="718" alt="image" src="https://github.com/user-attachments/assets/8d366f45-59c0-42f2-ad2c-8bd94642ba38" />
+<img width="1696" height="718" alt="image" src="https://github.com/user-attachments/assets/5a268abe-d5e4-4830-8e00-00ad6b14a9b9" />
+
 
 ---
 
@@ -232,6 +233,101 @@
     │   └── 📂 service
     ├── 📂 Image               # 이미지
     │   ├── 📂 dto
+    │   ├── 📂 entity
+    │   ├── 📂 repository
+    │   └── 📂 service
+    ├── 📂 item                # 상품
+    │   ├── 📂 controller
+    │   ├── 📂 dto
+    │   │   ├── 📂 request
+    │   │   └── 📂 response
+    │   ├── 📂 entity
+    │   ├── 📂 repository
+    │   └── 📂 service
+    ├── 📂 itemcomment         # 상품 댓글
+    │   ├── 📂 controller
+    │   ├── 📂 dto
+    │   │   ├── 📂 request
+    │   │   └── 📂 response
+    │   ├── 📂 entity
+    │   ├── 📂 repository
+    │   └── 📂 service
+    ├── 📂 itemtag             # 상품 태그
+    │   ├── 📂 entity
+    │   └── 📂 repository
+    ├── 📂 keyword             # 키워드
+    │   ├── 📂 controller
+    │   ├── 📂 domain
+    │   │   ├── 📂 model
+    │   │   └── 📂 repository
+    │   └── 📂 service
+    │       └── 📂 dto
+    ├── 📂 newsfeed            # 뉴스피드
+    │   ├── 📂 controller
+    │   ├── 📂 dto
+    │   │   ├── 📂 request
+    │   │   └── 📂 response
+    │   ├── 📂 entity
+    │   ├── 📂 repository
+    │   └── 📂 service
+    ├── 📂 newsfeedcomment     # 뉴스피드 댓글
+    │   ├── 📂 controller
+    │   ├── 📂 dto
+    │   │   ├── 📂 request
+    │   │   └── 📂 response
+    │   ├── 📂 entity
+    │   ├── 📂 repository
+    │   └── 📂 service
+    ├── 📂 order               # 주문
+    │   ├── 📂 controller
+    │   ├── 📂 dto
+    │   │   ├── 📂 request
+    │   │   └── 📂 response
+    │   ├── 📂 entity
+    │   ├── 📂 repository
+    │   └── 📂 service
+    ├── 📂 post                # 게시글
+    │   ├── 📂 controller
+    │   ├── 📂 dto
+    │   │   ├── 📂 request
+    │   │   └── 📂 response
+    │   ├── 📂 entity
+    │   ├── 📂 repository
+    │   └── 📂 service
+    ├── 📂 postcomment         # 게시글 댓글
+    │   ├── 📂 controller
+    │   ├── 📂 dto
+    │   │   ├── 📂 request
+    │   │   └── 📂 response
+    │   ├── 📂 entity
+    │   ├── 📂 repository
+    │   └── 📂 service
+    ├── 📂 tag                 # 태그
+    │   ├── 📂 controller
+    │   ├── 📂 dto
+    │   │   ├── 📂 request
+    │   │   └── 📂 response
+    │   ├── 📂 entity
+    │   ├── 📂 repository
+    │   ├── 📂 service
+    │   └── 📂 util
+    ├── 📂 user                # 사용자
+    │   ├── 📂 controller
+    │   ├── 📂 dto
+    │   ├── 📂 entity
+    │   ├── 📂 repository
+    │   └── 📂 service
+    ├── 📂 usertag             # 사용자 태그
+    │   ├── 📂 entity
+    │   └── 📂 repository
+    └── 📂 vote                # 투표
+        ├── 📂 controller
+        ├── 📂 dto
+        │   ├── 📂 request
+        │   └── 📂 response
+        ├── 📂 entity
+        ├── 📂 repository
+        └── 📂 service
 ```
 
 ## 🌊 서비스 플로우
@@ -1201,19 +1297,32 @@ http 프로토콜은 단방향통신으로 설계되었는데 실시간 채팅�
 ### 3. 의사결정
 
 1. 폴링 : 스핀락처럼 계속해서 새로운 메세지를 확인하는 방식
+
 단점 :  메세지가 왔는지 계속 확인을 하는과정에서 계속해서 리소스를 사용하는데, 이런 문제를 해결하기 위해 1초마다 확인하는것을 5초마다 확인하는식으로 수정한다면 실시간채팅을 확인하기 위한 목적이 부정되는 모순이 발생해 적합하지 않은 방식이라고 판단했습니다.
+
 2. 롱폴링 : 요청을 보내고 새로운 메세지가 생기면 응답하는방식
+
 단점 : 폴링의 단점인 무의미한 요청을 계속 보내는것은 해결했지만 메세지가 생길때까지 연결을 유지하기때문에 쓰레드를 점유하는 문제가 있어 대규모 트래픽상황에서 부적합한 방식이라고 판단했습니다.
+
 3. SSE : 클라이언트가 서버에 연결을 요청하면 서버는 이 연결을 유지하며 새로운 데이터가 생길때마다 클라이언트에게 응답을주는 실시간 단방향 통신방식 
+
 단점 : 요청은 http, 응답은 sse로 구현은 가능하지만 기본적으로 단방향 통신을 위해 나온방식이기고  채팅과 같은 양방향 구조엔 적합하지 않다고 판단했습니다.
+
 4. websocket + stomp 
+
 websockete : 한 번 연결되면 양방향으로 계속 통신하는 양방향 통신지원 프로토콜 stateful한 프로토콜이기에 서로의 상태를 알수있어 채팅읽음, 채팅방 나감등의 정보도 실시간으로 알수가 있음. 
+
 stomp프로토콜 : 웹소캣 프로토콜의 위에서 동작하는 프로토콜로 send, subscribe, publish 등의 규정된 틀을 제공하는 서브 프로토콜
 단점 : 단일 서버에서는 수많은 websocket연결을 유지하고 stomp 통신처리하는것이 부담될 수 있습니다.
+
 5. 결정 
+
 위의 방안들중 서비스의 안정성, 자원 소모를 고려했을때 아래와같은 이유로 4번을 선택했습니다. 
+
 웹소켓 연결 자체는 스레드를 계속 점유하지 않고 대기하다가 stomp통신이 오갈때만 스레드가 할당되어 유지하는것에는 문제가없다고 판단했습니다.
- 또한 대용량 트래픽 상황에서는 TaskExecutor 설정을 통해 메시지 처리를 위한 스레드 풀의 크기를 유연하게 조절할 수 있어 유연한 대처에 적합하다고 판단했습니다. 
+
+또한 대용량 트래픽 상황에서는 TaskExecutor 설정을 통해 메시지 처리를 위한 스레드 풀의 크기를 유연하게 조절할 수 있어 유연한 대처에 적합하다고 판단했습니다. 
+
 단일서버로 인해 생기는 문제점은 메세지 큐등을 사용하여 여러 서버로 상태를 공유하는 방식으로 구현해 해결해 볼 수 있을 것 같아 websocket + stomp 방식으로 구현하기로 결정했습니다.
 
 ---
@@ -1252,7 +1361,9 @@ stomp프로토콜 : 웹소캣 프로토콜의 위에서 동작하는 프로토�
     
 ### 1. 배경
 
-기존 채팅 시스템은 메세지가 생성될 때마다 매번 데이터베이스에 직접 INSERT 쿼리를 보내는 동기적 방식으로 구현되어 있습니다. 이 방식은 트레픽이 몰리는 상황이라면 DB에 부하가 집중되어 성능이 떨어질 수 있고, DB 접근 과정에서 문제가 발생한다면 서비스 응답 자체가 지연되는 문제를 발생시키기도 합니다.
+기존 채팅 시스템은 메세지가 생성될 때마다 매번 데이터베이스에 직접 INSERT 쿼리를 보내는 동기적 방식으로 구현되어 있습니다. 
+
+이 방식은 트레픽이 몰리는 상황이라면 DB에 부하가 집중되어 성능이 떨어질 수 있고, DB 접근 과정에서 문제가 발생한다면 서비스 응답 자체가 지연되는 문제를 발생시키기도 합니다.
 
 ```
    //controller
@@ -1303,7 +1414,8 @@ stomp프로토콜 : 웹소캣 프로토콜의 위에서 동작하는 프로토�
 5.  결론 
 네개의 메세징 기술중 rabbitMQ와 activeMQ를 고민했습니다. 
 자바기반의 언어인 activeMQ가 호환성 문제 등 적합하다고도 생각했지만, 오히려 자바에 대한 높은 종속성이 추후 확장을 고려했을 때 결합도를 높일 수 있다고 생각했습니다. 
- 이번 고민의 가장 근본적인 부분인 유연성과 확장성, 느슨한 결합이라는 관점에서 보았을때  java message service 기반인 activeMQ보다는 AMPQ기반의 RabbitMQ를 선택하는게 고민했던 부분을 해소할 수 있다고 판단했습니다.
+
+이번 고민의 가장 근본적인 부분인 유연성과 확장성, 느슨한 결합이라는 관점에서 보았을때  java message service 기반인 activeMQ보다는 AMPQ기반의 RabbitMQ를 선택하는게 고민했던 부분을 해소할 수 있다고 판단했습니다.
 
 ---
 
@@ -1359,6 +1471,7 @@ stomp프로토콜 : 웹소캣 프로토콜의 위에서 동작하는 프로토�
 ### 5. 향후 고려 사항
 
 트래픽 증가 시 RabbitMQ 큐에 메시지가 쌓여 병목 현상이 발생하지 않도록 큐의 상태 모니터링시스템 구축이 필요할 수 있습니다.
+
 메시지 전송 실패 시 재시도 로직이나 데드 레터 큐(Dead Letter Queue)를 활용하는 방안을 고민해야 합니다.
 
 </details>
@@ -1466,6 +1579,8 @@ java -javaagent:/home/ubuntu/pinpoint-agent-2.5.3/pinpoint-bootstrap.jar \
 
 - **알림 시스템 구축**: 성능 임계치 초과 시 자동 알림 설정
 - **모니터링 도구 확장**: Prometheus, Grafana와의 통합 모니터링 구축
+
+<br>
 
 **위험 요소 및 대응 방안**
 
