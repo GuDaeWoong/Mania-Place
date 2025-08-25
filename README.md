@@ -187,7 +187,7 @@
 <img width="2048" height="1041" alt="image" src="https://github.com/user-attachments/assets/a377ae7f-d3aa-4bfd-9909-1942c743d9d7" />
 
 ### API 명세서
-
+[API 문서](https://documenter.getpostman.com/view/44682451/2sB3HetPFi)
 
 ### 디렉토리
 
@@ -2802,6 +2802,39 @@ Redis 캐싱 과정에서 객체 직렬화 설정이 없어서 기본 `JdkSerial
 </details>
 
 <details>
+<summary>🚨 순환 참조 문제</summary>
+
+### 1. 문제 상황
+
+- OrderService에서 ItemService 의존, ItemService에서도 재고 관리를 위해 OrderService 참조 필요
+- 양방향 의존성으로 인한 순환참조 발생
+
+---
+
+### 2. 원인 분석
+
+- OrderService → ItemService(상품 정보 조회)
+- ItemService → OrderService (재고 관리 로직)
+- 두 서비스 간 상호 참조로 인한 의존성 순환 구조
+
+---
+
+### 3. 문제 해결
+
+1. 재고 관리 로직을 별도의 `StockService`로 분리
+2. OrderService → StockService, ItemService → StockService(의존성 구조 개선)
+
+---
+
+### 4. 회고
+
+초기 설계단계에서 의존성 관계를 충분히 검토하지 못하였습니다
+
+향후 새로운 서비스 추가 시 의존성 다이어그램 사전 작성을 시도해 보고자 합니다.
+
+</details>
+
+<details>
 <summary>🚨 분산 락 구현 시 트랜잭션 전파 이슈</summary>
 
 ### 1. 문제 상황
@@ -2947,20 +2980,20 @@ public void decreaseStock(Long itemId, Long quantity) {
 
 ## 🧭 향후 개선 계획
 
-중고거래의 완성도를 높이기 위해 실제 택배사 api 연동을 고려했으나,
-api인증 절차와 테스트의 어려움이 있어 이번 프로젝트에서는 구현하지 못하였습니다.
+실제 택배사 API 연동 - API 인증 절차 및 배송 추적 기능 구현
 
-검색어 랭킹 기능 최적화
+결제 시스템 완성 - 실제 결제 API 연동으로 완성도 향상
 
-테스트 코드를 더욱 보강하고, 실제 운영 환경을 가정한 다양한 테스트를 통해 시스템의 안정성을 높이고 싶습니다. 
+회원가입 API 성능 최적화 - 현재 느린 응답 속도 개선
 
-회원가입 API의 성능이 다른 기능들에 비해 현저히 느린 문제가 있었습니다. 또한 프로젝트의 핵심 기능인 결제 시스템에서 실제 결제 API 연동을 완전히 구현하지 못해 완성도가 아쉬웠습니다.
+검색어 랭킹 기능 최적화 - 검색 성능 및 정확도 향상
 
-캐싱 fallback 메커니즘 구축 **pre heating 시스템 구축**
+캐싱 fallback 메커니즘 & Pre-heating 시스템 구축 - 시스템 안정성 확보
 
-**모니터링 시스템 알림 체계를 구축하는 방안이 필요해 보입니다.**
+모니터링 및 알림 체계 구축 - 실시간 시스템 상태 모니터링
 
-**채팅 기능 예외 처리 보강**  
-메시지 전송 실패 시 재시도 로직이나 데드 레터 큐(Dead Letter Queue)로 개선 계획이 있습니다.
+채팅 기능 예외 처리 보강 - 메시지 전송 실패 시 재시도 로직 및 Dead Letter Queue 도입
+
+테스트 코드 확충 - 운영 환경 가정한 다양한 테스트로 안정성 강화
 
 ---

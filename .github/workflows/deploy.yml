@@ -21,6 +21,10 @@ jobs:
       - name: Grant permission to gradlew
         run: chmod +x ./gradlew
 
+      # ✅ 테스트 실행
+      - name: Run Tests
+        run: ./gradlew test
+
       # ✅ 빌드 시 테스트 제외 (원하면 --no-daemon만 사용)
       - name: Build Spring Boot App
         run: ./gradlew clean build -x test
