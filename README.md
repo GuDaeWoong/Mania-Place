@@ -2802,6 +2802,39 @@ Redis 캐싱 과정에서 객체 직렬화 설정이 없어서 기본 `JdkSerial
 </details>
 
 <details>
+<summary>🚨 순환 참조 문제</summary>
+
+### 1. 문제 상황
+
+- OrderService에서 ItemService 의존, ItemService에서도 재고 관리를 위해 OrderService 참조 필요
+- 양방향 의존성으로 인한 순환참조 발생
+
+---
+
+### 2. 원인 분석
+
+- OrderService → ItemService(상품 정보 조회)
+- ItemService → OrderService (재고 관리 로직)
+- 두 서비스 간 상호 참조로 인한 의존성 순환 구조
+
+---
+
+### 3. 문제 해결
+
+1. 재고 관리 로직을 별도의 `StockService`로 분리
+2. OrderService → StockService, ItemService → StockService(의존성 구조 개선)
+
+---
+
+### 4. 회고
+
+초기 설계단계에서 의존성 관계를 충분히 검토하지 못하였습니다
+
+향후 새로운 서비스 추가 시 의존성 다이어그램 사전 작성을 시도해 보고자 합니다.
+
+</details>
+
+<details>
 <summary>🚨 분산 락 구현 시 트랜잭션 전파 이슈</summary>
 
 ### 1. 문제 상황
