@@ -1,8 +1,7 @@
 package com.example.place.domain.item.dto.request;
 
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,6 +9,8 @@ import java.util.Set;
 
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class ItemRequest {
 
     @NotBlank(message = "상품 이름은 필수입니다")
