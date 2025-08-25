@@ -1,6 +1,5 @@
-package com.example.place.domain.keyword;
+package com.example.place.domain.keyword.service;
 
-import com.example.place.domain.keyword.service.SearchKeywordService;
 import com.example.place.domain.keyword.service.dto.KeywordRankingDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,7 +51,7 @@ class SearchKeywordServiceTest {
 	 */
 	@Test
 	void addKeyword_validKeyword_shouldIncrementScoreAndSetExpire() {
-		when(redisTemplate.getExpire(anyString())).thenReturn(-1L); // TTL 없음 가정
+		when(redisTemplate.getExpire(anyString())).thenReturn(-1L);
 
 		searchKeywordService.addKeyword(TEST_KEYWORD);
 
@@ -65,7 +64,7 @@ class SearchKeywordServiceTest {
 	 */
 	@Test
 	void addKeyword_whenTTLExists_shouldNotResetExpire() {
-		when(redisTemplate.getExpire(anyString())).thenReturn(1000L); // TTL 이미 있음
+		when(redisTemplate.getExpire(anyString())).thenReturn(1000L);
 
 		searchKeywordService.addKeyword(TEST_KEYWORD);
 
