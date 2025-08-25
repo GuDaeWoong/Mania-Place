@@ -1773,9 +1773,10 @@ DB 부하를 Redis로 이전하여 1차적인 시스템 안정성 확보에는 �
 
 **[Response Times Over Time(시간 경과별 응답 시간)]**
 
-| <img width="2048" height="1651" alt="image" src="https://github.com/user-attachments/assets/4940f656-9076-4a05-9dd5-202f66e2f98e" /> <br> [개선 전] : 3,000ms 이상 구간에서 요동 <br> (y축: 0~4000ms/ x축: 0~33s) | <img width="2048" height="1643" alt="image" src="https://github.com/user-attachments/assets/a9aac996-3ad4-41ec-b47c-e9be70979c93" /> <br> [인메모리 캐싱 적용] : 500~660ms 범위에서 안정 <br> (y축: 0~660ms/ x축: 0~7s) |
-| <img width="2048" height="1624" alt="image" src="https://github.com/user-attachments/assets/5a54eb91-1f4a-4791-9415-f725fd9fc099" /> <br> [카페인 캐싱 적용] : 500~600ms 범위 <br> (y축: 0~600ms/ x축: 0~6s)
- | <img width="2048" height="1627" alt="image" src="https://github.com/user-attachments/assets/ead609d7-d6a0-454a-93b4-2b8f2360db99" /> <br> [레디스 캐싱 적용] : 550~700ms 범위 <br> (y축: 0~700ms/ x축: 0~6s) |
+| <img width="2048" height="1651" alt="image" src="https://github.com/user-attachments/assets/4940f656-9076-4a05-9dd5-202f66e2f98e" /> | <img width="2048" height="1643" alt="image" src="https://github.com/user-attachments/assets/a9aac996-3ad4-41ec-b47c-e9be70979c93" /> |
+| [개선 전] : 3,000ms 이상 구간에서 요동 <br> (y축: 0~4000ms/ x축: 0~33s) | [인메모리 캐싱 적용] : 500~660ms 범위에서 안정 <br> (y축: 0~660ms/ x축: 0~7s) |
+| <img width="2048" height="1624" alt="image" src="https://github.com/user-attachments/assets/5a54eb91-1f4a-4791-9415-f725fd9fc099" /> | <img width="2048" height="1627" alt="image" src="https://github.com/user-attachments/assets/ead609d7-d6a0-454a-93b4-2b8f2360db99" /> |
+| [카페인 캐싱 적용] : 500~600ms 범위 <br> (y축: 0~600ms/ x축: 0~6s) | [레디스 캐싱 적용] : 550~700ms 범위 <br> (y축: 0~700ms/ x축: 0~6s) |
     
 ```
 ```
