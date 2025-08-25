@@ -75,7 +75,6 @@ public class NewsfeedController {
 		@PathVariable Long newsfeedId,
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
-
 		newsfeedDeleteService.removeReferencesAndDeleteNewsfeed(newsfeedId, principal.getId());
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 삭제가 완료되었습니다.", null));
 	}

@@ -19,5 +19,4 @@ public class NewsfeedDeleteService {
 		newsfeedService.softDeleteNewsfeed(newsfeedId, userId);
 		newsfeedCommentService.softDeleteAllNewsfeedComment(newsfeedId);
 	}
-
 }

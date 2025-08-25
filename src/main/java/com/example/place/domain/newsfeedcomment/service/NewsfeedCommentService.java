@@ -101,7 +101,6 @@ public class NewsfeedCommentService {
 
 	@Transactional
 	public void softDeleteAllNewsfeedComment(Long newsfeedId) {
-
 		List<NewsfeedComment> comments = newsfeedCommentRepository.findByNewsfeedIdAndIsDeletedFalse(newsfeedId);
 
 		for (NewsfeedComment comment : comments) {
