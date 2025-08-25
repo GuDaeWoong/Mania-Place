@@ -210,4 +210,5 @@ public class ItemService {
 				: LocalDateTime.of(3000, 1, 1, 0, 0);
 		return List.of(salesStartAt, salesEndAt);
 	}
+
 }
