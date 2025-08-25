@@ -6,6 +6,7 @@ import com.example.place.common.security.jwt.CustomPrincipal;
 import com.example.place.domain.newsfeed.dto.request.NewsfeedRequest;
 import com.example.place.domain.newsfeed.dto.response.NewsfeedListResponse;
 import com.example.place.domain.newsfeed.dto.response.NewsfeedResponse;
+import com.example.place.domain.newsfeed.service.NewsfeedDeleteService;
 import com.example.place.domain.newsfeed.service.NewsfeedService;
 
 import org.springframework.data.domain.Pageable;
@@ -25,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class NewsfeedController {
 
 	private final NewsfeedService newsfeedService;
+	private final NewsfeedDeleteService newsfeedDeleteService;
 
 	//새소식 생성
 	@PostMapping("/admin/newsfeeds")
@@ -74,7 +76,7 @@ public class NewsfeedController {
 		@AuthenticationPrincipal CustomPrincipal principal
 	) {
 
-		newsfeedService.softDeleteNewsfeed(newsfeedId, principal.getId());
+		newsfeedDeleteService.removeReferencesAndDeleteNewsfeed(newsfeedId, principal.getId());
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.of("게시글 삭제가 완료되었습니다.", null));
 	}
 }
