@@ -45,7 +45,6 @@ public class NewsfeedService {
 	private final UserService userService;
 	private final ImageService imageService;
 	private final MailRequestService mailRequestService;
-	private final NewsfeedCommentService newsfeedCommentService;
 	private final RedisTemplate<String, String> redisTemplate;
 
 	// listCache 전체 삭제
@@ -176,7 +175,6 @@ public class NewsfeedService {
 		evictListCache();
 
 		newsfeed.delete();
-		newsfeedCommentService.softDeleteAllNewsfeedComment(newsfeedId);
 	}
 
 }
