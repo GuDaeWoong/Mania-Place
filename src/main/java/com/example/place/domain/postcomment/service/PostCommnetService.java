@@ -80,6 +80,7 @@ public class PostCommnetService {
 		return new PageResponseDto<>(responsePage);
 	}
 
+
 	@Loggable
 	@Transactional
 	public void softDeletePostComment(Long postId, Long commentId, Long userId) {

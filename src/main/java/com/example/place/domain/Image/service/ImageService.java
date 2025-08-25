@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,8 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.place.common.exception.enums.ExceptionCode;
-import com.example.place.common.exception.exceptionclass.CustomException;
 import com.example.place.domain.Image.dto.ImageDto;
 import com.example.place.domain.Image.entity.Image;
 import com.example.place.domain.Image.repository.ImageRepository;
@@ -172,21 +169,6 @@ public class ImageService {
 		}
 
 		return ImageDto.of(resultImageUrls, resultMainIndex);
-	}
-
-	// 특정 itemId와 연관된 이미지를 일괄로 삭제
-	@Transactional
-	public void deleteImageByItemId(Long itemId) {
-		// 연관 이미지들 삭제
-		List<Image> images = imageRepository.findByItemId(itemId);
-		imageRepository.deleteAll(images);
-	}
-
-	//특정 NewsfeedId와 연관된 이미지를 일괄로 삭제
-	@Transactional
-	public void deleteImageByNewsfeedId(Long newsfeedId) {
-		List<Image> images = imageRepository.findByNewsfeedId(newsfeedId);
-		imageRepository.deleteAll(images);
 	}
 
 	// 대표 이미지 인덱스 검증

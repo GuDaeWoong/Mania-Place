@@ -2,8 +2,6 @@ package com.example.place.domain.Image.dto;
 
 import java.util.List;
 
-import com.example.place.domain.Image.entity.Image;
-
 import lombok.Getter;
 
 @Getter

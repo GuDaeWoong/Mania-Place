@@ -71,8 +71,8 @@ public class SearchKeywordService {
 			// 1. 24시간 전부터 지금까지의 키들 만들기
 			List<String> hourlyKeys = generateHourlyKeys();
 
-			// 2. Redis에서 여러 ZSet 합산 후 상위 N개 바로 조회
-			return getTopRankedKeywords(hourlyKeys, limit);
+			// 2. Redis에서 여러 ZSet 합산 후 상위 N개 바로 조회 (KEYS 명령어 없이)
+			return getTopRankedKeywordsWithoutKeys(hourlyKeys, limit);
 		} catch (Exception e) {
 			log.error("인기 검색어 조회 실패", e);
 			return Collections.emptyList();
@@ -95,41 +95,55 @@ public class SearchKeywordService {
 	}
 
 	/**
-	 * Redis ZUNIONSTORE 활용: 여러 키를 합산 후 상위 N개 조회
+	 * KEYS 명령어 없이 키워드 랭킹 조회 (수동 합산 방식)
 	 */
-	private List<KeywordRankingDto> getTopRankedKeywords(List<String> keys, int limit) {
-		if (keys.isEmpty()) {
+	private List<KeywordRankingDto> getTopRankedKeywordsWithoutKeys(List<String> keys, int limit) {
+		log.info("수동 합산 방식으로 키워드 랭킹 조회 시작 - 대상 키 개수: {}", keys.size());
+
+		Map<String, Long> keywordScores = new HashMap<>();
+		int validKeyCount = 0;
+
+		for (String key : keys) {
+			try {
+				// 각 키에서 모든 데이터 조회 (키가 없으면 빈 Set 반환됨)
+				Set<ZSetOperations.TypedTuple<String>> keyData =
+					redisTemplate.opsForZSet().rangeWithScores(key, 0, -1);
+
+				if (keyData != null && !keyData.isEmpty()) {
+					validKeyCount++;
+					log.debug("키 {} 에서 {} 개 데이터 조회됨", key, keyData.size());
+
+					for (ZSetOperations.TypedTuple<String> tuple : keyData) {
+						if (tuple.getValue() != null && tuple.getScore() != null) {
+							keywordScores.merge(tuple.getValue(),
+								tuple.getScore().longValue(),
+								Long::sum);
+						}
+					}
+				} else {
+					log.debug("키 {} 는 비어있음", key);
+				}
+			} catch (Exception e) {
+				log.warn("키 {} 조회 실패: {}", key, e.getMessage());
+			}
+		}
+
+		log.info("유효한 키 개수: {}, 총 키워드 개수: {}", validKeyCount, keywordScores.size());
+
+		if (keywordScores.isEmpty()) {
+			log.info("집계된 키워드가 없음 - 빈 결과 반환");
 			return Collections.emptyList();
 		}
 
-		String tempKey = "temp:ranking:" + UUID.randomUUID();
+		// 점수순으로 정렬 후 상위 N개 반환
+		List<KeywordRankingDto> result = keywordScores.entrySet().stream()
+			.sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+			.limit(limit)
+			.map(entry -> new KeywordRankingDto(entry.getKey(), entry.getValue()))
+			.collect(Collectors.toList());
 
-		try {
-			// ZUNIONSTORE: keys의 모든 ZSet을 합산해 tempKey에 저장
-			unionZSets(keys, tempKey);
-
-			// 상위 N개 점수 높은 순으로 조회
-			Set<ZSetOperations.TypedTuple<String>> topEntries =
-				redisTemplate.opsForZSet().reverseRangeWithScores(tempKey, 0, limit - 1);
-
-			return convertToRankingList(topEntries);
-
-		} finally {
-			// 임시 키 삭제
-			redisTemplate.delete(tempKey);
-		}
-	}
-
-	/**
-	 * ZSet 합산 처리
-	 */
-	private void unionZSets(List<String> keys, String tempKey) {
-		if (keys.size() == 1) {
-			// 키가 1개면 union할 필요 없이 복사
-			redisTemplate.opsForZSet().unionAndStore(keys.get(0), Collections.emptySet(), tempKey);
-		} else {
-			redisTemplate.opsForZSet().unionAndStore(keys.get(0), keys.subList(1, keys.size()), tempKey);
-		}
+		log.info("최종 랭킹 결과 개수: {}", result.size());
+		return result;
 	}
 
 	/**
