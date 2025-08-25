@@ -1777,97 +1777,745 @@ DB 부하를 Redis로 이전하여 1차적인 시스템 안정성 확보에는 �
 | [개선 전] : 3,000ms 이상 구간에서 요동 <br> (y축: 0~4000ms/ x축: 0~33s) | [인메모리 캐싱 적용] : 500~660ms 범위에서 안정 <br> (y축: 0~660ms/ x축: 0~7s) |
 | <img width="2048" height="1624" alt="image" src="https://github.com/user-attachments/assets/5a54eb91-1f4a-4791-9415-f725fd9fc099" /> | <img width="2048" height="1627" alt="image" src="https://github.com/user-attachments/assets/ead609d7-d6a0-454a-93b4-2b8f2360db99" /> |
 | [카페인 캐싱 적용] : 500~600ms 범위 <br> (y축: 0~600ms/ x축: 0~6s) | [레디스 캐싱 적용] : 550~700ms 범위 <br> (y축: 0~700ms/ x축: 0~6s) |
-    
+
+- 캐싱 전: 평균 응답 시간이 3,000ms 이상이며, 모든 요청을 처리하는 데 약 33초가 소요된다.
+- 캐싱 후: 응답 시간이 대체로 400~700ms 사이로 개선되었고, 모든 요청 처리 시간은 약 10초 내외이다.
+
+**[Transactions per Second(초당 처리 건수)]**
+
+<img width="2048" height="1650" alt="image" src="https://github.com/user-attachments/assets/8e12efa6-a829-477b-9fd2-b805afb13b3d" />
+[개선 전] : 100~190건 사이의 값에서 요동
+(y축: 0~200/ x축:0~33s)
+
+<img width="2048" height="1645" alt="image" src="https://github.com/user-attachments/assets/d9f48bfa-d1c8-4d31-8b46-b953971396a5" />
+[인메모리 캐싱 적용] : 950건까지 상승하다 하강
+(y축: 0~950/ x축:0~7s)
+
+<img width="2048" height="1629" alt="image" src="https://github.com/user-attachments/assets/5e6e3806-0534-453e-9e9b-5aa8a1baf711" />
+[카페인 캐싱 적용] : 1000건까지 상승하다 하강
+(y축: 0~1000/ x축:0~7s)
+
+<img width="2048" height="1624" alt="image" src="https://github.com/user-attachments/assets/792cfd99-c934-4fa3-a1dc-cfba06b06f5a" />
+[레디스 캐싱 적용] : 850건까지 상승하다 하강
+(y축: 0~900/ x축:0~6s)
+
+- 캐싱 전: 그래프가 흔들리는 모양을 띄며, 대체적으로 100~190건의 요청을 초마다 응답하고 있다.
+- 캐싱 후: 그래프가 위로 볼록한 곡선(3차 함수 형태)을 보이며, 초당 최대 약 1,000건의 요청을 처리한다.
+<br>
+**[총합 보고서]**
+
+| 캐시 종류 | 평균 | 99% | 최소 | 최대 | 오류률 | 처리량 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 캐시 없음 | 3010 | 4765 | 75 | 6009 | 0.00% | 152.3/sec |
+| 인메모리 캐시 | 539 | 1092 | 12 | 2086 | 0.00% | 765.3/sec |
+| Caffeine 캐시 | 506 | 1031 | 11 | 1405 | 0.00% | 806.6/sec |
+| Redis 캐시 | 551 | 1097 | 13 | 1500 | 0.00% | 733.9/sec |
+1. **평균 응답 시간**
+    - Caffeine(506ms) < 인메모리(539ms) < Redis(551ms) ≪ 캐시 없음(3010ms)
+2. **99퍼센타일 응답 시간** **(최악 성능)**
+    - Caffeine(1031ms) < 인메모리(1092ms) ≈ Redis(1097ms)  ≪ 캐시 없음(4765ms)
+3. **응답 시간 일관성**
+    - Caffeine ≈ Redis ≈ 인메모리 > 캐시 없음
+4. **처리량 (TPS)**
+    - Caffeine(806.6) > 인메모리(765.3) > Redis(733.9)  ≫ 캐시 없음(152.3)
+
+**✔️   최종 선택**
+
+| 방식 | 장점 | 단점 | 적합한 환경 |
+| --- | --- | --- | --- |
+| **캐시 없음** | 구현 단순 | 성능·안정성 모두 열세 | 권장하지 않음 |
+| **인메모리 캐싱** | 구현 간단, 단일 인스턴스에 적합 | Redis·Caffeine 대비 성능 낮음 | 단일 서버, 간단한 구조 |
+| **Caffeine 캐싱** | 속도·처리량 우수, 변동 폭 최소 | 단일 인스턴스 한정 | 최고 성능이 필요한 단일 서버 |
+| **Redis 캐싱** | TPS 유지력 우수, 멀티 서버 환경 지원 | 네트워크 오버헤드 발생 | 대규모 분산 환경 |
+1. 테스트 결과 **Caffeine**이 응답 시간과 처리량 면에서 가장 우수했으나(평균·p99·TPS 모두 선두), Caffeine과 다른 캐시들 간 성능 격차는 크지 않았습니다. 
+2. 인메모리 캐시는 JVM 내부 한정으로 멀티 서버 환경에서 확장성과 운영에 한계가 있습니다.
+3. 본 프로젝트는 다른 영역에서 분산 환경 확장성을 고려해 적합한 기술을 도입했으며, 캐싱도 같은 관점에서 결정했습니다. 기업 환경에서는 이와 같은 이유로 **Redis 등 분산 캐시**를 널리 사용합니다.
+
+따라서 캐시 미사용 대비 현저한 성능 향상이 확인되었고, 전체적인 성능 격차가 크지 않다는 점과 분산 구조에서의 적합성을 종합적으로 고려하여 **최종적으로 Redis를 선택**했습니다.
+
+#### ✔️ 최종 구현
+
 ```
+// build.gradle
+dependencies {
+	// redis 캐시
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	//json 직렬화를 위한 jackson
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+}
 ```
 
 ```
+@Configuration
+@EnableCaching
+public class CacheConfig {
+
+	@Bean
+	public RedisCacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
+		// 자바 타임 모듈 등록하여 LocalDateTime -> ISO-8601 형태로 직렬화
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JavaTimeModule());
+		mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+		// 타입 정보 포함 (직렬화/역직렬화 시 클래스 정보 유지)
+		mapper.activateDefaultTyping(
+			LaissezFaireSubTypeValidator.instance,
+			ObjectMapper.DefaultTyping.NON_FINAL,
+			JsonTypeInfo.As.PROPERTY
+		);
+
+		GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(mapper);
+
+		// 캐시 설정
+    RedisCacheConfiguration cacheConfig = RedisCacheConfiguration.defaultCacheConfig()
+        .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer())) // 키는 문자열 직렬화
+        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer)) // 값은 JSON 직렬화
+        .disableCachingNullValues() // null은 캐시에 저장하지 않음
+        .entryTtl(Duration.ofMinutes(10)); // TTL 10분
+
+    return RedisCacheManager.builder(redisConnectionFactory)
+        .cacheDefaults(cacheConfig) // 캐시 설정
+        .build();
+	}
+}
 ```
 
 ```
+@Service
+@RequiredArgsConstructor
+public class NewsfeedService {
+
+	private final NewsfeedRepository newsfeedRepository;
+	private final UserService userService;
+	private final ImageService imageService;
+	
+	@Loggable
+	@Transactional(readOnly = true)
+	@Cacheable(
+		value = "listCache",
+		key = "#pageable.pageNumber + '-' + #pageable.pageSize + '-' + #pageable.sort.toString()"
+	)
+	public PageResponseDto<NewsfeedListResponse> getAllNewsfeeds(Pageable pageable) {
+
+		// 새소식 전체 조회(소프트딜리트 빼고)
+		Page<Newsfeed> pagedNewsfeeds = newsfeedRepository.findByIsDeletedFalseWithFetchJoin(pageable);
+
+		// 페이지에 들어갈 대표 이미지 일괄 조회
+		Map<Long, Image> mainImageMap = imageService.getMainImagesForNewsfeeds(pagedNewsfeeds);
+
+		List<NewsfeedListResponse> contentList = pagedNewsfeeds.stream().map(newsfeed -> {
+        Image mainImage = mainImageMap.getOrDefault(newsfeed.getId(), null);
+        return NewsfeedListResponse.of(newsfeed, mainImage != null ? mainImage.getImageUrl() : null);
+    })
+    .collect(Collectors.toList()); // 가변 리스트로 변환
+
+    return new PageResponseDto<>(
+        new PageImpl<>(contentList, pageable, pagedNewsfeeds.getTotalElements())
+    );
+	}
+}
 ```
 
-```
-```
+- JPA에서 반환하는 `Page.getContent()`는 보통 불변 리스트로 감싸져 있어서, 직접 캐시에 넣으면 직렬화 문제가 발생
+- `PageResponseDto` 내부 `content` 필드는 `Page.getContent()`를 받아서 초기화하므로, 전달하는 `Page`의 리스트로 가변 리스트 필요
+- 따라서, 서비스 레이어에서 `Page<T>`의 내용을 가변 리스트로 새로 수집 후, 그 리스트를 사용해 `PageImpl`을 새로 생성하여 전달
+- `PageImpl`은 리스트를 복사하거나 불변으로 감싸지 않기 때문에, 개발자가 넘긴 가변 리스트를 그대로 유지
+
+---
+
+### 5. 해결 완료
+
+**결과와 효과**
+
+- **분산 환경과 확장성**: 서버 간 캐시 데이터 공유가 가능하여 분산 환경 구축과 확장이 용이합니다.
+- **높은 처리량과 안정성**: TPS 유지력이 뛰어나 높은 부하도 원활히 처리하며, 가용성·복제·영속성 옵션으로 안정적인 운영이 가능합니다.
+- **유연한 관리**: 캐시 매니저를 통한 설정 관리와 다양한 모니터링 도구를 지원합니다.
+- **다양한 데이터 구조 및 호환성**: Hash, List, Set, Sorted Set 등 다양한 데이터 구조를 저장할 수 있으며, 여러 언어와 플랫폼과 호환됩니다.
+
+**주의 사항 / 한계**
+
+- **외부 서버 의존**: 캐시가 외부 서버에 의존합니다.
+- **운영 및 유지보수 부담**: 관리 비용과 설정, 직렬화/역직렬화 구현이 필요하며, 튜닝 학습이 요구됩니다.
+- **네트워크 위험**: 네트워크 오버헤드 발생 가능성과 장애 시 캐시 접근 지연 또는 실패 위험이 있습니다.
+- **초기 지연 가능성**: 캐시 미스 발생 시 초기 지연(콜드 스타트)이 발생할 수 있습니다.
+
+---
+
+### 6. 향후 개선 사항
+
+- **콜드 스타트 문제 해결**
+    - 새 게시글 작성 시 캐시에 미리 적재하는 프리히팅 전략 도입합니다.
+    - TTL을 동적으로 조절하여 신규 새소식 등록 시 캐싱을 더 오랜 시간(예: 1시간) 동안 유지합니다.
+- **장애 대응 강화**
+    - 네트워크 장애나 서버 오류 시 예외 처리를 추가합니다.
+    - 폴백(fallback) 메커니즘과 타임아웃 설정 강화, 서비스 연속성을 확보합니다.
+- **가용성·복제·영속성 옵션 적용**
+    - 제공되는 옵션을 적극 도입하여 시스템 안정성과 데이터 무결성 강화합니다.
+  
 </details>
 
 <details>
-<summary>첫번째토글</summary>
+<summary>⚡️ 재고 관리 동시성 이슈 해결</summary>
+	
+### 1. 기능 소개
 
+상품 주문 및 재고 관리 시스템
+
+중거거래 플랫폼에서 용자가 상품을 주문할 때 실시간으로 재고를 차감하고 관리하는 핵심 기능입니다. 다수의 사용자가 동시에 같은 상품을 주문할 때 정확한 재고 계산과 오버셀링 방지가 중요한 비즈니스 요구사항입니다.
+
+---
+
+### 2. 문제 정의
+
+기존 시스템에서는 동시성 제어 메커니즘이 없어 여러 사용자가 동시에 주문할 때 심각한 데이터 불일치 문제가 발생했습니다.
+
+```
+상품: 5개
+실제 판매: 12개
+재고 오차: 7개 
+```
+
+주요 문제점
+
+- 동시 접근 시 재고 계산 오류
+- 재고보다 많은 수량 판매 (오버셀링)
+- 데이터 일관성 깨짐으로 인한 비즈니스 로직 오류
+
+---
+
+### 3. 해결 방안
+
+Redisson 분산 락 + 비관적 락 조합
+
+다중 인스턴스 환경에서 안전한 동시성 제어를 위해 이중 락 메커니즘을 사용
+
+해결 방법
+
+- Redisson 분산 락으로 인스턴스 간 동기화
+- DB 레벨 비관적 락으로 데이터 무결성 보장
+- REQUIRES_NEW 전파 옵션으로 독립적 트랜잭션 관리
+
+적용 코드
     
 ```
+// 수정 전: 동시성 이슈 발생 코드
+public void decreaseStock(Long itemId, Long quantity) {
+    Item item = itemRepository.findById(itemId).orElseThrow();
+    item.decreaseStock(quantity); // Race Condition 발생 지점
+}
+
+// 수정 후: 분산 락 적용
+@Transactional(propagation = Propagation.REQUIRES_NEW)
+public void decreaseStock(Long itemId, Long quantity) {
+    String lockKey = "Lock:" + itemId;
+    RLock lock = redissonClient.getLock(lockKey);
+    // 분산 락 + 비관적 락으로 안전한 재고 차감
+}
 ```
 
-```
-```
+---
 
-```
-```
+### **4. 성능 테스트**
 
-```
-```
+**Redis 분산락 사용전 후 비교**
+
+동시성 테스트
+
+초기 재고 : 5개
+
+동시 요청 : 100명 각 1번씩 시행
+
+19번 아이템 100명이 1번씩 구매 시도
+<img width="269" height="153" alt="image" src="https://github.com/user-attachments/assets/d628be4c-44fa-416a-9f3e-759b52d14ad2" />
+
+시행 결과
+
+분산락 적용 : 5개 성공, 95개 실패, 재고 0개
+
+분산락 미적용 : 12개 성공, 88개 실패, 재고 0개
+
+---
+
+### 5. 해결 완료
+
+동시성 이슈 해결
+
+- **데이터 정합성 100% 보장**: 재고 오차 완전 제거
+- **오버셀링 방지**: 재고 한도 내에서만 주문 처리
+- **다중 인스턴스 안정성**: MSA 환경에서도 안전한 동시성 제어
+- **예외 처리 강화**: 락 획득 실패 시 명확한 에러 메시지 제공
+
+동시성 이슈 해결함으로서 얻어지는 비즈니스 임팩트
+
+- 고객 신뢰도 향상 (재고 오류로 인한 주문 취소 0건)
+- 운영팀 업무 효율성 증대 (수동 재고 정정 작업 불필요)
+- 매출 손실 방지 (정확한 재고 관리로 판매 기회 극대화)
+
 </details>
-
-<details>
-<summary>첫번째토글</summary>
-
-    
-```
-```
-
-```
-```
-
-```
-```
-
-```
-```
-</details>
-
-
-- [⚡️ 인기 검색어 랭킹](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2532dc3ef5148060a259f2725a3702fc)
-
-- [⚡️ 캐싱을 이용하여 새소식 조회를 더욱 빠르게!](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2532dc3ef5148095965ac33c8bc36536)
-
-- [⚡️ 재고 관리 동시성 이슈 해결](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2532dc3ef5148097af2ff6da3e4576a8)
 
 ---
 
 ## 🚨 트러블 슈팅
 
 <details>
-<summary>첫번째토글</summary>
+<summary>🚨 커넥션풀 고갈 현상</summary>
+	
+### **1. 문제 상황**
 
+- Mania Place의 **상품 검색 기능** 부하 테스트 중, 동시 사용자 수 증가 시 검색 실패율이 급증하고 응답 시간이 현저히 지연되었습니다.
+- 검색 요청 처리 마비의 주된 원인은 **인기 검색어 랭킹 집계 기능이 검색 트랜잭션에 포함되어 있었기 때문**입니다.
+
+---
+
+### **2. 원인 분석**
+
+**[환경]**
+
+**Docker 컨테이너 환경**
+
+(애플리케이션에 CPU 1코어, 메모리 1.5GB 자원 할당)
+
+**[사용 도구]**
+Docker Compose, Apache JMeter
+
+**[데이터 조건]**
+
+- **초기 데이터:**  아이템 = 1600개 생성 후 실험
+
+---
+
+**[스레드 속성]**
+
+- **사용자 수**: 30명
+- **Ramp-up 시간**: 1초
+- **루프 카운트**: 10회
+
+---
+
+**[대상]**
+
+- 아이템 검색
+
+---
+
+**[목적]**
+
+- 오류 발생 확인
+
+<img width="1132" height="70" alt="image" src="https://github.com/user-attachments/assets/ab781d7f-d562-41ab-9103-89afe96481ae" />
+
+jp@gc - Transactions per Second
+
+<img width="1105" height="537" alt="image" src="https://github.com/user-attachments/assets/132330c2-77f5-4c9d-873f-cc132c57a741" />
+
+### **[검색기능]**
+
+- **TPS (초당 처리량):** 1.4 / sec
+- **Latency (평균 응답 시간):** 20,468 ms
+- **Error Rate (에러율):** 31.33 %
+
+### **[분석 및 주요 문제점]**
+
+- **시스템 마비 수준의 성능:** 31.33%의 높은 에러율과 20초가 넘는 응답 시간은 사실상 시스템이 부하를 전혀 감당하지 못하고 마비 상태에 이르렀음을 의미합니다.
+- **DB 커넥션 풀 고갈:** 부하를 견디지 못한 데이터베이스의 응답 지연이 원인이 되어 커넥션 풀이 완전히 고갈되었습니다. 이로 인해 새로운 요청은 트랜잭션조차 시작하지 못하고 실패했습니다.
+
+### **[결론]**
+
+**시스템 마비 발생.** 1초 만에 30명의 동시 사용자가 유입되는 스파이크 트래픽 상황에서, 시스템은 부하를 전혀 감당하지 못하고 사실상 마비 상태에 이르렀습니다.
+
+**[상세 분석]**
+
+- **원인:** 발생한 오류의 100%가 **HikariCP 커넥션 풀 타임아웃**이었습니다.
     
-```
-```
+    이는 데이터베이스의 응답이 너무 느려 커넥션을 제때 반납하지 못했기 때문입니다.
+  
+<img width="1548" height="546" alt="image" src="https://github.com/user-attachments/assets/e87b3c57-c270-4b1d-9ff0-accc4417b4bd" />
 
-```
-```
+- **결과:** 커넥션 부족으로 새로운 요청은 트랜잭션조차 시작하지 못하고 실패했으며, 이로 인해 **31.33%의 요청이 유실**되고, 응답 가능한 요청마저 **평균 20초 이상이 소요**되어 정상적인 서비스 제공이 불가능함을 확인했습니다.
+- **애플리케이션 스레드와 DB 커넥션 풀의 자원 불균형:** 60명의 동시 사용자 요청이 유입되자 100개 이상의 애플리케이션 스레드가 생성되었습니다. 하지만 데이터베이스 커넥션 풀(HikariCP)의 최대치는 **10개**로 설정되어 있었습니다.
+- **커넥션 병목 현상:** 검색 요청이 발생할 때마다 실행되는 '인기 검색어 카운트 업데이트' 로직으로 인해 DB 트랜잭션이 길어졌습니다. 먼저 커넥션을 차지한 10개의 스레드가 작업을 마칠 때까지 다른 모든 스레드(100개 이상)는 커넥션을 무한정 대기했습니다.
+- **타임아웃 및 예외 발생:** 대기하던 스레드들은 결국 커넥션 타임아웃(30초)을 초과하게 되었고, 이로 인해 `SQLTransientConnectionException`이 발생했습니다. Spring/JPA는 이 예외를 `CannotCreateTransactionException`으로 감싸 애플리케이션에 전달, 결과적으로 대량의 검색 실패(에러율 31.33%)로 이어졌습니다.
+- **근본 원인:** 검색 기능(읽기)과 랭킹 집계(쓰기)가 **동일한 DB 커넥션 풀을 공유**하며 경합하는 구조가 문제의 핵심이었습니다.
 
-```
-```
+---
 
-```
-```
+### **3. 문제 해결**
+
+1. **커넥션 풀 증설 시도 (10 - > 20 증설)**
+
+<img width="425" height="253" alt="image" src="https://github.com/user-attachments/assets/cdfe2716-d294-44fe-a542-fdd8e7903b7b" />
+
+<img width="1108" height="537" alt="image" src="https://github.com/user-attachments/assets/79fd0da8-353e-4673-b03e-ec648ca8d4a8" />
+
+<img width="1134" height="71" alt="image" src="https://github.com/user-attachments/assets/866255bf-42ca-496c-afdc-72bd32e585b0" />
+
+위 테스트와 동일하게 했을때 정상 작동을 확인했지만
+
+2배 증가한 커넥션 풀만큼 2배의 사용자를 추가 요청 보냈을때(사용자 30 - > 사용자 60)
+
+<img width="1117" height="544" alt="image" src="https://github.com/user-attachments/assets/dc128101-09fe-4cef-b01c-264d24fcb0a4" />
+
+<img width="1135" height="72" alt="image" src="https://github.com/user-attachments/assets/4ce7652e-d497-4376-b301-ba436a67b38c" />
+
+<img width="1546" height="216" alt="image" src="https://github.com/user-attachments/assets/771b6ea8-c00e-47fe-a4ad-19116b601a30" />
+
+똑같은 오류를 확인할 수 있었습니다.
+
+- DB 커넥션 풀(HikariCP) 최대치를 늘려 동시 트랜잭션 처리 능력을 확장
+- **결과:** 동시 요청 수가 증가하면 여전히 커넥션이 고갈되고 검색 실패가 발생 → 근본적인 해결책 아님
+1. **근본적 해결: Redis 도입**
+    - 인기 검색어 집계 기능을 **RDB → Redis ZSet**으로 이전
+    - **효과:**
+        - Redis의 인메모리 구조로 **빠른 읽기/쓰기 처리** 가능
+        - 검색 기능과 랭킹 집계 기능의 **자원 경합 해소**
+        - DB는 핵심 검색 트랜잭션 처리에만 집중 가능 → 안정성 확보
+
+###[검색 기능 개선 결과]
+
+<img width="1133" height="70" alt="image" src="https://github.com/user-attachments/assets/08b072b1-efd4-4110-9c30-3a8637bac0b0" />
+
+**jp@gc - Transactions per Second**
+
+<img width="1109" height="541" alt="image" src="https://github.com/user-attachments/assets/98961d8b-ffe7-4e09-a069-f46e8e19918a" />
+
+### **[검색기능/개선 후]**
+
+- **TPS (초당 처리량):** 59.9 / sec
+- **Latency (평균 응답 시간):** 380 ms
+- **Error Rate (에러율):** 0 %
+
+### **[분석 및 주요 개선점]**
+
+- **획기적인 성능 향상:** 평균 응답 시간이 **380ms**로 크게 단축되었고, 초당 처리량(TPS)은 **약 42배 증가**하여 사용자에게 쾌적한 검색 경험을 제공할 수 있게 되었습니다.
+- **시스템 안정성 완벽 확보:** 에러율이 **0%**로 해소되었고, DB 커넥션 병목 현상이 사라져 대규모 트래픽에도 안정적으로 서비스를 운영할 수 있는 기반을 마련했습니다.
+
+---
+
+### **4. 회고**
+
+- **아키텍처 설계의 중요성:** 잦은 쓰기와 실시간 집계 기능을 메인 DB에 통합한 것이 성능 저하의 직접적인 원인이었습니다.
+- **자원 이해의 필요성:** 애플리케이션 스레드와 DB 커넥션 풀 간의 상호작용을 이해하는 것이 병목 현상을 해결하는 핵심이었습니다.
+- **향후 대응 방안:** 실시간 집계 기능을 개발할 때는 검색 기능과의 의존성을 분리하는 것을 우선적으로 고려해야 합니다.
+
 </details>
 
 <details>
-<summary>첫번째토글</summary>
+<summary>🚨 태그 저장 동시성 문제</summary>
+[https://www.notion.so/teamsparta/24e2dc3ef514805eac6cce2bafe76037](https://www.notion.so/24e2dc3ef514805eac6cce2bafe76037?pvs=21)
 
+본 글은 해당 게시글을 요약한 내용이며, 자세한 내용은 위 링크에서 확인하실 수 있습니다.
+
+### 1. 문제 상황
+
+저희 팀에서 개발 중인 서브컬처 중고거래 사이트에는 개인화 서비스를 위한 '태그' 기능이 있습니다. 
+
+사용자는 관심사에 맞는 태그를 최대 10개까지 설정할 수 있으며, 이 태그는 회원 프로필과 중고 물품에 모두 적용되어 개인 맞춤 상품 추천에 활용됩니다.
+
+**그런데 여러 사용자가 동시에 태그를 저장하는 과정에서 동시성 문제가 발생했습니다.** 특히 회원가입 시점이나 사용자가 태그를 일괄 수정할 때, 물품 등록시 태그를 저장할때 데이터 일관성 문제와 중복 저장 오류가 반복적으로 나타났습니다.
+
+**[ 테스트 시나리오 ]** 
+인기 애니메이션 굿즈의 한정판매로 인해 판매 시작 전 대량의 사용자가 동시에 회원가입을 시도하는 상황을 시뮬레이션 했습니다. 약 **100명**의 사용자가 동시에 가입을 진행하며, 이 과정에서 **중복되는 태그를 입력**하는 경우가 발생할 수 있다고 가정했습니다.
+
+![image.png](attachment:878329f4-fd68-44c7-a52b-cbe6acafe5e1:image.png)
+
+- 전체 요청 중 약 16%의 에러율 발생
+- 주요 에러 :
+1. `Duplicate entry ... for key`
+    - 같은 태그명이 이미 존재하는데 INSERT 시도
+    - MySQL의 `UNIQUE` 제약조건에 걸려 `SQLIntegrityConstraintViolationException` 발생
+
+![image.png](attachment:3acdc9d9-76a8-431f-9a59-a4df4e649669:image.png)
+
+1. `Deadlock found when trying to get lock`
+    - 동시에 여러 트랜잭션이 같은 테이블/인덱스를 갱신하려다가 MySQL의 잠금 경합으로 데드락 발생
+    - MySQL이 교착 상태를 감지하고 한 트랜잭션을 강제 롤백
+
+---
+
+### 2. 원인 분석
+
+동시성 발생 주요 원인인 **`findOrCreateTag`** 메서드 코드와 작동 방식 :
     
 ```
+public Tag findOrCreateTag(String tagName) {
+		return tagRepository.findByTagName(tagName) // SELECT
+			.orElseGet(() -> tagRepository.save(Tag.of(tagName))); //INSERT
+	}
 ```
 
-```
-```
+1. 사용자가 입력한 태그 이름을 DB에서 먼저 조회를 합니다.
+2. 존재하지 않으면 해당 태그를 저장합니다.
+
+초기 개발 당시에는 `findOrCreateTag()` 메서드에서 태그의 중복 여부를 확인한 후 저장하는 로직으로 구현했기 때문에, 중복된 태그가 생성될 가능성을 고려하지 못했습니다.
+
+**`SELECT`** 쿼리로 태그를 조회한 후, 태그가 존재하지 않으면 **`INSERT`**쿼리로 태그를 저장하는 방식인데,
+
+이러한 로직을 여러 요청이 동시에 실행할 경우 아래와 같은 문제가 발생한것이었습니다.
 
 ```
+1번 오류 -> UNIQUE 제약조건 위반 
+Thread A : SELECT tag WHERE name='자바' → 없음
+Thread B : SELECT tag WHERE name='자바' → 없음
+
+Thread A : INSERT '자바'
+Thread B : INSERT '자바'  ← UNIQUE 제약조건 오류 발생 , 롤백
+
+2번 오류 -> 교착상태 발생
+Thread A : SELECT tag WHERE name='자바' → 없음
+Thread B : SELECT tag WHERE name='스프링' → 없음
+
+Thread A : INSERT '자바'
+Thread B : INSERT '스프링'
+
+Thread A : SELECT tag WHERE name='스프링' → 없음
+Thread B : SELECT tag WHERE name='자바' → 없음
+
+Thread A : INSERT '스프링' 
+Thread B : INSERT '자바' -> 교착상태 발생 , 롤백
 ```
 
+---
+
+### 3. 문제 해결
+
+### 1. S-lock, X-lock 락 적용
+
+- S Lock과 X Lock 이란?
+    
+    ## **MySQL의 비관적 락 : S-lock과 X-lock**
+    
+     → MySQL의 S-lock과 X-lock은 비관적 락을 구현한 것입니다.
+    
+    ### 기본 개념
+    
+    | 구분 | 이름 | 설명 | 동시에 접근 가능한 트랜잭션 |
+    | --- | --- | --- | --- |
+    | **S-lock** | Shared Lock (공유 락) | **읽기 전용 락**. 다른 트랜잭션도 읽기는 가능하지만, 쓰기는 불가능 | **다른 S-lock**은 허용 / X-lock은 불가 |
+    | **X-lock** | Exclusive Lock (배타 락) | **쓰기 전용 락**. 읽기·쓰기 모두 다른 트랜잭션이 접근 불가 | 아무도 접근 불가 |
+    
+    ### 동작 방식
+    
+    ### S-lock (공유 락)
+    
+    - 어떤 트랜잭션이 데이터에 S-lock을 걸면, 다른 트랜잭션은 해당 데이터를 **읽을 수는 있지만 수정은 못함**.
+    - 예:
+        
+        ```sql
+        SELECT * FROM tags WHERE tag_name = 'choco' LOCK IN SHARE MODE;
+        ```
+        
+        → 다른 트랜잭션은 `UPDATE`나 `DELETE`, `INSERT`(해당 레코드 키 값) 불가.
+        
+    
+    ### X-lock (배타 락)
+    
+    - 어떤 트랜잭션이 데이터에 X-lock을 걸면, 다른 트랜잭션은 **읽기·쓰기 모두 불가능**.
+    - 예:
+        
+        ```sql
+        SELECT * FROM tags WHERE tag_name = 'choco' FOR UPDATE;
+        ```
+        
+        → 해당 행을 다른 트랜잭션이 읽으려고 해도 대기 상태.
+        
+    
+    ### INSERT, UPDATE, DELETE 시 기본 락
+    
+    - **INSERT**: 새로운 행에 X-lock (배타 락)
+    - **UPDATE**: 해당 행에 X-lock
+    - **DELETE**: 해당 행에 X-lock
+    - **SELECT**: 기본적으로 락 없음 (단, `LOCK IN SHARE MODE` 또는 `FOR UPDATE` 옵션 사용 시 S/X-lock 걸림)
+    
+
+가장 먼저 생각한 해결책은 태그 조회 시점에 X-lock을 걸어서 다른 트랜잭션이 동일한 태그에 대해 조회조차 못하게 하는 것이었습니다.
+
+S-lock(공유락)의 경우 여러 트랜잭션이 동시에 같은 데이터를 조회할 수 있기 때문에, 조회 후 각자 INSERT를 시도하면 UNIQUE 제약조건 위반은 막을 수 있겠지만 여전히 데드락이 발생할 것으로 예상했습니다.
+
+예상대로 될지 확인하기 위해 S-lock과 X-lock을 번갈아 적용하며 테스트를 진행했습니다.
+
+- S-lock, X-lock 테스트 과정과 Gap lock
+    
+    **S-lock 적용 테스트:**
+    
+    ```java
+    @Repository
+    public interface TagRepository extends JpaRepository<Tag, Long> {
+        @Lock(LockModeType.PESSIMISTIC_READ) // S Lock
+        Optional<Tag> findByTagName(String tagName);
+        boolean existsByTagName(String tagName);
+    }
+    ```
+    
+    `findByTagName` 메서드에 S-lock을 적용하고 동시성 테스트를 수행했습니다.
+    
+    **테스트 결과 :**
+    
+    ![image.png](attachment:ebb51dc3-2d94-4920-afaf-4ae4f61c9353:image.png)
+    
+    ![image.png](attachment:7e08c120-2c06-4328-b789-3a75e9d58d0b:image.png)
+    
+    - 예상대로 **데드락이 발생**했습니다.
+    
+    **콘솔 시뮬레이션 :**
+    
+    ![트랜잭션 A](attachment:513e0ccc-c237-4da3-a558-a02c57fecc5f:image.png)
+    
+    트랜잭션 A
+    
+    ![트랜잭션 B](attachment:c1900238-0656-4874-90d3-c432fb4f24bf:image.png)
+    
+    트랜잭션 B
+    
+    콘솔에서 직접 시뮬레이션한 결과, 두 트랜잭션이 동시에 'hojun'이라는 동일한 태그명에 대해 S-lock을 획득한 후 각자 INSERT를 시도하면서 데드락에 빠지는 것을 확인했습니다. S-lock으로는 이 문제를 방지할 수 없다는것을 확인했습니다.
+    
+    **X-lock 적용 테스트:**
+    
+    ```java
+    @Repository
+    public interface TagRepository extends JpaRepository<Tag, Long> {
+        @Lock(LockModeType.PESSIMISTIC_WRITE) // X Lock
+        Optional<Tag> findByTagName(String tagName);
+        boolean existsByTagName(String tagName);
+    }
+    ```
+    
+    S-lock과 동일하게 `findByTagName` 메서드에 **X-lock**을 적용하고 동시성 테스트를 수행했습니다.
+    
+    **테스트 결과 :**
+    
+    ![image.png](attachment:2f7a89f7-3f00-4c10-a382-3300fb3aacfe:image.png)
+    
+    ![image.png](attachment:e656c188-2809-401f-9507-d92da4438ccc:image.png)
+    
+    - 예상과 다르게 이전과 똑같이 **데드락이 발생**했습니다.
+    
+    **콘솔 시뮬레이션 :**
+    
+    ![트랜잭션 A](attachment:f48df497-208a-4df6-81e3-bcbaaabb32f9:image.png)
+    
+    트랜잭션 A
+    
+    ![트랜잭션 B](attachment:13476fbe-b405-4a29-8436-e1d21e091aa9:image.png)
+    
+    트랜잭션 B
+    
+    처음 시뮬레이션했을 때 의아했던 점은, 트랜잭션 A에서 **X-lock**을 걸었음에도 불구하고 트랜잭션 B에서 같은 태그를 조회하는 것이 가능했다는 것입니다. 그리고 INSERT 단계에서는 S-lock과 동일한 메커니즘으로 데드락이 발생했습니다.
+    
+    '쿼리문을 잘못 작성했나?' 하는 의문이 들어 다시 검토해보니, **계속 SELECT로 조회하던 태그는 데이터베이스에 존재하지 않는 값**이었습니다.
+    
+    **검증 테스트:**
+    이미 존재하는 태그에 X-lock을 걸고 조회해보니, 다른 트랜잭션에서는 조회가 블록되는 것을 확인할 수 있었습니다. 그렇다면 존재하지 않는 태그를 INSERT할 때는 어떻게 락이 작동했던 걸까요?
+    
+    현재 걸려있는 락의 종류를 확인하기 위해 다음 쿼리를 실행했습니다
+    
+    ```sql
+    SELECT object_schema, object_name, lock_type, lock_mode FROM performance_schema.data_locks;
+    ```
+    
+    - S-lock 적용시
+    
+    ![image.png](attachment:23677733-81b6-46da-a201-cf4bb8d353b4:image.png)
+    
+    - X-lock 적용시
+    
+    ![image.png](attachment:22b87f85-c9ee-4279-8708-d8761090b487:image.png)
+    
+    S락과 X락만 걸린게 아닌 **GAP** 이라는 Lock이 걸린것을 확인했습니다.
+    
+    **Gap Lock의 작동 원리 :**
+    
+    ![인덱스 레코드 사이에 존재한 Gap들](attachment:44bff36e-26db-4071-b026-bd9bf16a65d9:image.png)
+    
+    인덱스 레코드 사이에 존재한 Gap들
+    
+    - Gap Lock은 인덱스 레코드 사이의 "빈 공간"에 걸리는 락입니다. 위 사진에서는 레코드 사이에 1,2,3,4번에 해당하는 공간을 지칭합니다. 존재하지 않는 태그명을 조회할 때 해당 인덱스 갭에 락이 걸려서, 그 범위에 새로운 레코드가 삽입되는 것을 방지합니다.
+    - 이로 인해 두 트랜잭션이 동일한 갭에 서로 다른 락을 요청하면서 데드락이 발생하게 됩니다.
+    
+
+**결론:**
+S-lock과 X-lock 모두 Gap Lock 메커니즘으로 인해, 처음 생성되는 태그들에 대한 동시 INSERT 시 데드락 문제를 근본적으로 해결할 수 없음을 확인했습니다.
+
+### 2. INSERT IGNORE
+
+### 3. @Retryable을 활용한 재시도 메커니즘
+
+**REQUIRES_NEW를 통한 새로운 트랜잭션 처리 시도:**
+
+락 기반 해결책의 한계를 확인한 후, 태그 저장 부분만 새로운 트랜잭션으로 분리하여 
+
+: `@Transactional(propagation = Propagation.REQUIRES_NEW)` 
+
+오류 발생 시 재시도하는 방법을 시도했습니다.
+하지만 이 방법은 예상과 달리 제대로 작동하지 않았습니다. 원인을 분석해보니, 새로운 트랜잭션 생성으로 인해 
+
+**커넥션 풀 부족 현상**이 발생했습니다.
+
+- 기존 트랜잭션(회원가입/물품등록)이 커넥션을 점유한 상태
+- 태그 저장용 새로운 트랜잭션이 추가 커넥션을 요구
+- 동시 접속자가 많을 때 사용 가능한 커넥션 부족으로 아예 처리가 불가능한 상황 발생
+
+**@Retryable 어노테이션 적용:**
+
+그래서 트랜잭션을 분리하지 않고, 기존의 단일 트랜잭션 내에서 동시성 오류 발생 시 **재시도**하는 방향으로 접근했습니다. Spring에서 제공하는 `@Retryable` 어노테이션을 활용했습니다.
+
 ```
+	@Retryable(
+		retryFor = {CannotAcquireLockException.class, SQLTransientException.class,
+		 IllegalStateException.class},
+		maxAttempts = 3, // 기본값
+		backoff = @Backoff(delay = 200) // ms 단위
+	)
+	@Transactional
+	public UserRegisterResponse register(UserRegisterRequest userRegisterRequest,
+	 UserRole userRole) {
+				... // 회원가입 로직
+		}
 ```
+
+**@Retryable의 동작 방식:**
+
+- `retryFor`: 지정된 예외(락,  발생 시에만 재시도 수행
+- `maxAttempts`: 최대 재시도 횟수 설정 (기본값 3회)
+- `backoff`: 재시도 간격 설정 (200ms 지연으로 순간적인 동시성 충돌 회피)
+
+![image.png](attachment:e8f1d55a-ea9c-4e52-8ec5-f059d9ac0256:image.png)
+
+![image.png](attachment:027df347-a872-4e5f-9b28-f344a07d3b55:image.png)
+
+**테스트 결과:**
+동시성 오류가 발생했을 때 200ms 딜레이를 두고 자동으로 재시도하게 함으로써, JMeter 테스트에서 모든 회원가입과 물품등록이 성공적으로 완료되는 것을 확인했습니다.
+
+**@Retryable 의 장점 :**
+
+- 복잡한 메커니즘 없이 간단한 설정으로 동시성 문제 해결가능
+- 기존 트랜잭션 구조 유지로 커넥션 풀 부족 문제 방지
+
+**@Retryable 의 단점 :**
+
+**근본적 해결이 아닌 우회 방식**
+
+- 동시성 문제의 원인을 제거한 것이 아니라 오류 발생 시 재시도로 회피하는 방식
+- 동시 접속자가 매우 많아질 경우 재시도 횟수가 증가하여 성능 저하 가능성
+
+**예측 불가능한 응답 시간**
+
+- 재시도로 인해 사용자 요청 처리 시간이 불규칙해짐 (200ms ~ 600ms 추가 지연 가능)
+- 현재는 3번 반복으로 문제가 안생겼지만 최악의 경우 3번 모두 실패하면 여전히 에러 발생 가능
+
+---
+
+### 4. 회고
+
+**개선방향 :**
+
+현재의 `@Retryable` 방식은 임시방편이라고 판단되어, 향후에는 MySQL의 구문을 활용하여 데이터베이스 레벨에서 **동시성 문제를 근본적으로 해결**하거나, Redis를 활용한 태그 캐싱 및 분산 락 구현을 통해 더 정교한 동시성 제어를 도입할 예정입니다. 또한 인기 태그 사전에 생성(현실적으로 가장 쉬운 방법)하여 중복을 없애는 방법과 재시도 빈도 테스트하여 동시성 충돌 자체를 예방하고 시스템 성능을 지속적으로 관찰할 계획입니다. 
+
+**느낀점 :** 
+
+앞으로 새로운 비즈니스 로직을 설계할 때는 동시성과 트랜잭션을 한 번 더 꼼꼼히 고려한 뒤에 구현해야겠다고 느꼈습니다.
+
 </details>
 
 <details>
