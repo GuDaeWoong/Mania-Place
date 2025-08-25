@@ -1,12 +1,11 @@
 package com.example.place.domain.newsfeedcomment.controller;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -66,5 +65,16 @@ public class NewsfeedCommentController {
 			principal);
 		ApiResponseDto<NewsfeedCommentResponse> success = ApiResponseDto.of("댓글이 수정이 완료되었습니다.", response);
 		return ResponseEntity.status(HttpStatus.OK).body(success);
+	}
+
+	@DeleteMapping("/{newsfeedId}/comments/{commentId}")
+	public ResponseEntity<ApiResponseDto<Void>> deleteNewsfeedComment(
+		@PathVariable Long newsfeedId,
+		@PathVariable Long commentId,
+		@AuthenticationPrincipal CustomPrincipal principal
+	) {
+		Long userId = principal.getId();
+		newsfeedCommentService.softDeleteNewsfeedComment(newsfeedId, commentId, userId);
+		return ResponseEntity.ok(ApiResponseDto.of("댓글 삭제가 완료되었습니다.", null));
 	}
 }

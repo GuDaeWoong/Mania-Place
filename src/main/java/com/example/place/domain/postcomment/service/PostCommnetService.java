@@ -33,7 +33,8 @@ public class PostCommnetService {
 
 	@Loggable
 	@Transactional
-	public PostCommentResponseDto createPostComment(Long postId, PostCommentRequestDto request, CustomPrincipal principal) {
+	public PostCommentResponseDto createPostComment(Long postId, PostCommentRequestDto request,
+		CustomPrincipal principal) {
 		User user = userService.findByIdOrElseThrow(principal.getId());
 
 		Post post = postService.findByIdOrElseThrow(postId);
@@ -46,7 +47,8 @@ public class PostCommnetService {
 
 	@Loggable
 	@Transactional
-	public PostCommentResponseDto updatePostComment(Long postId ,Long commentId, PostCommentRequestDto request, CustomPrincipal principal) {
+	public PostCommentResponseDto updatePostComment(Long postId, Long commentId, PostCommentRequestDto request,
+		CustomPrincipal principal) {
 
 		postService.findByIdOrElseThrow(postId);
 
@@ -68,7 +70,7 @@ public class PostCommnetService {
 	@Loggable
 	@Transactional
 	public PageResponseDto<PostCommentResponseDto> getAllCommentsByPosts(Long postId, Pageable pageable
-	){
+	) {
 		Post post = postService.findByIdOrElseThrow(postId);
 
 		Page<PostComment> commentPage = postCommentRepository.findAllByPostAndIsDeletedFalse(post, pageable);
