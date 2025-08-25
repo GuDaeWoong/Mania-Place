@@ -187,7 +187,7 @@
 <img width="2048" height="1041" alt="image" src="https://github.com/user-attachments/assets/a377ae7f-d3aa-4bfd-9909-1942c743d9d7" />
 
 ### API 명세서
-
+[API 문서](https://documenter.getpostman.com/view/44682451/2sB3HetPFi)
 
 ### 디렉토리
 
