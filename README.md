@@ -232,7 +232,7 @@
     │   └── 📂 service
     ├── 📂 Image               # 이미지
     │   ├── 📂 dto
-
+```
 
 ## 🌊 서비스 플로우
 <img width="1995" height="1002" alt="image" src="https://github.com/user-attachments/assets/ee7ffc90-208b-4f39-87c2-2f1b896031a1" />
