@@ -56,6 +56,7 @@
 **결국 충동구매로 후회하거나, 망설이다 놓치거나...**
 
 <br>
+
 > 이런 불편함을 해결하기 위해,  
 > **하루 한 번, 애니메이션과 더 가까워지는 플랫폼**을 만들었습니다.
 
@@ -185,6 +186,52 @@
 <img width="2048" height="1041" alt="image" src="https://github.com/user-attachments/assets/a377ae7f-d3aa-4bfd-9909-1942c743d9d7" />
 
 ### API 명세서
+
+
+### 디렉토리
+
+## 📂 프로젝트 구조
+
+```plaintext
+📦 Mania-Place
+├── 📂 common                  # 공통 모듈, 전체 프로젝트에서 재사용되는 코드
+│   ├── 📂 annotation          # 커스텀 어노테이션
+│   ├── 📂 aop                 # AOP 관련 로직
+│   ├── 📂 config              # 공통 설정
+│   ├── 📂 dto                 # 공통 DTO
+│   ├── 📂 entity              # 공통 엔티티
+│   ├── 📂 exception           # 예외 처리
+│   │   ├── 📂 enums           # 예외 관련 열거형
+│   │   └── 📂 exceptionclass  # 커스텀 예외 클래스
+│   ├── 📂 filter              # 필터 처리
+│   ├── 📂 health              # 상태 체크
+│   └── 📂 security            # 보안 관련
+│       └── 📂 jwt             # JWT 인증 처리
+└── 📂 domain                  # 도메인별 모듈
+    ├── 📂 auth                # 인증/인가
+    │   ├── 📂 controller      # API 컨트롤러
+    │   │   └── 📂 dto         # 요청/응답 DTO
+    │   ├── 📂 domain          # 도메인 레이어
+    │   │   ├── 📂 model       # 도메인 모델
+    │   │   └── 📂 repository  # DB 접근
+    │   └── 📂 service         # 서비스 로직
+    ├── 📂 chatmessage         # 채팅 메시지
+    │   ├── 📂 controller
+    │   ├── 📂 dto
+    │   │   └── 📂 request
+    │   ├── 📂 entity
+    │   ├── 📂 repository
+    │   └── 📂 service
+    ├── 📂 chatroom            # 채팅방
+    │   ├── 📂 controller
+    │   ├── 📂 dto
+    │   │   ├── 📂 request
+    │   │   └── 📂 response
+    │   ├── 📂 entity
+    │   ├── 📂 repository
+    │   └── 📂 service
+    ├── 📂 Image               # 이미지
+    │   ├── 📂 dto
 
 
 ## 🌊 서비스 플로우
