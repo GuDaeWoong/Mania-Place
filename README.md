@@ -170,7 +170,7 @@
 ## <h2 id="시스템-아키텍처">🖇️ 시스템 아키텍처</h2>
 
 ### Cloud Architecture
-<img width="1592" height="942" alt="image" src="https://github.com/user-attachments/assets/c3c7f9bb-7431-43a2-bb53-fbde8983b690" />
+<img width="1530" height="1182" alt="클라우드아키텍처" src="https://github.com/user-attachments/assets/1bd0ab1b-a7ae-4ac8-a469-14cac621fe74" />
 
 ### CI/CD Pipeline
 <img width="1696" height="718" alt="image" src="https://github.com/user-attachments/assets/8d366f45-59c0-42f2-ad2c-8bd94642ba38" />
