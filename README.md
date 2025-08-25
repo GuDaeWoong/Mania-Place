@@ -2519,45 +2519,416 @@ S-lock과 X-lock 모두 Gap Lock 메커니즘으로 인해, 처음 생성되는 
 </details>
 
 <details>
-<summary>첫번째토글</summary>
+<summary>🚨 Redis 직렬화 문제</summary>
+	
+### 1. 문제 상황
 
+처음에는 Redis 캐시 매니저에 **null 값 캐싱 방지**와 **TTL 만료 시간**만 설정한 뒤,
+새소식 전체 조회 메서드에 `@Cacheable`을 적용해 캐싱을 구현했습니다.
+
+하지만 새소식 전체 조회를 호출하자 다음과 같은 오류가 발생했습니다.
+
+- 최초 코드
     
-```
+    ```java
+    // build.gradle
+    dependencies {
+    	// redis 캐시
+    	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    
+    	//json 직렬화를 위한 jackson
+    	implementation 'com.fasterxml.jackson.core:jackson-databind'
+    	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    }
+    ```
+    
+    ```java
+    @Configuration
+    @EnableCaching
+    public class CacheConfig {
+    
+    	@Bean
+    	public RedisCacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
+    		RedisCacheConfiguration cacheConfig = RedisCacheConfiguration.defaultCacheConfig()
+    			.disableCachingNullValues() // null은 캐시에 저장하지 않음
+          .entryTtl(Duration.ofMinutes(10)); // TTL 10분
+    
+    		return RedisCacheManager.builder(redisConnectionFactory)
+    			.cacheDefaults(cacheConfig)
+    			.build();
+    	}
+    }
+    ```
+    
+    ```java
+    @Service
+    @RequiredArgsConstructor
+    public class NewsfeedService {
+    
+    	private final NewsfeedRepository newsfeedRepository;
+    	private final UserService userService;
+    	private final ImageService imageService;
+    	
+    	@Loggable
+    	@Transactional(readOnly = true)
+    	@Cacheable(
+    		value = "listCache",
+    		key = "#pageable.pageNumber + '-' + #pageable.pageSize + '-' + #pageable.sort.toString()"
+    	)
+    	public PageResponseDto<NewsfeedListResponse> getAllNewsfeeds(Pageable pageable) {
+    
+    		// 새소식 전체 조회(소프트딜리트 빼고)
+    		Page<Newsfeed> pagedNewsfeeds = newsfeedRepository.findByIsDeletedFalseWithFetchJoin(pageable);
+    
+    		// 페이지에 들어갈 대표 이미지 일괄 조회
+    		Map<Long, Image> mainImageMap = imageService.getMainImagesForNewsfeeds(pagedNewsfeeds);
+    
+    		// NewsfeedListResponse에 적용 (+ 이미지 맵핑)
+    		Page<NewsfeedListResponse> dtoPage = pagedNewsfeeds.map(newsfeed -> {
+    			Image mainImage = mainImageMap.getOrDefault(newsfeed.getId(), null);
+    			return NewsfeedListResponse.of(newsfeed, mainImage.getImageUrl());
+    		});
+    
+    		return new PageResponseDto<>(dtoPage);
+    	}
+    }
+    ```
+    
+
+```java
+2025-08-12 14:52:35.328 15137 ERROR [http-nio-8080-exec-3] o.a.c.c.C.[.[.[.[dispatcherServlet] - Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed: org.springframework.data.redis.serializer.SerializationException: Cannot serialize] with root cause
+java.lang.IllegalArgumentException: DefaultSerializer requires a Serializable payload but received an object of type [com.example.place.common.dto.PageResponseDto]
 ```
 
-```
-```
+---
 
-```
-```
+### 2. 원인 분석
 
-```
-```
+Redis 캐싱 과정에서 객체 직렬화 설정이 없어서 기본 `JdkSerializationRedisSerializer` 방식이 사용되었고, 이로 인해 DTO가 직렬화/역직렬화되지 못해 예외가 발생하였습니다.
+
+---
+
+### 3. 문제 해결
+
+1. **Spring CacheManager 직렬화 방식을 JSON으로 변경**
+    
+    ```java
+    // CacheConfig.cacheManager()
+    
+    // 캐시 설정
+    RedisCacheConfiguration cacheConfig = RedisCacheConfiguration.defaultCacheConfig()
+      .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer())) // 키는 문자열 직렬화
+      .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer())) // 값은 JSON 직렬화
+      .disableCachingNullValues() // null은 캐시에 저장하지 않음
+      .entryTtl(Duration.ofMinutes(10)); // TTL 10분
+    ```
+    
+    - 직렬화 방식을 지정:
+        - 키 직렬화는 StringRedisSerializer 사용해 문자열로 지정
+        - 값 직렬화 GenericJackson2JsonRedisSerializer 사용해 Json형태로 지정
+2. **가변 리스트 변환**
+    
+    ```java
+    // newsfeedService.getAllNewsfeeds()
+    
+    List<NewsfeedListResponse> contentList = pagedNewsfeeds.stream().map(newsfeed -> {
+        Image mainImage = mainImageMap.getOrDefault(newsfeed.getId(), null);
+        return NewsfeedListResponse.of(newsfeed, mainImage != null ? mainImage.getImageUrl() : null);
+    })
+    .collect(Collectors.toList()); // 가변 리스트로 변환
+    
+    return new PageResponseDto<>(
+        new PageImpl<>(contentList, pageable, pagedNewsfeeds.getTotalElements())
+    );
+    ```
+    
+    - `Page`의 `content`가 불변 리스트일 경우 직렬화 과정에서 문제가 발생할 수 있다고 판단하여, `Collectors.toList()`를 사용해 가변 리스트로 변환 후 응답값으로 전달
+3. **LocalDateTime 직렬화 처리**
+    
+    ```java
+    // CacheConfig.cacheManager()
+    
+    // 자바 타임 모듈 등록하여 LocalDateTime -> ISO-8601 형태로 직렬화
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.registerModule(new JavaTimeModule());
+    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    
+    GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(mapper);
+    
+    // 캐시 설정
+    RedisCacheConfiguration cacheConfig = RedisCacheConfiguration.defaultCacheConfig()
+    	.serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer())) // 키는 문자열 직렬화
+    	.serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer)) // 값은 JSON 직렬화
+    	.disableCachingNullValues() // null은 캐시에 저장하지 않음
+    	.entryTtl(Duration.ofMinutes(10)); // TTL 10분
+    ```
+    
+    - `java.time.LocalDateTime`은 기본 설정에서 직렬화가 지원되지 않아 여전히 예외가 발생
+    - 이를 해결하기 위해 `JavaTimeModule`을 등록하고, `WRITE_DATES_AS_TIMESTAMPS` 옵션을 비활성화해 ISO-8601 문자열로 직렬화/역직렬화되도록 설정
+4. **타입 정보 유지**
+    
+    ```java
+    // CacheConfig.cacheManager()
+    
+    // 타입 정보 포함 (직렬화/역직렬화 시 클래스 정보 유지)
+    mapper.activateDefaultTyping(
+    	LaissezFaireSubTypeValidator.instance,
+    	ObjectMapper.DefaultTyping.NON_FINAL,
+    	JsonTypeInfo.As.PROPERTY
+    );
+    ```
+    
+    - 직렬화 가능. 
+    그러나 여전히 역직렬화 시 **런타임에 제네릭 타입 정보**를 제대로 알 수 없어,
+    Jackson이 `LinkedHashMap` 같은 기본 구조로 변환해버리는 문제 발생
+    - 이를 방지하기 위해 `ObjectMapper.activateDefaultTyping`을 사용해 JSON에 클래스 타입 정보를 함께 저장하도록 설정
+    1. **DTO 생성자에 @JsonCreator/@JsonProperty 적용**
+    
+    ```java
+    // PageResponseDto
+    
+    @JsonCreator
+    private PageResponseDto(
+    	@JsonProperty("content") List<T> content,
+    	@JsonProperty("page") int page,
+    	@JsonProperty("totalPages") int totalPages) {
+    	this.content = content;
+    	this.page = page;
+    	this.totalPages = totalPages;
+    }
+    ```
+    
+    - 불변 객체나 `final` 필드만 있는 DTO는 Jackson이 기본 생성자 없이 역직렬화할 수 없는 문제 발생
+    - `@JsonCreator`와 `@JsonProperty`를 사용해 역직렬화 시 필드 매핑이 가능하도록 명시
+
+- 최종 코드
+    
+    ```java
+    // build.gradle
+    dependencies {
+    	// redis 캐시
+    	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    
+    	//json 직렬화를 위한 jackson
+    	implementation 'com.fasterxml.jackson.core:jackson-databind'
+    	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    }
+    ```
+    
+    ```java
+    @Configuration
+    @EnableCaching
+    public class CacheConfig {
+    
+    	@Bean
+    	public RedisCacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
+    		// 자바 타임 모듈 등록하여 LocalDateTime -> ISO-8601 형태로 직렬화
+    		ObjectMapper mapper = new ObjectMapper();
+    		mapper.registerModule(new JavaTimeModule());
+    		mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    
+    		// 타입 정보 포함 (직렬화/역직렬화 시 클래스 정보 유지)
+    		mapper.activateDefaultTyping(
+    			LaissezFaireSubTypeValidator.instance,
+    			ObjectMapper.DefaultTyping.NON_FINAL,
+    			JsonTypeInfo.As.PROPERTY
+    		);
+    
+    		GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(mapper);
+    
+    		// 캐시 설정
+        RedisCacheConfiguration cacheConfig = RedisCacheConfiguration.defaultCacheConfig()
+            .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer())) // 키는 문자열 직렬화
+            .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer)) // 값은 JSON 직렬화
+            .disableCachingNullValues() // null은 캐시에 저장하지 않음
+            .entryTtl(Duration.ofMinutes(10)); // TTL 10분
+    
+        return RedisCacheManager.builder(redisConnectionFactory)
+            .cacheDefaults(cacheConfig) // 캐시 설정
+            .build();
+    	}
+    }
+    ```
+    
+    ```java
+    @Service
+    @RequiredArgsConstructor
+    public class NewsfeedService {
+    
+    	private final NewsfeedRepository newsfeedRepository;
+    	private final UserService userService;
+    	private final ImageService imageService;
+    	
+    	@Loggable
+    	@Transactional(readOnly = true)
+    	@Cacheable(
+    		value = "listCache",
+    		key = "#pageable.pageNumber + '-' + #pageable.pageSize + '-' + #pageable.sort.toString()"
+    	)
+    	public PageResponseDto<NewsfeedListResponse> getAllNewsfeeds(Pageable pageable) {
+    
+    		// 새소식 전체 조회(소프트딜리트 빼고)
+    		Page<Newsfeed> pagedNewsfeeds = newsfeedRepository.findByIsDeletedFalseWithFetchJoin(pageable);
+    
+    		// 페이지에 들어갈 대표 이미지 일괄 조회
+    		Map<Long, Image> mainImageMap = imageService.getMainImagesForNewsfeeds(pagedNewsfeeds);
+    
+    		List<NewsfeedListResponse> contentList = pagedNewsfeeds.stream().map(newsfeed -> {
+            Image mainImage = mainImageMap.getOrDefault(newsfeed.getId(), null);
+            return NewsfeedListResponse.of(newsfeed, mainImage != null ? mainImage.getImageUrl() : null);
+        })
+        .collect(Collectors.toList()); // 가변 리스트로 변환
+    
+        return new PageResponseDto<>(
+            new PageImpl<>(contentList, pageable, pagedNewsfeeds.getTotalElements())
+        );
+    	}
+    }
+    ```
+    
+    - JPA에서 반환하는 `Page.getContent()`는 보통 불변 리스트로 감싸져 있어서, 직접 캐시에 넣으면 직렬화 문제가 발생할 수 있음.
+    - `PageResponseDto` 내부 `content` 필드는 `Page.getContent()`를 받아서 초기화하므로, 전달하는 `Page`의 리스트가 가변 리스트여야 함.
+    - 서비스 레이어에서 `Page<T>`의 내용을 가변 리스트로 새로 수집 후, 그 리스트를 사용해 `PageImpl`을 새로 만들면, 그 내부 리스트는 가변 리스트가 됨.
+    - `PageImpl`은 리스트를 복사하거나 불변으로 감싸지 않기 때문에, 개발자가 넘긴 가변 리스트를 그대로 유지함.
+
+---
+
+### 4. 회고
+
+이 과정을 통해 Redis 캐시에서 DTO를 안전하게 저장·조회하려면,
+
+값 직렬화 시 JSON 변환 + 타입 정보 포함 + 역직렬화를 위한 생성자 설정이 함께 고려되어야 한다는 것을 알 수 있었습니다.
+    
 </details>
 
 <details>
-<summary>첫번째토글</summary>
+<summary>🚨 분산 락 구현 시 트랜잭션 전파 이슈</summary>
 
+### 1. 문제 상황
+
+분산 락과 트랜잭션 경계 충돌 문제
+분산 락을 도입하면서 기존 트랜잭션 관리 방식과 충돌이 발생했습니다. 특히 `OrderService`에서 `StockService`를 호출할 때 트랜잭션 경계와 락의 생명주기가 맞지 않아 예상과 다른 동작이 발생했습니다.
+
+발생 문제
+
+- 락이 해제된 후 트랜잭션이 커밋되어 동시성 제어가 무의미해짐
+- 트랜잭션 롤백 시 락은 이미 해제되어 다른 스레드가 잘못된 데이터에 접근
+- 외부 트랜잭션과 내부 트랜잭션의 경계가 모호하여 데이터 일관성 문제 발생
+
+문제 발생 구간
+
+```jsx
+// 문제 발생 구간
+@Transactional  // 외부 트랜잭션 시작
+public CreateOrderResponseDto createOrder(...) {
     
-```
+    stockService.decreaseStock(itemId, quantity); // 내부에서 락 획득/해제
+    
+    // 주문 생성 및 저장
+    orderRepository.save(order);
+    
+    // 외부 트랜잭션 커밋 (락은 이미 해제된 상황)
+}
 ```
 
-```
+문제의 시퀀스
+
+1. 사용자A: 외부 트랜잭션 시작 → 락 획득 → 재고 차감 → 락 해제
+2. 사용자B: 락 획득 가능 → 재고 차감 (사용자A 트랜잭션 미커밋 상태)
+3. 사용자A: 트랜잭션 커밋
+4. 사용자B: 트랜잭션 커밋
+5. **결과**: 동시성 제어 실패, 재고 오차 발생
+
+---
+
+### 2. 원인 분석
+
+트랜잭션 전파 방식의 문제
+
+- 기존에는 기본 전파 방식인 `REQUIRED`를 사용했는데, 이는 외부 트랜잭션에 참여하는 방식이었습니다.
+
+### 트랜잭션과 락의 생명주기 불일치
+
+- **락의 생명주기**: 메서드 실행 시간 동안만 유지
+- **트랜잭션 생명주기**: 외부 메서드 완료까지 유지
+- **결과**: 락이 해제된 후에도 트랜잭션이 살아있어 데이터 일관성 보장 불가
+
+---
+
+### 3. 문제 해결
+
+### REQUIRES_NEW 전파 옵션 적용
+
+독립적인 트랜잭션을 생성하여 락과 트랜잭션의 생명주기를 일치시켰습니다.
+
+```jsx
+// 해결된 코드
+@Transactional(propagation = Propagation.REQUIRES_NEW)
+public void decreaseStock(Long itemId, Long quantity) {
+    String lockKey = "Lock:" + itemId;
+    RLock lock = redissonClient.getLock(lockKey);
+    
+    try {
+        boolean acquired = lock.tryLock(3000, 10000, TimeUnit.MILLISECONDS);
+        if (!acquired) {
+            throw new CustomException(ExceptionCode.STOCK_LOCK_FAILED);
+        }
+        
+        try {
+            // 독립적인 트랜잭션에서 DB 작업 수행
+            Item item = itemRepository.findByIdWithLock(itemId)
+                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_ITEM));
+            
+            item.decreaseStock(quantity);
+            // 메서드 종료 시 트랜잭션 즉시 커밋
+            
+        } finally {
+            if (lock.isHeldByCurrentThread()) {
+                lock.unlock(); // 트랜잭션 커밋 후 락 해제
+            }
+        }
+        
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        throw new CustomException(ExceptionCode.OPERATION_INTERRUPTED);
+    }
+}
 ```
 
-```
-```
+개선사항
 
-```
-```
+**1. 트랜잭션 격리**
+
+- 재고 관리 로직을 독립적인 트랜잭션으로 분리
+- 락 해제 전에 데이터베이스 변경사항 확실히 커밋
+- 외부 트랜잭션과 무관하게 재고 처리 완료
+
+**2. 원자성 보장**
+
+- 락 획득 → DB 작업 → 트랜잭션 커밋 → 락 해제 순서 보장
+- 중간에 실패 시 트랜잭션 롤백 후 락 해제
+- 다른 스레드는 완전히 처리된 데이터만 접근 가능
+
+---
+
+### 4. 회고
+
+잘했던 점
+
+1. 문제 분석
+- 단순히 "동시성 문제"로 끝내지 않고 트랜잭션 전파 방식까지 깊이 있게 분석
+- 락과 트랜잭션의 생명주기 차이를 정확히 파악하고 해결방안 도출
+1. 안정성 고려
+- REQUIRES_NEW로 인한 성능 오버헤드를 인지하면서도 데이터 일관성을 우선시함
+
+아쉬운점
+
+1. 초기 설계 단계에서 지식부족
+
+- 분산 락 도입 시 트랜잭션 전파 방식에 대한 사전 검토 부족
+- 동시성 테스트 시나리오를 충분히 구성하지 못해 늦은 발견  
+
 </details>
-- [🚨 커넥션풀 고갈 현상](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2532dc3ef51480ff88cdfd92f9610d90)
-
-- [🚨 태그 저장 동시성 문제](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2542dc3ef5148025bebbf303f9137a64)
-
-- [🚨 Redis 직렬화 문제](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2542dc3ef514803caf10f01060a81727)
-
-- [🚨 분산 락 구현 시 트랜잭션 전파 이슈](https://www.notion.so/teamsparta/5-Mania-Place-2462dc3ef51480ac98a0d38eace19c50?source=copy_link#2542dc3ef51480238d45fbcb0c6e1033)
 
 ---
 
@@ -2574,28 +2945,22 @@ S-lock과 X-lock 모두 Gap Lock 메커니즘으로 인해, 처음 생성되는 
 
 ---
 
-## ☕ KPT회고
+## 🧭 향후 개선 계획
 
-- **Keep**
-    - 작업 진행 상황을 꼼꼼히 공유하여 팀 전체의 이해를 높임
-    - 모든 팀원이 성실하게 코드 리뷰에 참여함
-    - 회의 시 모두가 마이크를 켜고 참여했으며,
-    불필요한 시간을 줄이기 위해 회의 시간을 20분으로 제한함
-    - 신규 기능 도입 시 가이드라인을 문서화하여 공유함
-    - 항상 서로를 존중하며 트러블 없이 프로젝트를 성공적으로 완수함
-    - 새로운 기술이나 새로운 기능 구현에 있어 사용자 관점에서  깊이 있는 고민을 하고 
-    문제 해결 방안을 찾아 적용한 것
+중고거래의 완성도를 높이기 위해 실제 택배사 api 연동을 고려했으나,
+api인증 절차와 테스트의 어려움이 있어 이번 프로젝트에서는 구현하지 못하였습니다.
 
-- **Problem**
-    - 초기 깃 컨벤션 설정이 다소 미흡하여 일관성 유지에 어려움이 있었음
-    - 프로젝트 릴리즈 버전 관리에 대한 이해도 부족
-    - 주기적 서류 업데이트 체계 미흡으로, 후에 문서 버전 관리 강화의 필요성을 느낌
-    - 테스트 코드 보강 필요
- 
-- **Try**
-    - 단순 캘린더 형태에 그치지 않고, 업무별 세부 일정을 조직적으로 관리
-    - 릴리즈 버전 규칙(SemVer 등)을 학습하고 실제 배포 과정에 적용하여 일관된 버전 관리 정착
-    - 문서 버전 관리를 코드와 동일하게 Git/협업 툴 기반으로 운영하여 최신화 체계 강화
-    - 적극적인 신규 기능 도입 확대
+검색어 랭킹 기능 최적화
+
+테스트 코드를 더욱 보강하고, 실제 운영 환경을 가정한 다양한 테스트를 통해 시스템의 안정성을 높이고 싶습니다. 
+
+회원가입 API의 성능이 다른 기능들에 비해 현저히 느린 문제가 있었습니다. 또한 프로젝트의 핵심 기능인 결제 시스템에서 실제 결제 API 연동을 완전히 구현하지 못해 완성도가 아쉬웠습니다.
+
+캐싱 fallback 메커니즘 구축 **pre heating 시스템 구축**
+
+**모니터링 시스템 알림 체계를 구축하는 방안이 필요해 보입니다.**
+
+**채팅 기능 예외 처리 보강**  
+메시지 전송 실패 시 재시도 로직이나 데드 레터 큐(Dead Letter Queue)로 개선 계획이 있습니다.
 
 ---
