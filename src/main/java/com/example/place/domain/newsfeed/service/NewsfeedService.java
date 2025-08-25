@@ -17,11 +17,9 @@ import com.example.place.domain.newsfeed.entity.Newsfeed;
 import com.example.place.domain.newsfeed.repository.NewsfeedRepository;
 import com.example.place.domain.user.entity.User;
 import com.example.place.domain.user.service.UserService;
-import com.example.place.domain.newsfeedcomment.service.NewsfeedCommentService;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
